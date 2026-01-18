@@ -14,7 +14,6 @@ class AppConstants {
 }
 
 enum DisguiseType {
-  shield('shield', 'Shield', Icons.security),
   calculator('calculator', 'Calculator', Icons.calculate),
   notes('notes', 'Notes', Icons.note_alt),
   clock('clock', 'Clock', Icons.access_time),

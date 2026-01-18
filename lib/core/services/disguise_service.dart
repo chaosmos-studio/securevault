@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
-import 'icon_service.dart';
 
 class DisguiseService {
   static const _currentDisguiseKey = 'current_disguise';
@@ -33,8 +32,14 @@ class DisguiseService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_currentDisguiseKey, disguise.id);
 
-    // Change App Icon
-    await IconService.changeIcon(disguise.displayName);
+    // Change App Icon via native method channel
+    if (Platform.isAndroid) {
+      try {
+        await _methodChannel.invokeMethod('setDisguise', {'disguiseId': disguise.id});
+      } catch (e) {
+        // Ignore errors - icon change may cause app restart
+      }
+    }
   }
 
   // Deprecated methods removed as we use IconService now
