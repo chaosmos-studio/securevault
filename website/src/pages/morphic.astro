@@ -226,7 +226,7 @@ import Layout from '../layouts/Layout.astro';
 	</div>
 </Layout>
 
-<script type="module" lang="ts">
+<script type="module">
 	import gsap from 'gsap';
 	import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -285,7 +285,7 @@ import Layout from '../layouts/Layout.astro';
 	});
 
 	// Disguise cards
-	gsap.utils.toArray('.disguise-morph').forEach((card: any, i) => {
+	gsap.utils.toArray('.disguise-morph').forEach((card, i) => {
 		gsap.from(card, {
 			scrollTrigger: {
 				trigger: card,
@@ -337,7 +337,7 @@ import Layout from '../layouts/Layout.astro';
 	});
 
 	// Security items
-	gsap.utils.toArray('.security-item').forEach((item: any, i) => {
+	gsap.utils.toArray('.security-item').forEach((item, i) => {
 		gsap.from(item, {
 			scrollTrigger: {
 				trigger: item,
@@ -351,7 +351,7 @@ import Layout from '../layouts/Layout.astro';
 	});
 
 	// Flow cards
-	gsap.utils.toArray('.flow-card').forEach((card: any, i) => {
+		gsap.utils.toArray('.flow-card').forEach((card, i) => {
 		gsap.from(card, {
 			scrollTrigger: {
 				trigger: card,

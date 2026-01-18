@@ -453,7 +453,7 @@ import Layout from '../layouts/Layout.astro';
 		}
 	</style>
 
-	<script type="module" lang="ts">
+	<script type="module">
 		import * as THREE from 'three';
 		import { gsap } from 'gsap';
 		import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -461,7 +461,7 @@ import Layout from '../layouts/Layout.astro';
 		gsap.registerPlugin(ScrollTrigger);
 
 		// Three.js setup
-		const canvas = document.getElementById('glassCanvas') as HTMLCanvasElement;
+		const canvas = document.getElementById('glassCanvas');
 		const scene = new THREE.Scene();
 		const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 		const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -471,7 +471,7 @@ import Layout from '../layouts/Layout.astro';
 		camera.position.z = 8;
 
 		// Create glass spheres
-		const spheres: THREE.Mesh[] = [];
+		const spheres = [];
 		for (let i = 0; i < 8; i++) {
 			const geometry = new THREE.SphereGeometry(0.5 + Math.random() * 0.5, 32, 32);
 			const material = new THREE.MeshBasicMaterial({

@@ -291,7 +291,7 @@ import Layout from '../layouts/Layout.astro';
 		}
 	</style>
 
-	<script type="module" lang="ts">
+	<script type="module">
 		import * as THREE from 'three';
 		import { gsap } from 'gsap';
 		import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -299,7 +299,7 @@ import Layout from '../layouts/Layout.astro';
 		gsap.registerPlugin(ScrollTrigger);
 
 		// Three.js Holographic Shield Setup
-		const canvas = document.getElementById('holoCanvas') as HTMLCanvasElement;
+		const canvas = document.getElementById('holoCanvas');
 		const scene = new THREE.Scene();
 		const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 		const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -351,7 +351,7 @@ import Layout from '../layouts/Layout.astro';
 		scene.add(particles);
 
 		// Orbiting rings
-		const rings: THREE.Mesh[] = [];
+		const rings = [];
 		for (let i = 0; i < 3; i++) {
 			const ringGeometry = new THREE.TorusGeometry(2.5 + i * 0.3, 0.02, 16, 100);
 			const ringMaterial = new THREE.MeshBasicMaterial({
@@ -417,9 +417,9 @@ import Layout from '../layouts/Layout.astro';
 
 		// Animate cards
 		gsap.utils.toArray('.feature-card').forEach((card, i) => {
-			gsap.from(card as HTMLElement, {
+			gsap.from(card, {
 				scrollTrigger: {
-					trigger: card as HTMLElement,
+					trigger: card,
 					start: 'top 90%'
 				},
 				y: 50,
@@ -430,9 +430,9 @@ import Layout from '../layouts/Layout.astro';
 		});
 
 		gsap.utils.toArray('.disguise-card').forEach((card, i) => {
-			gsap.from(card as HTMLElement, {
+			gsap.from(card, {
 				scrollTrigger: {
-					trigger: card as HTMLElement,
+					trigger: card,
 					start: 'top 90%'
 				},
 				scale: 0.8,

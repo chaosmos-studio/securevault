@@ -492,7 +492,7 @@ import Layout from '../layouts/Layout.astro';
 		}
 	</style>
 
-	<script type="module" lang="ts">
+	<script type="module">
 		import * as THREE from 'three';
 		import { gsap } from 'gsap';
 		import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -500,7 +500,7 @@ import Layout from '../layouts/Layout.astro';
 		gsap.registerPlugin(ScrollTrigger);
 
 		// Three.js minimal particle setup
-		const canvas = document.getElementById('minimalCanvas') as HTMLCanvasElement;
+		const canvas = document.getElementById('minimalCanvas');
 		const scene = new THREE.Scene();
 		const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 		const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });

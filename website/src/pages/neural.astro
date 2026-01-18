@@ -535,7 +535,7 @@ import Layout from '../layouts/Layout.astro';
 		}
 	</style>
 
-	<script type="module" lang="ts">
+	<script type="module">
 		import * as THREE from 'three';
 		import { gsap } from 'gsap';
 		import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -543,7 +543,7 @@ import Layout from '../layouts/Layout.astro';
 		gsap.registerPlugin(ScrollTrigger);
 
 		// Three.js Neural Network Setup
-		const canvas = document.getElementById('neuralCanvas') as HTMLCanvasElement;
+		const canvas = document.getElementById('neuralCanvas');
 		const scene = new THREE.Scene();
 		const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 		const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -553,7 +553,7 @@ import Layout from '../layouts/Layout.astro';
 		camera.position.z = 15;
 
 		// Create neural network nodes
-		const nodes: THREE.Mesh[] = [];
+		const nodes = [];
 		const nodeCount = 50;
 		const nodeGeometry = new THREE.SphereGeometry(0.1, 16, 16);
 		
@@ -576,7 +576,7 @@ import Layout from '../layouts/Layout.astro';
 		}
 
 		// Create connections between nodes
-		const connections: { line: THREE.Line; distance: number }[] = [];
+		const connections = [];
 		const lineMaterial = new THREE.LineBasicMaterial({
 			color: 0x00ff88,
 			transparent: true,
@@ -598,7 +598,7 @@ import Layout from '../layouts/Layout.astro';
 
 		// Data pulse particles
 		const pulseGeometry = new THREE.SphereGeometry(0.05, 8, 8);
-		const pulses: THREE.Mesh[] = [];
+		const pulses = [];
 		
 		for (let i = 0; i < 20; i++) {
 			const pulseMaterial = new THREE.MeshBasicMaterial({

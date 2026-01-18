@@ -136,10 +136,10 @@ import Layout from '../layouts/Layout.astro';
 	</div>
 </Layout>
 
-<script type="module" lang="ts">
+<script type="module">
 	import * as THREE from 'three';
 
-	const canvas = document.getElementById('particle-canvas') as HTMLCanvasElement;
+	const canvas = document.getElementById('particle-canvas');
 	const scene = new THREE.Scene();
 	const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 	const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -268,7 +268,7 @@ import Layout from '../layouts/Layout.astro';
 	});
 
 	// Feature cards animation
-	gsap.utils.toArray('.feature-3d').forEach((feature: any, i) => {
+	gsap.utils.toArray('.feature-3d').forEach((feature, i) => {
 		gsap.from(feature, {
 			scrollTrigger: {
 				trigger: feature,
@@ -282,7 +282,7 @@ import Layout from '../layouts/Layout.astro';
 	});
 
 	// Disguise items animation
-	gsap.utils.toArray('.disguise-item').forEach((item: any, i) => {
+		gsap.utils.toArray('.disguise-item').forEach((item, i) => {
 		gsap.from(item, {
 			scrollTrigger: {
 				trigger: item,
