@@ -1,0 +1,8 @@
+{
+  "typescript.validate.enable": true,
+  "javascript.validate.enable": true,
+  "astro.typescript.enabled": true,
+  "files.associations": {
+    "*.astro": "astro"
+  }
+}
