@@ -8,11 +8,12 @@ import 'screens/disguises/calculator_disguise.dart';
 import 'screens/disguises/notes_disguise.dart';
 import 'screens/disguises/clock_disguise.dart';
 import 'screens/disguises/weather_disguise.dart';
+import 'screens/disguises/shield_disguise.dart';
 import 'screens/vault/vault_home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -66,11 +67,11 @@ class AppRouter extends StatelessWidget {
         if (!appState.isSetupComplete) {
           return const SetupWizard();
         }
-        
+
         if (appState.isUnlocked) {
           return const VaultHomeScreen();
         }
-        
+
         return const DisguiseRouter();
       },
     );
@@ -85,6 +86,8 @@ class DisguiseRouter extends StatelessWidget {
     return Consumer<AppState>(
       builder: (context, appState, _) {
         switch (appState.currentDisguise) {
+          case DisguiseType.shield:
+            return const ShieldDisguise();
           case DisguiseType.calculator:
             return const CalculatorDisguise();
           case DisguiseType.notes:

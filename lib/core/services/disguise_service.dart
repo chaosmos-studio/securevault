@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
+import 'icon_service.dart';
 
 class DisguiseService {
   static const _currentDisguiseKey = 'current_disguise';
@@ -20,7 +21,8 @@ class DisguiseService {
 
   static Future<DisguiseType> getCurrentDisguise() async {
     final prefs = await SharedPreferences.getInstance();
-    final disguiseId = prefs.getString(_currentDisguiseKey) ?? DisguiseType.calculator.id;
+    final disguiseId =
+        prefs.getString(_currentDisguiseKey) ?? DisguiseType.calculator.id;
     return DisguiseType.values.firstWhere(
       (d) => d.id == disguiseId,
       orElse: () => DisguiseType.calculator,
@@ -30,40 +32,21 @@ class DisguiseService {
   static Future<void> setDisguise(DisguiseType disguise) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_currentDisguiseKey, disguise.id);
-    
-    if (Platform.isAndroid) {
-      await _setAndroidDisguise(disguise);
-    } else if (Platform.isIOS) {
-      await _setIOSDisguise(disguise);
-    }
+
+    // Change App Icon
+    await IconService.changeIcon(disguise.displayName);
   }
 
-  static Future<void> _setAndroidDisguise(DisguiseType disguise) async {
-    try {
-      await _methodChannel.invokeMethod('setDisguise', {
-        'disguiseId': disguise.id,
-      });
-    } catch (e) {
-      // Method channel not implemented yet - will be added with native code
-    }
-  }
-
-  static Future<void> _setIOSDisguise(DisguiseType disguise) async {
-    try {
-      await _methodChannel.invokeMethod('setAlternateIcon', {
-        'iconName': disguise.id,
-      });
-    } catch (e) {
-      // Method channel not implemented yet
-    }
-  }
+  // Deprecated methods removed as we use IconService now
 
   static Future<bool> supportsIconChange() async {
     if (Platform.isAndroid) {
       return true;
     } else if (Platform.isIOS) {
       try {
-        final result = await _methodChannel.invokeMethod<bool>('supportsAlternateIcons');
+        final result = await _methodChannel.invokeMethod<bool>(
+          'supportsAlternateIcons',
+        );
         return result ?? false;
       } catch (e) {
         return false;
