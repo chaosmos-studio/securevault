@@ -1,0 +1,92 @@
+package com.example.securevault
+
+import android.content.ComponentName
+import android.content.pm.PackageManager
+import android.os.Bundle
+import android.view.WindowManager
+import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
+
+class MainActivity : FlutterActivity() {
+    private val CHANNEL = "com.securevault/disguise"
+
+    private val aliases = mapOf(
+        "calculator" to ".CalculatorAlias",
+        "notes" to ".NotesAlias",
+        "clock" to ".ClockAlias",
+        "weather" to ".WeatherAlias"
+    )
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
+    }
+
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "setDisguise" -> {
+                    val disguiseId = call.argument<String>("disguiseId")
+                    if (disguiseId != null) {
+                        setDisguise(disguiseId)
+                        result.success(true)
+                    } else {
+                        result.error("INVALID_ARGUMENT", "disguiseId is required", null)
+                    }
+                }
+                "getCurrentDisguise" -> {
+                    result.success(getCurrentDisguise())
+                }
+                else -> {
+                    result.notImplemented()
+                }
+            }
+        }
+    }
+
+    private fun setDisguise(disguiseId: String) {
+        val packageManager = packageManager
+        val packageName = packageName
+
+        packageManager.setComponentEnabledSetting(
+            ComponentName(packageName, "$packageName.MainActivity"),
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            PackageManager.DONT_KILL_APP
+        )
+
+        for ((id, alias) in aliases) {
+            val state = if (id == disguiseId) {
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            } else {
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+            }
+            
+            packageManager.setComponentEnabledSetting(
+                ComponentName(packageName, "$packageName$alias"),
+                state,
+                PackageManager.DONT_KILL_APP
+            )
+        }
+    }
+
+    private fun getCurrentDisguise(): String {
+        val packageManager = packageManager
+        val packageName = packageName
+
+        for ((id, alias) in aliases) {
+            val state = packageManager.getComponentEnabledSetting(
+                ComponentName(packageName, "$packageName$alias")
+            )
+            if (state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                return id
+            }
+        }
+        return "default"
+    }
+}
