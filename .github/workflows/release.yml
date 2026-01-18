@@ -47,6 +47,7 @@ jobs:
         shell: bash
         run: |
           tag="${{ steps.generate_tag.outputs.tag_name }}"
+          git fetch --tags
           if git rev-parse "$tag" >/dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "Tag $tag already exists. Skipping release."
