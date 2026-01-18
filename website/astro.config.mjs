@@ -9,4 +9,13 @@ export default defineConfig({
 	site: 'https://shravangoswami.com',
 	base: '/SecureVault',
 	integrations: [mdx(), sitemap()],
+	vite: {
+		build: {
+			rollupOptions: {
+				output: {
+					manualChunks: undefined
+				}
+			}
+		}
+	}
 });
