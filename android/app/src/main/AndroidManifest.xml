@@ -6,13 +6,9 @@
     <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
     
     <application
-        android:label="Utility"
+        android:label="SecureVault"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
-        
-        <service
-            android:name="com.solusibejo.flutter_dynamic_icon_plus.FlutterDynamicIconPlusService"
-            android:stopWithTask="false"/>
+        android:icon="@mipmap/ic_shield">
         
         <activity
             android:name=".MainActivity"
