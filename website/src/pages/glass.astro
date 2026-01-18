@@ -1,0 +1,632 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="SecureVault - Glass Vault">
+	<div class="glass-container">
+		<canvas id="glassCanvas"></canvas>
+		
+		<div class="content">
+			<section class="hero-glass">
+				<div class="glass-orb"></div>
+				
+				<h1 class="glass-title">SecureVault</h1>
+				<p class="glass-subtitle">Transparent Interface. Opaque Security.</p>
+				
+				<a href="https://play.google.com/store" class="glass-btn" target="_blank" rel="noopener noreferrer">
+					<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+					</svg>
+					Download on Google Play
+				</a>
+				
+				<div class="device-req">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M17,19H7V5H17M17,1H7C5.89,1 5,1.89 5,3V21A2,2 0 0,0 7,23H17A2,2 0 0,0 19,21V3C19,1.89 18.1,1 17,1Z"/>
+					</svg>
+					Android 8.0 or higher
+				</div>
+			</section>
+
+			<section class="security-features">
+				<h2 class="glass-heading">Unbreakable Security</h2>
+				
+				<div class="glass-cards">
+					<div class="glass-card">
+						<div class="card-glow"></div>
+						<span class="card-emoji">🔐</span>
+						<h3>AES-256-CBC Encryption</h3>
+						<p>Military-grade encryption standard that protects banks and governments now secures your personal files, photos, and documents</p>
+					</div>
+					
+					<div class="glass-card">
+						<div class="card-glow"></div>
+						<span class="card-emoji">🔑</span>
+						<h3>PBKDF2 Key Derivation</h3>
+						<p>Advanced password-based key generation creates unique encryption keys, making brute-force attacks virtually impossible</p>
+					</div>
+					
+					<div class="glass-card">
+						<div class="card-glow"></div>
+						<span class="card-emoji">🗂️</span>
+						<h3>Multi-Vault System</h3>
+						<p>Create unlimited separate vaults with individual passwords - organize by category, sensitivity, or any way you prefer</p>
+					</div>
+					
+					<div class="glass-card">
+						<div class="card-glow"></div>
+						<span class="card-emoji">✈️</span>
+						<h3>Completely Offline</h3>
+						<p>Zero internet dependency - your encrypted data stays on your device with no cloud uploads or data collection</p>
+					</div>
+					
+					<div class="glass-card">
+						<div class="card-glow"></div>
+						<span class="card-emoji">🚫</span>
+						<h3>Screenshot Protection</h3>
+						<p>Built-in screenshot blocking prevents unauthorized captures of your sensitive content while using the vault</p>
+					</div>
+					
+					<div class="glass-card">
+						<div class="card-glow"></div>
+						<span class="card-emoji">🎭</span>
+						<h3>Perfect Disguises</h3>
+						<p>Transform your vault into Calculator, Notes, Clock, or Weather app - each works perfectly as camouflage</p>
+					</div>
+				</div>
+			</section>
+
+			<section class="disguise-section">
+				<h2 class="glass-heading">4 Seamless Disguises</h2>
+				<p class="disguise-intro">Each disguise is fully functional - no one will know it's hiding your vault</p>
+				
+				<div class="disguise-grid">
+					<div class="disguise-glass-card">
+						<div class="disguise-header">
+							<div class="disguise-emoji">🧮</div>
+							<h3>Calculator App</h3>
+						</div>
+						<p class="disguise-description">Full-featured calculator with basic and scientific operations. Works exactly like a real calculator app.</p>
+						<div class="entry-method">
+							<span class="method-label">Secret Entry:</span>
+							<span class="method-code">Type 123456 then press =</span>
+						</div>
+					</div>
+					
+					<div class="disguise-glass-card">
+						<div class="disguise-header">
+							<div class="disguise-emoji">📝</div>
+							<h3>Notes App</h3>
+						</div>
+						<p class="disguise-description">Simple note-taking interface with create, edit, and organize features. Looks like any notes app.</p>
+						<div class="entry-method">
+							<span class="method-label">Secret Entry:</span>
+							<span class="method-code">Long press the + button</span>
+						</div>
+					</div>
+					
+					<div class="disguise-glass-card">
+						<div class="disguise-header">
+							<div class="disguise-emoji">⏰</div>
+							<h3>Clock App</h3>
+						</div>
+						<p class="disguise-description">Working clock with time display, timer, and alarm functions. Completely functional timepiece.</p>
+						<div class="entry-method">
+							<span class="method-label">Secret Entry:</span>
+							<span class="method-code">Tap time area at 12:34:56</span>
+						</div>
+					</div>
+					
+					<div class="disguise-glass-card">
+						<div class="disguise-header">
+							<div class="disguise-emoji">🌤️</div>
+							<h3>Weather App</h3>
+						</div>
+						<p class="disguise-description">Weather forecast display with current conditions and predictions. Standard weather interface.</p>
+						<div class="entry-method">
+							<span class="method-label">Secret Entry:</span>
+							<span class="method-code">Pull down to refresh 5 times</span>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="final-action">
+				<div class="action-glass">
+					<h2>Your Privacy, Perfectly Protected</h2>
+					<p>Download SecureVault and take control of your digital privacy</p>
+					<a href="https://play.google.com/store" class="final-btn" target="_blank" rel="noopener noreferrer">
+						Get Started Free
+					</a>
+				</div>
+			</section>
+		</div>
+	</div>
+
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		.glass-container {
+			min-height: 100vh;
+			background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+			color: #fff;
+			position: relative;
+			overflow-x: hidden;
+		}
+
+		#glassCanvas {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			z-index: 1;
+		}
+
+		.content {
+			position: relative;
+			z-index: 2;
+			max-width: 1300px;
+			margin: 0 auto;
+			padding: 2rem;
+		}
+
+		.hero-glass {
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			text-align: center;
+		}
+
+		.glass-orb {
+			width: 200px;
+			height: 200px;
+			background: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(10px);
+			border: 2px solid rgba(255, 255, 255, 0.2);
+			border-radius: 50%;
+			margin-bottom: 3rem;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			position: relative;
+		}
+
+		.glass-orb::before {
+			content: '🛡️';
+			font-size: 6rem;
+		}
+
+		.glass-orb::after {
+			content: '';
+			position: absolute;
+			inset: -20px;
+			border: 2px solid rgba(255, 255, 255, 0.1);
+			border-radius: 50%;
+		}
+
+		.glass-title {
+			font-size: clamp(3.5rem, 10vw, 7rem);
+			font-weight: 900;
+			margin-bottom: 1rem;
+			text-shadow: 0 4px 20px rgba(255, 255, 255, 0.3);
+		}
+
+		.glass-subtitle {
+			font-size: clamp(1.2rem, 3vw, 1.8rem);
+			color: rgba(255, 255, 255, 0.8);
+			margin-bottom: 3rem;
+			font-weight: 300;
+		}
+
+		.glass-btn {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.75rem;
+			padding: 1.25rem 2.5rem;
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(10px);
+			border: 2px solid rgba(255, 255, 255, 0.3);
+			color: white;
+			text-decoration: none;
+			font-weight: 700;
+			font-size: 1.1rem;
+			border-radius: 50px;
+			transition: all 0.3s ease;
+			margin-bottom: 1.5rem;
+		}
+
+		.glass-btn:hover {
+			background: rgba(255, 255, 255, 0.25);
+			transform: translateY(-3px);
+			box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
+		}
+
+		.device-req {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			color: rgba(255, 255, 255, 0.6);
+			font-size: 0.9rem;
+		}
+
+		.security-features {
+			padding: 8rem 0;
+			opacity: 0;
+		}
+
+		.glass-heading {
+			font-size: clamp(2.5rem, 6vw, 4rem);
+			text-align: center;
+			margin-bottom: 4rem;
+			font-weight: 900;
+		}
+
+		.glass-cards {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+			gap: 2rem;
+		}
+
+		.glass-card {
+			background: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			border-radius: 20px;
+			padding: 2.5rem;
+			transition: all 0.3s ease;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.card-glow {
+			position: absolute;
+			inset: 0;
+			background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.1), transparent);
+			opacity: 0;
+			transition: opacity 0.3s ease;
+		}
+
+		.glass-card:hover .card-glow {
+			opacity: 1;
+		}
+
+		.glass-card:hover {
+			transform: translateY(-10px);
+			border-color: rgba(255, 255, 255, 0.4);
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+		}
+
+		.card-emoji {
+			font-size: 3.5rem;
+			display: block;
+			margin-bottom: 1rem;
+		}
+
+		.glass-card h3 {
+			font-size: 1.5rem;
+			margin-bottom: 1rem;
+			color: #fff;
+		}
+
+		.glass-card p {
+			color: rgba(255, 255, 255, 0.8);
+			line-height: 1.7;
+		}
+
+		.disguise-section {
+			padding: 8rem 0;
+			opacity: 0;
+		}
+
+		.disguise-intro {
+			text-align: center;
+			font-size: 1.2rem;
+			color: rgba(255, 255, 255, 0.7);
+			margin-bottom: 4rem;
+		}
+
+		.disguise-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+			gap: 2rem;
+		}
+
+		.disguise-glass-card {
+			background: rgba(255, 255, 255, 0.08);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			border-radius: 15px;
+			padding: 2rem;
+			transition: all 0.3s ease;
+		}
+
+		.disguise-glass-card:hover {
+			transform: scale(1.05);
+			border-color: rgba(255, 255, 255, 0.4);
+			box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+		}
+
+		.disguise-header {
+			text-align: center;
+			margin-bottom: 1.5rem;
+		}
+
+		.disguise-emoji {
+			font-size: 4rem;
+			margin-bottom: 0.75rem;
+		}
+
+		.disguise-header h3 {
+			font-size: 1.8rem;
+			color: #fff;
+		}
+
+		.disguise-description {
+			color: rgba(255, 255, 255, 0.7);
+			line-height: 1.6;
+			margin-bottom: 1.5rem;
+			text-align: center;
+		}
+
+		.entry-method {
+			background: rgba(0, 0, 0, 0.2);
+			padding: 1rem;
+			border-radius: 10px;
+			border-left: 3px solid rgba(255, 255, 255, 0.5);
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+		}
+
+		.method-label {
+			font-size: 0.9rem;
+			color: rgba(255, 255, 255, 0.6);
+			font-weight: 600;
+		}
+
+		.method-code {
+			font-family: 'Courier New', monospace;
+			color: #fff;
+			font-size: 1rem;
+			font-weight: 700;
+		}
+
+		.final-action {
+			padding: 8rem 0;
+		}
+
+		.action-glass {
+			background: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(10px);
+			border: 2px solid rgba(255, 255, 255, 0.2);
+			border-radius: 30px;
+			padding: 4rem 2rem;
+			text-align: center;
+		}
+
+		.action-glass h2 {
+			font-size: clamp(2.5rem, 6vw, 4rem);
+			margin-bottom: 1rem;
+		}
+
+		.action-glass p {
+			font-size: 1.3rem;
+			color: rgba(255, 255, 255, 0.8);
+			margin-bottom: 2.5rem;
+		}
+
+		.final-btn {
+			display: inline-block;
+			padding: 1.5rem 4rem;
+			background: rgba(255, 255, 255, 0.2);
+			backdrop-filter: blur(10px);
+			border: 2px solid rgba(255, 255, 255, 0.4);
+			color: white;
+			text-decoration: none;
+			font-weight: 700;
+			font-size: 1.3rem;
+			border-radius: 50px;
+			transition: all 0.3s ease;
+		}
+
+		.final-btn:hover {
+			background: rgba(255, 255, 255, 0.3);
+			transform: translateY(-5px);
+			box-shadow: 0 20px 60px rgba(255, 255, 255, 0.2);
+		}
+
+		@media (max-width: 768px) {
+			.glass-cards {
+				grid-template-columns: 1fr;
+			}
+			
+			.disguise-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+
+	<script>
+		import * as THREE from 'three';
+		import { gsap } from 'gsap';
+		import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+		gsap.registerPlugin(ScrollTrigger);
+
+		// Three.js setup
+		const canvas = document.getElementById('glassCanvas') as HTMLCanvasElement;
+		const scene = new THREE.Scene();
+		const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+		const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+		
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+		camera.position.z = 8;
+
+		// Create glass spheres
+		const spheres: THREE.Mesh[] = [];
+		for (let i = 0; i < 8; i++) {
+			const geometry = new THREE.SphereGeometry(0.5 + Math.random() * 0.5, 32, 32);
+			const material = new THREE.MeshBasicMaterial({
+				color: 0xffffff,
+				transparent: true,
+				opacity: 0.1,
+				wireframe: true
+			});
+			
+			const sphere = new THREE.Mesh(geometry, material);
+			sphere.position.set(
+				(Math.random() - 0.5) * 15,
+				(Math.random() - 0.5) * 15,
+				(Math.random() - 0.5) * 8
+			);
+			
+			sphere.userData.speed = 0.001 + Math.random() * 0.002;
+			spheres.push(sphere);
+			scene.add(sphere);
+		}
+
+		// Floating particles
+		const particlesGeometry = new THREE.BufferGeometry();
+		const particlesCount = 300;
+		const positions = new Float32Array(particlesCount * 3);
+		
+		for (let i = 0; i < particlesCount * 3; i++) {
+			positions[i] = (Math.random() - 0.5) * 25;
+		}
+		
+		particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+		const particlesMaterial = new THREE.PointsMaterial({
+			color: 0xffffff,
+			size: 0.03,
+			transparent: true,
+			opacity: 0.4
+		});
+		const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+		scene.add(particles);
+
+		// GSAP Animations
+		gsap.from('.glass-orb', {
+			scale: 0,
+			duration: 1.5,
+			ease: 'elastic.out(1, 0.5)',
+			delay: 0.3
+		});
+
+		gsap.to('.glass-orb', {
+			rotateY: 360,
+			duration: 10,
+			repeat: -1,
+			ease: 'none'
+		});
+
+		gsap.from('.glass-title', {
+			opacity: 0,
+			y: 50,
+			duration: 1,
+			delay: 0.8
+		});
+
+		gsap.from('.glass-subtitle', {
+			opacity: 0,
+			duration: 1,
+			delay: 1.2
+		});
+
+		gsap.to('.security-features', {
+			scrollTrigger: {
+				trigger: '.security-features',
+				start: 'top 80%',
+				toggleActions: 'play none none reverse'
+			},
+			opacity: 1,
+			duration: 1
+		});
+
+		gsap.from('.glass-card', {
+			scrollTrigger: {
+				trigger: '.glass-cards',
+				start: 'top 70%'
+			},
+			y: 100,
+			opacity: 0,
+			duration: 0.8,
+			stagger: 0.1,
+			ease: 'power2.out'
+		});
+
+		gsap.to('.disguise-section', {
+			scrollTrigger: {
+				trigger: '.disguise-section',
+				start: 'top 80%',
+				toggleActions: 'play none none reverse'
+			},
+			opacity: 1,
+			duration: 1
+		});
+
+		gsap.from('.disguise-glass-card', {
+			scrollTrigger: {
+				trigger: '.disguise-grid',
+				start: 'top 70%'
+			},
+			scale: 0.8,
+			opacity: 0,
+			duration: 0.6,
+			stagger: 0.15,
+			ease: 'back.out(1.7)'
+		});
+
+		// Animation loop
+		let mouseX = 0;
+		let mouseY = 0;
+		
+		document.addEventListener('mousemove', (event) => {
+			mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+			mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+		});
+
+		function animate() {
+			requestAnimationFrame(animate);
+			
+			const time = Date.now() * 0.001;
+			
+			// Rotate and float spheres
+			spheres.forEach((sphere, index) => {
+				sphere.rotation.x += sphere.userData.speed;
+				sphere.rotation.y += sphere.userData.speed * 0.5;
+				sphere.position.y += Math.sin(time + index) * 0.002;
+			});
+			
+			// Rotate particles
+			particles.rotation.y += 0.0005;
+			
+			// Mouse parallax
+			camera.position.x += (mouseX * 1.5 - camera.position.x) * 0.05;
+			camera.position.y += (mouseY * 1.5 - camera.position.y) * 0.05;
+			camera.lookAt(scene.position);
+			
+			// Scroll effect
+			const scrollY = window.scrollY;
+			camera.position.z = 8 + scrollY * 0.001;
+			
+			renderer.render(scene, camera);
+		}
+		
+		animate();
+
+		// Resize handler
+		window.addEventListener('resize', () => {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+		});
+	</script>
+</Layout>
