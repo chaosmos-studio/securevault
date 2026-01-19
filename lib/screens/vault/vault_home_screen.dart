@@ -1,7 +1,11 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/providers/app_state.dart';
 import '../../core/services/vault_service.dart';
@@ -17,10 +21,14 @@ class VaultHomeScreen extends StatefulWidget {
   State<VaultHomeScreen> createState() => _VaultHomeScreenState();
 }
 
-class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingObserver {
+class _VaultHomeScreenState extends State<VaultHomeScreen>
+    with WidgetsBindingObserver {
   int _selectedIndex = 0;
   bool _isLoading = false;
   final ImagePicker _picker = ImagePicker();
+  
+  bool _isSelectionMode = false;
+  final Set<String> _selectedItems = {};
 
   @override
   void initState() {
@@ -36,7 +44,8 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
       final appState = context.read<AppState>();
       if (appState.shouldAutoLock()) {
         appState.lock();
@@ -57,12 +66,12 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
       setState(() => _isLoading = true);
       final vault = appState.currentVault;
       final password = appState.currentPassword;
-      
+
       if (vault == null || password == null) return;
 
       final bytes = await image.readAsBytes();
       final thumbnail = await _generateThumbnail(bytes);
-      
+
       await VaultService.addItem(
         vault: vault,
         password: password,
@@ -71,13 +80,17 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
         data: bytes,
         thumbnail: thumbnail,
       );
-      
+
       await appState.refreshVault();
+
+      if (mounted && source == ImageSource.gallery) {
+        _showDeleteOriginalDialog(image.name, 'photo');
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error adding photo: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error adding photo: $e')));
       }
     } finally {
       setState(() => _isLoading = false);
@@ -96,11 +109,11 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
       setState(() => _isLoading = true);
       final vault = appState.currentVault;
       final password = appState.currentPassword;
-      
+
       if (vault == null || password == null) return;
 
       final bytes = await video.readAsBytes();
-      
+
       await VaultService.addItem(
         vault: vault,
         password: password,
@@ -108,16 +121,104 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
         name: video.name,
         data: bytes,
       );
-      
+
       await appState.refreshVault();
+
+      if (mounted && source == ImageSource.gallery) {
+        _showDeleteOriginalDialog(video.name, 'video');
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error adding video: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error adding video: $e')));
       }
     } finally {
       setState(() => _isLoading = false);
+    }
+  }
+
+  void _showDeleteOriginalDialog(String fileName, String type) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Delete Original $type?'),
+        content: Text(
+          'The $type has been securely stored in your vault. '
+          'Would you like to delete the original from your device gallery?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Keep Original'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              await _deleteFromGallery(fileName, type);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text(
+              'Delete Original',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteFromGallery(String fileName, String type) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    try {
+      final permission = await PhotoManager.requestPermissionExtend();
+      if (!permission.isAuth) {
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(content: Text('Permission denied to access gallery')),
+        );
+        return;
+      }
+
+      final assetType = type == 'photo' ? RequestType.image : RequestType.video;
+      final albums = await PhotoManager.getAssetPathList(type: assetType);
+
+      AssetEntity? targetAsset;
+
+      for (final album in albums) {
+        final assets = await album.getAssetListRange(start: 0, end: 500);
+        for (final asset in assets) {
+          if (asset.title == fileName ||
+              asset.title?.contains(fileName.split('.').first) == true) {
+            targetAsset = asset;
+            break;
+          }
+        }
+        if (targetAsset != null) break;
+      }
+
+      if (targetAsset != null) {
+        final result = await PhotoManager.editor.deleteWithIds([
+          targetAsset.id,
+        ]);
+        if (result.isNotEmpty) {
+          scaffoldMessenger.showSnackBar(
+            SnackBar(content: Text('Original $type deleted from gallery')),
+          );
+        } else {
+          scaffoldMessenger.showSnackBar(
+            SnackBar(content: Text('Could not delete original $type')),
+          );
+        }
+      } else {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Original $type not found in gallery')),
+        );
+      }
+    } catch (e) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('Error deleting original: $e')),
+      );
     }
   }
 
@@ -154,35 +255,155 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
     Navigator.of(context).pushReplacementNamed('/home');
   }
 
+  void _toggleSelectionMode() {
+    setState(() {
+      _isSelectionMode = !_isSelectionMode;
+      if (!_isSelectionMode) {
+        _selectedItems.clear();
+      }
+    });
+  }
+
+  void _toggleItemSelection(String itemId) {
+    setState(() {
+      if (_selectedItems.contains(itemId)) {
+        _selectedItems.remove(itemId);
+        if (_selectedItems.isEmpty) {
+          _isSelectionMode = false;
+        }
+      } else {
+        _selectedItems.add(itemId);
+      }
+    });
+  }
+
+  Future<void> _shareSelectedItems() async {
+    final appState = context.read<AppState>();
+    final vault = appState.currentVault;
+    final password = appState.currentPassword;
+    
+    if (vault == null || password == null) return;
+
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final tempDir = await getTemporaryDirectory();
+    final files = <XFile>[];
+
+    for (final itemId in _selectedItems) {
+      final item = vault.items.firstWhere((i) => i.id == itemId);
+      final data = await VaultService.getItemData(vault, password, itemId);
+      if (data != null) {
+        final ext = item.type == VaultItemType.photo ? 'jpg' : 'mp4';
+        final file = File('${tempDir.path}/${item.name}.$ext');
+        await file.writeAsBytes(data);
+        files.add(XFile(file.path));
+      }
+    }
+
+    if (files.isNotEmpty) {
+      await Share.shareXFiles(files, text: 'Shared from SecureVault');
+    }
+    
+    setState(() {
+      _isSelectionMode = false;
+      _selectedItems.clear();
+    });
+    
+    scaffoldMessenger.showSnackBar(
+      SnackBar(content: Text('Shared ${files.length} items')),
+    );
+  }
+
+  Future<void> _deleteSelectedItems() async {
+    final appState = context.read<AppState>();
+    final vault = appState.currentVault;
+    final password = appState.currentPassword;
+    
+    if (vault == null || password == null) return;
+    
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Items'),
+        content: Text('Delete ${_selectedItems.length} selected items?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    for (final itemId in _selectedItems) {
+      await VaultService.deleteItem(vault, password, itemId);
+    }
+    
+    await appState.refreshVault();
+    
+    setState(() {
+      _isSelectionMode = false;
+      _selectedItems.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
     final vault = appState.currentVault;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (vault == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Vault'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.lock),
-            onPressed: _lockVault,
-            tooltip: 'Lock Vault',
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const VaultSettingsScreen()),
+      appBar: _isSelectionMode
+          ? AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: _toggleSelectionMode,
+              ),
+              title: Text('${_selectedItems.length} selected'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.share),
+                  onPressed: _selectedItems.isNotEmpty ? _shareSelectedItems : null,
+                  tooltip: 'Share',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: _selectedItems.isNotEmpty ? _deleteSelectedItems : null,
+                  tooltip: 'Delete',
+                ),
+              ],
+            )
+          : AppBar(
+              title: const Text('Vault'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.lock),
+                  onPressed: _lockVault,
+                  tooltip: 'Lock Vault',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.settings),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const VaultSettingsScreen(),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : IndexedStack(
@@ -193,21 +414,100 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
                 const NotesVaultScreen(),
               ],
             ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.photo), label: 'Photos'),
-          BottomNavigationBarItem(icon: Icon(Icons.videocam), label: 'Videos'),
-          BottomNavigationBarItem(icon: Icon(Icons.note), label: 'Notes'),
-        ],
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isDark
+                ? [Colors.grey[850]!, Colors.grey[900]!]
+                : [Colors.white, Colors.grey[50]!],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withValues(alpha: 0.15),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+              spreadRadius: 2,
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(
+            color: isDark 
+                ? Colors.grey[700]!.withValues(alpha: 0.3)
+                : Colors.grey[200]!.withValues(alpha: 0.8),
+            width: 1,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(0, Icons.photo_outlined, Icons.photo, 'Photos', colorScheme),
+              _buildNavItem(1, Icons.videocam_outlined, Icons.videocam, 'Videos', colorScheme),
+              _buildNavItem(2, Icons.note_outlined, Icons.note, 'Notes', colorScheme),
+            ],
+          ),
+        ),
       ),
-      floatingActionButton: _selectedIndex < 2
+      floatingActionButton: _selectedIndex < 2 && !_isSelectionMode
           ? FloatingActionButton(
               onPressed: _selectedIndex == 0 ? _addPhoto : _addVideo,
               child: const Icon(Icons.add),
             )
           : null,
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, IconData selectedIcon, String label, ColorScheme colorScheme) {
+    final isSelected = _selectedIndex == index;
+    
+    return GestureDetector(
+      onTap: () => setState(() => _selectedIndex = index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? 20 : 16,
+          vertical: 10,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? colorScheme.primaryContainer
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? selectedIcon : icon,
+              color: isSelected 
+                  ? colorScheme.onPrimaryContainer 
+                  : colorScheme.onSurface.withValues(alpha: 0.6),
+              size: 24,
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: colorScheme.onPrimaryContainer,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 
@@ -220,7 +520,9 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              type == VaultItemType.photo ? Icons.photo_library : Icons.video_library,
+              type == VaultItemType.photo
+                  ? Icons.photo_library
+                  : Icons.video_library,
               size: 64,
               color: Colors.grey[400],
             ),
@@ -233,7 +535,9 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
             ElevatedButton.icon(
               onPressed: type == VaultItemType.photo ? _addPhoto : _addVideo,
               icon: const Icon(Icons.add),
-              label: Text(type == VaultItemType.photo ? 'Add Photo' : 'Add Video'),
+              label: Text(
+                type == VaultItemType.photo ? 'Add Photo' : 'Add Video',
+              ),
             ),
           ],
         ),
@@ -256,28 +560,97 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
   }
 
   Widget _buildMediaTile(VaultItem item, VaultItemType type) {
+    final isSelected = _selectedItems.contains(item.id);
+    
     return GestureDetector(
-      onTap: () => _openMedia(item),
-      onLongPress: () => _showDeleteDialog(item),
-      child: Container(
-        color: Colors.grey[300],
-        child: FutureBuilder<Uint8List?>(
-          future: _loadThumbnail(item),
-          builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.data != null) {
-              return Image.memory(
-                snapshot.data!,
-                fit: BoxFit.cover,
-              );
-            }
-            return Center(
-              child: Icon(
-                type == VaultItemType.photo ? Icons.photo : Icons.videocam,
-                color: Colors.grey[500],
+      onTap: () {
+        if (_isSelectionMode) {
+          _toggleItemSelection(item.id);
+        } else {
+          _openMedia(item);
+        }
+      },
+      onLongPress: () {
+        if (!_isSelectionMode) {
+          setState(() {
+            _isSelectionMode = true;
+            _selectedItems.add(item.id);
+          });
+        }
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: FutureBuilder<Uint8List?>(
+              future: _loadThumbnail(item),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  return Image.memory(snapshot.data!, fit: BoxFit.cover);
+                }
+                return Center(
+                  child: Icon(
+                    type == VaultItemType.photo ? Icons.photo : Icons.videocam,
+                    color: Colors.grey[500],
+                  ),
+                );
+              },
+            ),
+          ),
+          if (type == VaultItemType.video)
+            Positioned(
+              right: 4,
+              bottom: 4,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Icon(Icons.play_arrow, color: Colors.white, size: 16),
               ),
-            );
-          },
-        ),
+            ),
+          if (_isSelectionMode)
+            Positioned(
+              top: 4,
+              right: 4,
+              child: Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected 
+                      ? Theme.of(context).colorScheme.primary 
+                      : Colors.white.withValues(alpha: 0.8),
+                  border: Border.all(
+                    color: isSelected 
+                        ? Theme.of(context).colorScheme.primary 
+                        : Colors.grey,
+                    width: 2,
+                  ),
+                ),
+                child: isSelected
+                    ? const Icon(Icons.check, color: Colors.white, size: 16)
+                    : null,
+              ),
+            ),
+          if (isSelected)
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -286,9 +659,9 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
     final appState = context.read<AppState>();
     final vault = appState.currentVault;
     final password = appState.currentPassword;
-    
+
     if (vault == null || password == null) return null;
-    
+
     return await VaultService.getThumbnail(vault, password, item);
   }
 
@@ -296,7 +669,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
     final appState = context.read<AppState>();
     final vault = appState.currentVault;
     final password = appState.currentPassword;
-    
+
     if (vault == null || password == null) return;
 
     final data = await VaultService.getItemData(vault, password, item.id);
@@ -306,48 +679,32 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PhotoViewerScreen(imageData: data, title: item.name),
+          builder: (context) => PhotoViewerScreen(
+            imageData: data,
+            title: item.name,
+            onDelete: () => _deleteItem(item),
+          ),
         ),
       );
     } else if (item.type == VaultItemType.video) {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => VideoPlayerScreen(videoData: data, title: item.name),
+          builder: (context) => VideoPlayerScreen(
+            videoData: data,
+            title: item.name,
+            onDelete: () => _deleteItem(item),
+          ),
         ),
       );
     }
-  }
-
-  void _showDeleteDialog(VaultItem item) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Item'),
-        content: const Text('Are you sure you want to delete this item?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await _deleteItem(item);
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> _deleteItem(VaultItem item) async {
     final appState = context.read<AppState>();
     final vault = appState.currentVault;
     final password = appState.currentPassword;
-    
+
     if (vault == null || password == null) return;
 
     try {
@@ -355,9 +712,9 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> with WidgetsBindingOb
       await appState.refreshVault();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting item: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error deleting item: $e')));
       }
     }
   }

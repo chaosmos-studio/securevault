@@ -17,14 +17,17 @@ class _SetupWizardState extends State<SetupWizard> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   DisguiseType _selectedDisguise = DisguiseType.calculator;
+  final _vaultNameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  bool _isMasterVault = true;
   bool _isLoading = false;
   String? _error;
 
   @override
   void dispose() {
     _pageController.dispose();
+    _vaultNameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -49,6 +52,10 @@ class _SetupWizardState extends State<SetupWizard> {
   }
 
   Future<void> _completeSetup() async {
+    if (_vaultNameController.text.trim().isEmpty) {
+      setState(() => _error = 'Please enter a vault name');
+      return;
+    }
     if (_passwordController.text.length < 4) {
       setState(() => _error = 'Password must be at least 4 characters');
       return;
@@ -66,7 +73,11 @@ class _SetupWizardState extends State<SetupWizard> {
     final appState = context.read<AppState>();
     
     try {
-      await VaultService.createVault(_passwordController.text);
+      await VaultService.createVault(
+        _passwordController.text,
+        name: _vaultNameController.text.trim(),
+        isMaster: _isMasterVault,
+      );
       await DisguiseService.setDisguise(_selectedDisguise);
       
       if (mounted) {
@@ -271,16 +282,26 @@ class _SetupWizardState extends State<SetupWizard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Create Master Password',
+            'Create Your Vault',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           const Text(
-            'This password unlocks your main vault. '
-            'You can add more passwords later for decoy vaults.',
+            'Give your vault a name and set a password. '
+            'You can create more vaults later with different passwords.',
             style: TextStyle(color: Colors.grey),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
+          TextField(
+            controller: _vaultNameController,
+            decoration: const InputDecoration(
+              labelText: 'Vault Name',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.folder),
+              hintText: 'e.g., Personal, Work, Private',
+            ),
+          ),
+          const SizedBox(height: 16),
           TextField(
             controller: _passwordController,
             obscureText: true,
@@ -300,8 +321,19 @@ class _SetupWizardState extends State<SetupWizard> {
               prefixIcon: Icon(Icons.lock_outline),
             ),
           ),
+          const SizedBox(height: 16),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Admin Vault'),
+            subtitle: const Text(
+              'Can see and manage all other vaults',
+              style: TextStyle(fontSize: 12),
+            ),
+            value: _isMasterVault,
+            onChanged: (value) => setState(() => _isMasterVault = value),
+          ),
           if (_error != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             Text(_error!, style: const TextStyle(color: Colors.red)),
           ],
           const Spacer(),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'core/constants/app_constants.dart';
 import 'core/providers/app_state.dart';
+import 'core/services/migration_service.dart';
 import 'screens/setup/setup_wizard.dart';
 import 'screens/disguises/calculator_disguise.dart';
 import 'screens/disguises/notes_disguise.dart';
@@ -17,6 +18,8 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  await MigrationService.runMigrations();
 
   runApp(
     ChangeNotifierProvider(

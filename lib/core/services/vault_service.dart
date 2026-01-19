@@ -63,6 +63,52 @@ class Vault {
   );
 }
 
+class VaultInfo {
+  final String id;
+  final String name;
+  final bool isMaster;
+  final String? createdByVaultId;
+  final List<String> canSeeVaultIds;
+  
+  VaultInfo({
+    required this.id,
+    required this.name,
+    this.isMaster = false,
+    this.createdByVaultId,
+    List<String>? canSeeVaultIds,
+  }) : canSeeVaultIds = canSeeVaultIds ?? [];
+  
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'isMaster': isMaster,
+    'createdByVaultId': createdByVaultId,
+    'canSeeVaultIds': canSeeVaultIds,
+  };
+  
+  factory VaultInfo.fromJson(Map<String, dynamic> json) => VaultInfo(
+    id: json['id'],
+    name: json['name'] ?? 'Vault',
+    isMaster: json['isMaster'] ?? false,
+    createdByVaultId: json['createdByVaultId'],
+    canSeeVaultIds: (json['canSeeVaultIds'] as List?)?.cast<String>() ?? [],
+  );
+  
+  VaultInfo copyWith({
+    String? id,
+    String? name,
+    bool? isMaster,
+    String? createdByVaultId,
+    List<String>? canSeeVaultIds,
+  }) => VaultInfo(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    isMaster: isMaster ?? this.isMaster,
+    createdByVaultId: createdByVaultId ?? this.createdByVaultId,
+    canSeeVaultIds: canSeeVaultIds ?? this.canSeeVaultIds,
+  );
+}
+
 class VaultService {
   static const _storage = FlutterSecureStorage();
   static const _vaultIndexKey = 'vault_index';
@@ -77,14 +123,26 @@ class VaultService {
     return vaultsDir;
   }
 
-  static Future<Map<String, String>> _getVaultIndex() async {
+  static Future<Map<String, VaultInfo>> _getVaultIndex() async {
     final indexData = await _storage.read(key: _vaultIndexKey);
     if (indexData == null) return {};
-    return Map<String, String>.from(json.decode(indexData));
+    
+    final decoded = json.decode(indexData) as Map<String, dynamic>;
+    final result = <String, VaultInfo>{};
+    
+    for (final entry in decoded.entries) {
+      if (entry.value is String) {
+        result[entry.key] = VaultInfo(id: entry.value, name: 'Vault');
+      } else {
+        result[entry.key] = VaultInfo.fromJson(entry.value);
+      }
+    }
+    return result;
   }
 
-  static Future<void> _saveVaultIndex(Map<String, String> index) async {
-    await _storage.write(key: _vaultIndexKey, value: json.encode(index));
+  static Future<void> _saveVaultIndex(Map<String, VaultInfo> index) async {
+    final toSave = index.map((key, value) => MapEntry(key, value.toJson()));
+    await _storage.write(key: _vaultIndexKey, value: json.encode(toSave));
   }
 
   static Future<bool> hasAnyVault() async {
@@ -92,12 +150,32 @@ class VaultService {
     return index.isNotEmpty;
   }
 
-  static Future<String> createVault(String password) async {
-    final vaultId = _uuid.v4();
+  static Future<bool> isPasswordTaken(String password) async {
+    final passwordHash = await EncryptionService.hashPassword(password);
+    final index = await _getVaultIndex();
+    return index.containsKey(passwordHash);
+  }
+
+  static Future<String> createVault(
+    String password, {
+    String name = 'Vault',
+    bool isMaster = false,
+    String? createdByVaultId,
+  }) async {
     final passwordHash = await EncryptionService.hashPassword(password);
     
     final index = await _getVaultIndex();
-    index[passwordHash] = vaultId;
+    if (index.containsKey(passwordHash)) {
+      throw Exception('A vault with this password already exists');
+    }
+    
+    final vaultId = _uuid.v4();
+    index[passwordHash] = VaultInfo(
+      id: vaultId,
+      name: name,
+      isMaster: isMaster,
+      createdByVaultId: createdByVaultId,
+    );
     await _saveVaultIndex(index);
     
     final vault = Vault(id: vaultId, passwordHash: passwordHash);
@@ -114,10 +192,10 @@ class VaultService {
     final passwordHash = await EncryptionService.hashPassword(password);
     final index = await _getVaultIndex();
     
-    final vaultId = index[passwordHash];
-    if (vaultId == null) return null;
+    final vaultInfo = index[passwordHash];
+    if (vaultInfo == null) return null;
     
-    return await _loadVault(vaultId, password);
+    return await _loadVault(vaultInfo.id, password);
   }
 
   static Future<void> _saveVault(Vault vault, String password) async {
@@ -230,5 +308,195 @@ class VaultService {
     
     vault.items.removeWhere((item) => item.id == itemId);
     await _saveVault(vault, password);
+  }
+
+  static Future<bool> changePassword(Vault vault, String oldPassword, String newPassword) async {
+    try {
+      final oldHash = await EncryptionService.hashPassword(oldPassword);
+      final newHash = await EncryptionService.hashPassword(newPassword);
+      
+      final index = await _getVaultIndex();
+      final vaultInfo = index[oldHash];
+      if (vaultInfo == null || vaultInfo.id != vault.id) return false;
+      
+      index.remove(oldHash);
+      index[newHash] = vaultInfo;
+      await _saveVaultIndex(index);
+      
+      final vaultsDir = await _getVaultsDirectory();
+      final oldKey = await EncryptionService.deriveKeyFromPassword(oldPassword);
+      final newKey = await EncryptionService.deriveKeyFromPassword(newPassword);
+      
+      final assetsDir = Directory('${vaultsDir.path}/${vault.id}/assets');
+      if (await assetsDir.exists()) {
+        await for (final file in assetsDir.list()) {
+          if (file is File && file.path.endsWith('.enc')) {
+            final encryptedData = await file.readAsBytes();
+            final decryptedData = await EncryptionService.decryptBytes(encryptedData, oldKey);
+            final reEncrypted = await EncryptionService.encryptBytes(decryptedData, newKey);
+            await file.writeAsBytes(reEncrypted);
+          }
+        }
+      }
+      
+      vault = Vault(id: vault.id, passwordHash: newHash, items: vault.items);
+      await _saveVault(vault, newPassword);
+      
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getAllVaults() async {
+    final index = await _getVaultIndex();
+    return index.entries.map((e) => {
+      'name': e.value.name,
+      'id': e.value.id,
+      'isMaster': e.value.isMaster,
+      'canSeeVaultIds': e.value.canSeeVaultIds,
+    }).toList();
+  }
+
+  static Set<String> _getAncestorIds(String vaultId, Map<String, VaultInfo> index) {
+    final ancestors = <String>{};
+    String? currentId = vaultId;
+    
+    while (currentId != null) {
+      VaultInfo? vaultInfo;
+      for (final entry in index.entries) {
+        if (entry.value.id == currentId) {
+          vaultInfo = entry.value;
+          break;
+        }
+      }
+      
+      if (vaultInfo?.createdByVaultId != null) {
+        ancestors.add(vaultInfo!.createdByVaultId!);
+        currentId = vaultInfo.createdByVaultId;
+      } else {
+        break;
+      }
+    }
+    
+    return ancestors;
+  }
+
+  static Set<String> _getDescendantIds(String vaultId, Map<String, VaultInfo> index) {
+    final descendants = <String>{};
+    final toProcess = <String>[vaultId];
+    
+    while (toProcess.isNotEmpty) {
+      final currentId = toProcess.removeLast();
+      
+      for (final entry in index.entries) {
+        if (entry.value.createdByVaultId == currentId && 
+            !descendants.contains(entry.value.id)) {
+          descendants.add(entry.value.id);
+          toProcess.add(entry.value.id);
+        }
+      }
+    }
+    
+    return descendants;
+  }
+
+  static Future<List<Map<String, dynamic>>> getVisibleVaults(String currentVaultId) async {
+    final index = await _getVaultIndex();
+    VaultInfo? currentVaultInfo;
+    
+    for (final entry in index.entries) {
+      if (entry.value.id == currentVaultId) {
+        currentVaultInfo = entry.value;
+        break;
+      }
+    }
+    
+    if (currentVaultInfo == null) return [];
+    
+    final ancestors = _getAncestorIds(currentVaultId, index);
+    final descendants = _getDescendantIds(currentVaultId, index);
+    
+    final visibleVaults = <Map<String, dynamic>>[];
+    
+    for (final entry in index.entries) {
+      final vaultInfo = entry.value;
+      
+      if (vaultInfo.id == currentVaultId) {
+        visibleVaults.add({
+          'name': vaultInfo.name,
+          'id': vaultInfo.id,
+          'isMaster': vaultInfo.isMaster,
+          'isCurrent': true,
+        });
+        continue;
+      }
+      
+      if (ancestors.contains(vaultInfo.id)) {
+        continue;
+      }
+      
+      if (currentVaultInfo.isMaster) {
+        visibleVaults.add({
+          'name': vaultInfo.name,
+          'id': vaultInfo.id,
+          'isMaster': vaultInfo.isMaster,
+          'isCurrent': false,
+          'isDescendant': descendants.contains(vaultInfo.id),
+        });
+      } else {
+        if (!vaultInfo.isMaster && !ancestors.contains(vaultInfo.id)) {
+          visibleVaults.add({
+            'name': vaultInfo.name,
+            'id': vaultInfo.id,
+            'isMaster': vaultInfo.isMaster,
+            'isCurrent': false,
+            'isDescendant': descendants.contains(vaultInfo.id),
+          });
+        }
+      }
+    }
+    
+    return visibleVaults;
+  }
+
+  static Future<VaultInfo?> getVaultInfo(String vaultId) async {
+    final index = await _getVaultIndex();
+    for (final entry in index.entries) {
+      if (entry.value.id == vaultId) {
+        return entry.value;
+      }
+    }
+    return null;
+  }
+
+  static Future<bool> updateVaultPermissions(
+    String vaultId, {
+    bool? isMaster,
+    List<String>? canSeeVaultIds,
+  }) async {
+    final index = await _getVaultIndex();
+    
+    for (final entry in index.entries) {
+      if (entry.value.id == vaultId) {
+        index[entry.key] = entry.value.copyWith(
+          isMaster: isMaster,
+          canSeeVaultIds: canSeeVaultIds,
+        );
+        await _saveVaultIndex(index);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static Future<String?> getVaultName(String vaultId) async {
+    final index = await _getVaultIndex();
+    for (final entry in index.entries) {
+      if (entry.value.id == vaultId) {
+        return entry.value.name;
+      }
+    }
+    return null;
   }
 }

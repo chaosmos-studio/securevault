@@ -10,12 +10,15 @@ class AppState extends ChangeNotifier {
   Vault? _currentVault;
   String? _currentPassword;
   DateTime? _lastActivityTime;
+  VaultInfo? _currentVaultInfo;
 
   DisguiseType get currentDisguise => _currentDisguise;
   bool get isSetupComplete => _isSetupComplete;
   bool get isUnlocked => _isUnlocked;
   Vault? get currentVault => _currentVault;
   String? get currentPassword => _currentPassword;
+  VaultInfo? get currentVaultInfo => _currentVaultInfo;
+  bool get isMasterVault => _currentVaultInfo?.isMaster ?? false;
 
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
@@ -49,6 +52,7 @@ class AppState extends ChangeNotifier {
       _currentVault = vault;
       _currentPassword = password;
       _lastActivityTime = DateTime.now();
+      _currentVaultInfo = await VaultService.getVaultInfo(vault.id);
       notifyListeners();
       return true;
     }
@@ -60,6 +64,7 @@ class AppState extends ChangeNotifier {
     _currentVault = null;
     _currentPassword = null;
     _lastActivityTime = null;
+    _currentVaultInfo = null;
     notifyListeners();
   }
 
