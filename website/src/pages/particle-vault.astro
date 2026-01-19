@@ -4,7 +4,7 @@ import Layout from '../layouts/Layout.astro';
 
 <Layout title="SecureVault - 3D Particle Vault">
 	<div class="back-nav">
-		<a href="/SecureVault/">← Back</a>
+		<a href={`${import.meta.env.BASE_URL}/`.replace(/\/\//g, '/')}>← Back</a>
 	</div>
 
 	<div class="particle-vault">
