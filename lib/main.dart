@@ -8,7 +8,7 @@ import 'screens/setup/setup_wizard.dart';
 import 'screens/disguises/calculator_disguise.dart';
 import 'screens/disguises/notes_disguise.dart';
 import 'screens/disguises/clock_disguise.dart';
-import 'screens/disguises/weather_disguise.dart';
+import 'screens/disguises/moodspace_disguise.dart';
 import 'screens/vault/vault_home_screen.dart';
 
 void main() async {
@@ -80,9 +80,14 @@ class AppRouter extends StatelessWidget {
   }
 }
 
-class DisguiseRouter extends StatelessWidget {
+class DisguiseRouter extends StatefulWidget {
   const DisguiseRouter({super.key});
 
+  @override
+  State<DisguiseRouter> createState() => _DisguiseRouterState();
+}
+
+class _DisguiseRouterState extends State<DisguiseRouter> {
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
@@ -94,8 +99,8 @@ class DisguiseRouter extends StatelessWidget {
             return const NotesDisguise();
           case DisguiseType.clock:
             return const ClockDisguise();
-          case DisguiseType.weather:
-            return const WeatherDisguise();
+          case DisguiseType.moodspace:
+            return const MoodSpaceDisguise();
         }
       },
     );

@@ -82,11 +82,11 @@
 				<key>UIPrerenderedIcon</key>
 				<false/>
 			</dict>
-			<key>weather</key>
+			<key>moodspace</key>
 			<dict>
 				<key>CFBundleIconFiles</key>
 				<array>
-					<string>WeatherIcon</string>
+					<string>MoodSpaceIcon</string>
 				</array>
 				<key>UIPrerenderedIcon</key>
 				<false/>

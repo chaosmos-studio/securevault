@@ -124,14 +124,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.share),
-              title: const Text('Share'),
-              onTap: () {
-                Navigator.pop(context);
-                _shareVideo();
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.open_in_new),
               title: const Text('Open in other app'),
               onTap: () {
@@ -139,26 +131,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 _openInExternalApp();
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.save_alt),
-              title: const Text('Export to Downloads'),
-              onTap: () {
-                Navigator.pop(context);
-                _exportToDownloads();
-              },
-            ),
-            if (widget.onDelete != null)
-              ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text(
-                  'Delete from vault',
-                  style: TextStyle(color: Colors.red),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _confirmDelete();
-                },
-              ),
           ],
         ),
       ),
@@ -247,11 +219,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           _buildActionButton(Icons.share, 'Share', _shareVideo),
-                          _buildActionButton(
-                            Icons.open_in_new,
-                            'Open',
-                            _openInExternalApp,
-                          ),
                           _buildActionButton(
                             Icons.save_alt,
                             'Export',

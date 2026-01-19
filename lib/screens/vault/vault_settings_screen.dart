@@ -9,6 +9,7 @@ import '../../core/providers/app_state.dart';
 import '../../core/services/disguise_service.dart';
 import '../../core/services/vault_service.dart';
 import '../../core/services/backup_service.dart';
+import '../../core/services/app_dialogs_service.dart';
 
 class VaultSettingsScreen extends StatefulWidget {
   const VaultSettingsScreen({super.key});
@@ -101,7 +102,8 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
             ElevatedButton(
               onPressed: () async {
                 Navigator.pop(context);
-                await _applyDisguise(selectedDisguise);
+                // Show instructions BEFORE applying disguise to avoid app restart
+                _showDisguiseInstructions(selectedDisguise);
               },
               child: const Text('Apply'),
             ),
@@ -111,32 +113,123 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
     );
   }
 
-  Future<void> _applyDisguise(DisguiseType disguise) async {
+  Future<void> _performDisguiseChange(DisguiseType disguise) async {
     final appState = context.read<AppState>();
     await appState.setDisguise(disguise);
     await DisguiseService.setDisguise(disguise);
 
-    if (Platform.isAndroid && mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          title: const Text('Apply Changes'),
-          content: const Text(
-            'The app will briefly close to apply the new icon and name. '
-            'This is normal and only happens when changing the disguise.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
+    if (mounted) {
+      if (Platform.isAndroid) {
+        _showAndroidIconChangeDialog();
+      } else if (Platform.isIOS) {
+        _showIOSNameChangeTutorial();
+      }
+    }
+  }
+
+  void _showDisguiseInstructions(DisguiseType disguise) {
+    String title;
+    List<String> instructions;
+    
+    switch (disguise) {
+      case DisguiseType.calculator:
+        title = 'Calculator Mode';
+        instructions = [
+          'Enter password as numbers, press = to unlock',
+          'Use ⌫ (backspace) to delete numbers',
+          'Or use "Request a Feature" menu for any password',
+        ];
+        break;
+      case DisguiseType.clock:
+        title = 'Clock Mode';
+        instructions = [
+          'Tap time digits to enter password',
+          'Add alarm - enter time and label (both try unlock)',
+          'Tap existing alarm to edit time and label',
+          'Or use "Request a Feature" menu for any password',
+        ];
+        break;
+      case DisguiseType.moodspace:
+        title = 'MoodSpace Mode';
+        instructions = [
+          'Tap the mood emoji area to enter password',
+          'Or type password in the mood input field',
+          'The app tracks moods as cover functionality',
+        ];
+        break;
+      case DisguiseType.notes:
+        title = 'Notes Mode';
+        instructions = [
+          'Type your password in the notes area',
+          'The vault unlocks automatically when password is typed',
+          'Notes are saved as cover functionality',
+        ];
+        break;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(disguise.icon),
+            const SizedBox(width: 12),
+            Text(title),
           ],
         ),
-      );
-    } else if (Platform.isIOS && mounted) {
-      _showIOSNameChangeTutorial();
-    }
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'How to open your vault:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            ...instructions.map((instruction) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('• '),
+                  Expanded(child: Text(instruction)),
+                ],
+              ),
+            )),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              // Apply disguise AFTER user reads instructions
+              await _performDisguiseChange(disguise);
+            },
+            child: const Text('Got it!'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAndroidIconChangeDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Apply Changes'),
+        content: const Text(
+          'The app will briefly close to apply the new icon and name. '
+          'This is normal and only happens when changing the disguise.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showIOSNameChangeTutorial() {
@@ -687,10 +780,12 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
               ),
             ),
           ),
-          const ListTile(
-            leading: Icon(Icons.info),
-            title: Text('Version'),
-            subtitle: Text(AppConstants.version),
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: const Text('Version'),
+            subtitle: const Text(AppConstants.version),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _showChangelog,
           ),
           ListTile(
             leading: const Icon(Icons.people_outline),
@@ -698,6 +793,20 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
             subtitle: const Text('Meet the developers'),
             trailing: const Icon(Icons.chevron_right),
             onTap: _showAboutDialog,
+          ),
+          ListTile(
+            leading: const Icon(Icons.email_outlined),
+            title: const Text('Contact Us'),
+            subtitle: const Text('Get in touch with support'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => AppDialogsService.showContactUs(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.lightbulb_outline),
+            title: const Text('Request a Feature'),
+            subtitle: const Text('Suggest improvements'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => AppDialogsService.showRequestFeature(context),
           ),
         ],
       ),
@@ -915,6 +1024,169 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
       MaterialPageRoute(builder: (context) => const AboutScreen()),
     );
   }
+
+  void _showChangelog() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ChangelogScreen()),
+    );
+  }
+}
+
+class ChangelogScreen extends StatelessWidget {
+  const ChangelogScreen({super.key});
+
+  Future<String> _loadChangelog() async {
+    final file = File('CHANGELOG.md');
+    if (await file.exists()) {
+      return await file.readAsString();
+    }
+    throw Exception('CHANGELOG.md file not found');
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Changelog'),
+      ),
+      body: FutureBuilder<String>(
+        future: _loadChangelog(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          if (snapshot.hasError || !snapshot.hasData) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+                    const SizedBox(height: 16),
+                    Text(
+                      snapshot.hasError 
+                          ? 'Error loading changelog: ${snapshot.error}'
+                          : 'Changelog not available',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: _parseChangelog(snapshot.data!, context),
+          );
+        },
+      ),
+    );
+  }
+
+  List<Widget> _parseChangelog(String content, BuildContext context) {
+    final lines = content.split('\n');
+    final widgets = <Widget>[];
+    String currentVersion = '';
+    String currentDate = '';
+    List<String> currentChanges = [];
+
+    for (final line in lines) {
+      if (line.startsWith('## [')) {
+        if (currentVersion.isNotEmpty && currentChanges.isNotEmpty) {
+          widgets.add(_ChangelogEntry(
+            version: currentVersion,
+            date: currentDate,
+            changes: List.from(currentChanges),
+          ));
+          widgets.add(const SizedBox(height: 16));
+        }
+        final match = RegExp(r'\[([^\]]+)\]\s*-\s*(.+)').firstMatch(line);
+        if (match != null) {
+          currentVersion = match.group(1) ?? '';
+          currentDate = match.group(2) ?? '';
+        }
+        currentChanges = [];
+      } else if (line.startsWith('- ')) {
+        currentChanges.add(line.substring(2).replaceAll('**', ''));
+      }
+    }
+
+    if (currentVersion.isNotEmpty && currentChanges.isNotEmpty) {
+      widgets.add(_ChangelogEntry(
+        version: currentVersion,
+        date: currentDate,
+        changes: currentChanges,
+      ));
+    }
+
+    return widgets;
+  }
+}
+
+class _ChangelogEntry extends StatelessWidget {
+  final String version;
+  final String date;
+  final List<String> changes;
+
+  const _ChangelogEntry({
+    required this.version,
+    required this.date,
+    required this.changes,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    'v$version',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  date,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ...changes.map((change) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Expanded(child: Text(change)),
+                ],
+              ),
+            )),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class AboutScreen extends StatelessWidget {
@@ -970,11 +1242,11 @@ class AboutScreen extends StatelessWidget {
             name: 'Shravan Goswami',
             role: 'Lead Developer',
             links: [
-              _DeveloperLink(Icons.code, 'GitHub', 'https://github.com/shravangoswami'),
-              _DeveloperLink(Icons.language, 'Website', 'https://shravangoswami.com'),
-              _DeveloperLink(Icons.work_outline, 'LinkedIn', 'https://linkedin.com/in/shravangoswami'),
-              _DeveloperLink(Icons.email_outlined, 'Email', 'mailto:hello@chaosmos.studio'),
-              _DeveloperLink(Icons.favorite, 'Sponsor', 'https://github.com/sponsors/shravangoswami'),
+              _DeveloperLink(_SocialIcon.github, 'GitHub', 'https://github.com/shravangoswami'),
+              _DeveloperLink(_SocialIcon.linkedin, 'LinkedIn', 'https://linkedin.com/in/shravangoswami'),
+              _DeveloperLink(_SocialIcon.website, 'Website', 'https://shravangoswami.com'),
+              _DeveloperLink(_SocialIcon.email, 'Email', 'mailto:hello@chaosmos.studio'),
+              _DeveloperLink(_SocialIcon.sponsor, 'Sponsor', 'https://github.com/sponsors/shravangoswami'),
             ],
           ),
           const SizedBox(height: 16),
@@ -983,7 +1255,8 @@ class AboutScreen extends StatelessWidget {
             name: 'Jash Ambaliya',
             role: 'Co-Developer',
             links: [
-              _DeveloperLink(Icons.favorite, 'Sponsor', 'https://github.com/sponsors/jashambaliya'),
+              _DeveloperLink(_SocialIcon.github, 'GitHub', 'https://github.com/AJ0070'),
+              _DeveloperLink(_SocialIcon.linkedin, 'LinkedIn', 'https://www.linkedin.com/in/jash0070/'),
             ],
           ),
           const SizedBox(height: 32),
@@ -1047,7 +1320,7 @@ class AboutScreen extends StatelessWidget {
               runSpacing: 8,
               children: links.map((link) {
                 return ActionChip(
-                  avatar: Icon(link.icon, size: 18),
+                  avatar: link.icon.widget,
                   label: Text(link.label),
                   onPressed: () => _launchUrl(link.url),
                 );
@@ -1060,8 +1333,167 @@ class AboutScreen extends StatelessWidget {
   }
 }
 
+enum _SocialIcon {
+  github,
+  linkedin,
+  website,
+  email,
+  sponsor;
+
+  Widget get widget {
+    switch (this) {
+      case _SocialIcon.github:
+        return const _GitHubIcon();
+      case _SocialIcon.linkedin:
+        return const _LinkedInIcon();
+      case _SocialIcon.website:
+        return const Icon(Icons.language, size: 18);
+      case _SocialIcon.email:
+        return const Icon(Icons.email_outlined, size: 18);
+      case _SocialIcon.sponsor:
+        return const Icon(Icons.favorite, size: 18, color: Colors.pink);
+    }
+  }
+}
+
+class _GitHubIcon extends StatelessWidget {
+  const _GitHubIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return SizedBox(
+      width: 18,
+      height: 18,
+      child: CustomPaint(
+        painter: _GitHubSVGPainter(isDark: isDark),
+      ),
+    );
+  }
+}
+
+class _GitHubSVGPainter extends CustomPainter {
+  final bool isDark;
+  _GitHubSVGPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = isDark ? Colors.white : Colors.black
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    // GitHub SVG path scaled to 18x18
+    path.moveTo(9, 0);
+    path.cubicTo(13.97, 0, 18, 4.03, 18, 9.0);
+    path.cubicTo(18, 12.97, 15.64, 16.35, 12.27, 17.5);
+    path.cubicTo(11.82, 17.59, 11.66, 17.3, 11.66, 17.05);
+    path.cubicTo(11.66, 16.74, 11.67, 15.75, 11.67, 14.52);
+    path.cubicTo(11.67, 13.66, 11.39, 13.1, 11.07, 12.82);
+    path.cubicTo(13.03, 12.59, 15.09, 11.81, 15.09, 8.36);
+    path.cubicTo(15.09, 7.35, 14.74, 6.53, 14.16, 5.89);
+    path.cubicTo(14.25, 5.65, 14.56, 4.74, 14.08, 3.49);
+    path.cubicTo(14.08, 3.49, 13.32, 3.24, 11.68, 4.4);
+    path.cubicTo(10.96, 4.19, 10.19, 4.09, 9.43, 4.09);
+    path.cubicTo(8.67, 4.09, 7.9, 4.19, 7.18, 4.4);
+    path.cubicTo(5.54, 3.24, 4.77, 3.49, 4.77, 3.49);
+    path.cubicTo(4.29, 4.74, 4.6, 5.65, 4.69, 5.89);
+    path.cubicTo(4.12, 6.53, 3.76, 7.35, 3.76, 8.36);
+    path.cubicTo(3.76, 11.8, 5.81, 12.59, 7.76, 12.83);
+    path.cubicTo(7.51, 13.06, 7.29, 13.48, 7.21, 14.07);
+    path.cubicTo(6.71, 14.31, 5.42, 14.72, 4.62, 13.33);
+    path.cubicTo(4.62, 13.33, 4.15, 12.46, 3.26, 12.39);
+    path.cubicTo(3.26, 12.39, 2.39, 12.38, 3.21, 12.95);
+    path.cubicTo(3.21, 12.95, 3.79, 13.23, 4.19, 14.28);
+    path.cubicTo(4.19, 14.28, 4.72, 15.88, 7.18, 15.33);
+    path.cubicTo(7.18, 16.09, 7.19, 16.8, 7.19, 17.05);
+    path.cubicTo(7.19, 17.3, 7.03, 17.6, 6.58, 17.5);
+    path.cubicTo(3.21, 16.36, 0.84, 12.97, 0.84, 9.0);
+    path.cubicTo(0.84, 4.03, 4.87, 0, 9.84, 0);
+    path.close();
+    
+    canvas.translate(-0.84, 0); // Adjust for viewBox offset
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _LinkedInIcon extends StatelessWidget {
+  const _LinkedInIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 18,
+      height: 18,
+      child: CustomPaint(
+        painter: _LinkedInSVGPainter(),
+      ),
+    );
+  }
+}
+
+class _LinkedInSVGPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF0A66C2)
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    // LinkedIn SVG path scaled to 18x18
+    path.moveTo(13.75, 13.75);
+    path.lineTo(11.75, 13.75);
+    path.lineTo(11.75, 10.62);
+    path.cubicTo(11.75, 9.87, 11.74, 8.92, 10.71, 8.92);
+    path.cubicTo(9.67, 8.92, 9.51, 9.73, 9.51, 10.57);
+    path.lineTo(9.51, 13.75);
+    path.lineTo(7.51, 13.75);
+    path.lineTo(7.51, 7.31);
+    path.lineTo(9.43, 7.31);
+    path.lineTo(9.43, 8.19);
+    path.lineTo(9.46, 8.19);
+    path.cubicTo(9.85, 7.52, 10.58, 7.13, 11.36, 7.16);
+    path.cubicTo(13.38, 7.16, 13.75, 8.56, 13.75, 10.31);
+    path.lineTo(13.75, 13.75);
+    path.close();
+    
+    path.moveTo(5.25, 6.43);
+    path.cubicTo(4.42, 6.43, 3.94, 5.8, 3.94, 5.06);
+    path.cubicTo(3.94, 4.32, 4.42, 3.69, 5.25, 3.69);
+    path.cubicTo(6.08, 3.69, 6.56, 4.32, 6.56, 5.06);
+    path.cubicTo(6.56, 5.8, 6.08, 6.43, 5.25, 6.43);
+    path.close();
+    
+    path.moveTo(6.25, 13.75);
+    path.lineTo(4.25, 13.75);
+    path.lineTo(4.25, 7.31);
+    path.lineTo(6.25, 7.31);
+    path.lineTo(6.25, 13.75);
+    path.close();
+    
+    path.moveTo(14.75, 2.25);
+    path.lineTo(3.24, 2.25);
+    path.cubicTo(2.56, 2.25, 2.25, 2.52, 2.25, 3.22);
+    path.lineTo(2.25, 14.78);
+    path.cubicTo(2.25, 15.48, 2.56, 15.75, 3.24, 15.75);
+    path.lineTo(14.75, 15.75);
+    path.cubicTo(15.44, 15.75, 15.75, 15.48, 15.75, 14.78);
+    path.lineTo(15.75, 3.22);
+    path.cubicTo(15.75, 2.52, 15.44, 2.25, 14.75, 2.25);
+    path.close();
+    
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 class _DeveloperLink {
-  final IconData icon;
+  final _SocialIcon icon;
   final String label;
   final String url;
 

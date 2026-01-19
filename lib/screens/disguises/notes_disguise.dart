@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../core/providers/app_state.dart';
+import '../../core/widgets/disguise_menu.dart';
 
 class DisguiseNote {
   String id;
@@ -231,6 +232,9 @@ class _NotesDisguiseState extends State<NotesDisguise> {
           onTap: _handleTitleTap,
           child: const Text('Notes'),
         ),
+        actions: const [
+          DisguiseMenu(),
+        ],
       ),
       body: Column(
         children: [

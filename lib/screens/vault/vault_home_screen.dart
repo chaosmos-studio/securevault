@@ -60,31 +60,60 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
     if (source == null) return;
 
     try {
-      final XFile? image = await _picker.pickImage(source: source);
-      if (image == null) return;
+      if (source == ImageSource.gallery) {
+        final List<XFile> images = await _picker.pickMultiImage();
+        if (images.isEmpty) return;
 
-      setState(() => _isLoading = true);
-      final vault = appState.currentVault;
-      final password = appState.currentPassword;
+        setState(() => _isLoading = true);
+        final vault = appState.currentVault;
+        final password = appState.currentPassword;
 
-      if (vault == null || password == null) return;
+        if (vault == null || password == null) return;
 
-      final bytes = await image.readAsBytes();
-      final thumbnail = await _generateThumbnail(bytes);
+        final addedFiles = <String>[];
+        for (final image in images) {
+          final bytes = await image.readAsBytes();
+          final thumbnail = await _generateThumbnail(bytes);
 
-      await VaultService.addItem(
-        vault: vault,
-        password: password,
-        type: VaultItemType.photo,
-        name: image.name,
-        data: bytes,
-        thumbnail: thumbnail,
-      );
+          await VaultService.addItem(
+            vault: vault,
+            password: password,
+            type: VaultItemType.photo,
+            name: image.name,
+            data: bytes,
+            thumbnail: thumbnail,
+          );
+          addedFiles.add(image.path);
+        }
 
-      await appState.refreshVault();
+        await appState.refreshVault();
 
-      if (mounted && source == ImageSource.gallery) {
-        _showDeleteOriginalDialog(image.name, 'photo');
+        if (mounted && addedFiles.isNotEmpty) {
+          _showDeleteOriginalDialog(addedFiles, 'photo');
+        }
+      } else {
+        final XFile? image = await _picker.pickImage(source: source);
+        if (image == null) return;
+
+        setState(() => _isLoading = true);
+        final vault = appState.currentVault;
+        final password = appState.currentPassword;
+
+        if (vault == null || password == null) return;
+
+        final bytes = await image.readAsBytes();
+        final thumbnail = await _generateThumbnail(bytes);
+
+        await VaultService.addItem(
+          vault: vault,
+          password: password,
+          type: VaultItemType.photo,
+          name: image.name,
+          data: bytes,
+          thumbnail: thumbnail,
+        );
+
+        await appState.refreshVault();
       }
     } catch (e) {
       if (mounted) {
@@ -125,7 +154,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
       await appState.refreshVault();
 
       if (mounted && source == ImageSource.gallery) {
-        _showDeleteOriginalDialog(video.name, 'video');
+        _showDeleteOriginalDialog([video.path], 'video');
       }
     } catch (e) {
       if (mounted) {
@@ -138,29 +167,31 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
     }
   }
 
-  void _showDeleteOriginalDialog(String fileName, String type) {
+  void _showDeleteOriginalDialog(List<String> filePaths, String type) {
+    final count = filePaths.length;
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Delete Original $type?'),
+        title: Text('Delete Original $type${count > 1 ? 's' : ''}?'),
         content: Text(
-          'The $type has been securely stored in your vault. '
-          'Would you like to delete the original from your device gallery?',
+          count > 1
+              ? '$count ${type}s have been securely stored in your vault. Would you like to delete the originals from your device gallery?'
+              : 'The $type has been securely stored in your vault. Would you like to delete the original from your device gallery?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Keep Original'),
+            child: Text(count > 1 ? 'Keep Originals' : 'Keep Original'),
           ),
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(dialogContext);
-              await _deleteFromGallery(fileName, type);
+              await _deleteFromGallery(filePaths, type);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text(
-              'Delete Original',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              count > 1 ? 'Delete Originals' : 'Delete Original',
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ],
@@ -168,7 +199,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
     );
   }
 
-  Future<void> _deleteFromGallery(String fileName, String type) async {
+  Future<void> _deleteFromGallery(List<String> filePaths, String type) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     try {
@@ -183,36 +214,49 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
       final assetType = type == 'photo' ? RequestType.image : RequestType.video;
       final albums = await PhotoManager.getAssetPathList(type: assetType);
 
-      AssetEntity? targetAsset;
+      final idsToDelete = <String>[];
 
-      for (final album in albums) {
-        final assets = await album.getAssetListRange(start: 0, end: 500);
-        for (final asset in assets) {
-          if (asset.title == fileName ||
-              asset.title?.contains(fileName.split('.').first) == true) {
-            targetAsset = asset;
-            break;
+      for (final filePath in filePaths) {
+        final file = File(filePath);
+        if (!await file.exists()) continue;
+        
+        final fileStats = await file.stat();
+        final fileSize = fileStats.size;
+        
+        for (final album in albums) {
+          final assets = await album.getAssetListRange(start: 0, end: 1000);
+          for (final asset in assets) {
+            final assetFile = await asset.file;
+            if (assetFile != null) {
+              if (assetFile.path == filePath) {
+                idsToDelete.add(asset.id);
+                break;
+              }
+              final assetSize = await assetFile.length();
+              if (assetSize == fileSize) {
+                idsToDelete.add(asset.id);
+                break;
+              }
+            }
           }
+          if (idsToDelete.length == filePaths.length) break;
         }
-        if (targetAsset != null) break;
       }
 
-      if (targetAsset != null) {
-        final result = await PhotoManager.editor.deleteWithIds([
-          targetAsset.id,
-        ]);
+      if (idsToDelete.isNotEmpty) {
+        final result = await PhotoManager.editor.deleteWithIds(idsToDelete);
         if (result.isNotEmpty) {
           scaffoldMessenger.showSnackBar(
-            SnackBar(content: Text('Original $type deleted from gallery')),
+            SnackBar(content: Text('${result.length} original $type${result.length > 1 ? 's' : ''} deleted from gallery')),
           );
         } else {
           scaffoldMessenger.showSnackBar(
-            SnackBar(content: Text('Could not delete original $type')),
+            SnackBar(content: Text('Could not delete original ${type}s')),
           );
         }
       } else {
         scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('Original $type not found in gallery')),
+          SnackBar(content: Text('Original $type${filePaths.length > 1 ? 's' : ''} not found in gallery')),
         );
       }
     } catch (e) {
@@ -389,18 +433,19 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
               title: const Text('Vault'),
               actions: [
                 IconButton(
+                  icon: const Icon(Icons.settings),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const VaultSettingsScreen()),
+                    );
+                  },
+                  tooltip: 'Settings',
+                ),
+                IconButton(
                   icon: const Icon(Icons.lock),
                   onPressed: _lockVault,
                   tooltip: 'Lock Vault',
-                ),
-                IconButton(
-                  icon: const Icon(Icons.settings),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const VaultSettingsScreen(),
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -479,7 +524,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
           vertical: 10,
         ),
         decoration: BoxDecoration(
-          color: isSelected 
+          color: isSelected
               ? colorScheme.primaryContainer
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),

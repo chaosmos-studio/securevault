@@ -15,7 +15,7 @@ class MainActivity : FlutterActivity() {
         "calculator" to ".CalculatorAlias",
         "notes" to ".NotesAlias",
         "clock" to ".ClockAlias",
-        "weather" to ".WeatherAlias"
+        "moodspace" to ".MoodSpaceAlias"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {

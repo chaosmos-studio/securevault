@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/app_state.dart';
+import '../../core/widgets/disguise_menu.dart';
 
 class CalculatorDisguise extends StatefulWidget {
   const CalculatorDisguise({super.key});
@@ -92,6 +93,24 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
     return result.toStringAsFixed(8).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
   }
 
+  void _onBackspacePress() {
+    setState(() {
+      if (_secretCode.isNotEmpty) {
+        _secretCode = _secretCode.substring(0, _secretCode.length - 1);
+      }
+      
+      if (_display.isNotEmpty && _display != '0') {
+        if (_display.length == 1) {
+          _display = '0';
+          _currentInput = '';
+        } else {
+          _display = _display.substring(0, _display.length - 1);
+          _currentInput = _display;
+        }
+      }
+    });
+  }
+
   void _onClearPress() {
     setState(() {
       _display = '0';
@@ -137,8 +156,17 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+      appBar: AppBar(
+        backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        elevation: 0,
+        actions: [
+          DisguiseMenu(iconColor: isDark ? Colors.white : Colors.black),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -146,29 +174,50 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
               flex: 2,
               child: Container(
                 alignment: Alignment.bottomRight,
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  _display,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 64,
-                    fontWeight: FontWeight.w300,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (_operator.isNotEmpty)
+                      Text(
+                        '${_formatResult(_firstOperand)} $_operator',
+                        style: TextStyle(
+                          color: isDark ? Colors.white54 : Colors.black45,
+                          fontSize: 24,
+                        ),
+                      ),
+                    Text(
+                      _display,
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black,
+                        fontSize: _display.length > 10 ? 48 : 64,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
             ),
+            Container(
+              height: 1,
+              color: isDark ? Colors.white12 : Colors.black12,
+            ),
             Expanded(
               flex: 4,
-              child: Column(
-                children: [
-                  _buildRow(['C', '±', '%', '÷']),
-                  _buildRow(['7', '8', '9', '×']),
-                  _buildRow(['4', '5', '6', '-']),
-                  _buildRow(['1', '2', '3', '+']),
-                  _buildRow(['0', '.', '=']),
-                ],
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  children: [
+                    _buildAndroidRow(['C', '⌫', '%', '÷'], isDark),
+                    _buildAndroidRow(['7', '8', '9', '×'], isDark),
+                    _buildAndroidRow(['4', '5', '6', '-'], isDark),
+                    _buildAndroidRow(['1', '2', '3', '+'], isDark),
+                    _buildAndroidRow(['±', '0', '.', '='], isDark),
+                  ],
+                ),
               ),
             ),
           ],
@@ -177,37 +226,51 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
     );
   }
 
-  Widget _buildRow(List<String> buttons) {
+  Widget _buildAndroidRow(List<String> buttons, bool isDark) {
     return Expanded(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: buttons.map((btn) {
-          final isOperator = ['÷', '×', '-', '+', '='].contains(btn);
-          final isFunction = ['C', '±', '%'].contains(btn);
-          final isZero = btn == '0';
+          final isOperator = ['÷', '×', '-', '+'].contains(btn);
+          final isEquals = btn == '=';
+          final isFunction = ['C', '⌫', '%', '±'].contains(btn);
+
+          Color bgColor;
+          Color textColor;
+          
+          if (isEquals) {
+            bgColor = const Color(0xFF4285F4);
+            textColor = Colors.white;
+          } else if (isOperator) {
+            bgColor = isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE8E8E8);
+            textColor = const Color(0xFF4285F4);
+          } else if (isFunction) {
+            bgColor = isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE8E8E8);
+            textColor = isDark ? Colors.white : Colors.black87;
+          } else {
+            bgColor = isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF5F5F5);
+            textColor = isDark ? Colors.white : Colors.black87;
+          }
 
           return Expanded(
-            flex: isZero ? 2 : 1,
             child: Padding(
               padding: const EdgeInsets.all(4),
-              child: ElevatedButton(
-                onPressed: () => _handleButtonPress(btn),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isOperator
-                      ? Colors.orange
-                      : isFunction
-                          ? Colors.grey[400]
-                          : Colors.grey[850],
-                  foregroundColor: isFunction ? Colors.black : Colors.white,
-                  shape: isZero
-                      ? RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(40),
-                        )
-                      : const CircleBorder(),
-                ),
-                child: Text(
-                  btn,
-                  style: const TextStyle(fontSize: 28),
+              child: Material(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(24),
+                child: InkWell(
+                  onTap: () => _handleButtonPress(btn),
+                  borderRadius: BorderRadius.circular(24),
+                  child: Center(
+                    child: Text(
+                      btn,
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: isOperator || isEquals ? FontWeight.w500 : FontWeight.w400,
+                        color: textColor,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -227,6 +290,9 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
         break;
       case '%':
         _onPercentPress();
+        break;
+      case '⌫':
+        _onBackspacePress();
         break;
       case '=':
         _onEqualsPress();

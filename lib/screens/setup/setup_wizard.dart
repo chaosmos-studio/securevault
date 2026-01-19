@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/providers/app_state.dart';
 import '../../core/services/vault_service.dart';
 import '../../core/services/disguise_service.dart';
+import '../../core/services/app_dialogs_service.dart';
 
 class SetupWizard extends StatefulWidget {
   const SetupWizard({super.key});
@@ -78,11 +80,21 @@ class _SetupWizardState extends State<SetupWizard> {
         name: _vaultNameController.text.trim(),
         isMaster: _isMasterVault,
       );
-      await DisguiseService.setDisguise(_selectedDisguise);
+      
+      // Save disguise preference first (doesn't restart app)
+      await appState.setDisguise(_selectedDisguise);
+      await appState.completeSetup();
       
       if (mounted) {
-        await appState.setDisguise(_selectedDisguise);
-        await appState.completeSetup();
+        // Show first-time instructions BEFORE applying disguise (which restarts app)
+        await AppDialogsService.showFirstTimeInstructions(context);
+        
+        // Mark instructions as shown
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('first_time_instructions', false);
+        
+        // Now apply disguise (this will restart app on Android)
+        await DisguiseService.setDisguise(_selectedDisguise);
         
         if (Platform.isAndroid) {
           _showRestartDialog();

@@ -4,7 +4,7 @@ A privacy vault app disguised as utility apps. Store photos, videos, and notes w
 
 ## Features
 
-- 4 disguises: Calculator, Notes, Clock, Weather
+- 4 disguises: Calculator, Notes, Clock, MoodSpace
 - Multi-vault system with separate passwords
 - AES-256 encryption
 - Dynamic app icon and name (Android)
@@ -28,8 +28,8 @@ Displays current time with an analog clock face. Shows hours, minutes, and secon
 
 **Secret Entry:** Tap the clock digits (hours/minutes) to input your code. For passcode `1234`, set it as time `12:34`. Alternatively, use the alarm feature and set the alarm time as your code.
 
-### Weather
-Shows current weather conditions with temperature, humidity, and weather icons. Displays a 5-day forecast with mock data.
+### MoodSpace
+A mood tracking and emotional wellness app. Log your daily moods, view mood history with beautiful visualizations, and gain insights into your emotional patterns.
 
 **Secret Entry:** Tap the **settings icon** (gear) in the top-right corner **7 times** rapidly. A password dialog will appear.
 

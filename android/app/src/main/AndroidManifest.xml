@@ -87,9 +87,9 @@
         </activity-alias>
         
         <activity-alias
-            android:name=".WeatherAlias"
-            android:label="Weather"
-            android:icon="@mipmap/ic_weather"
+            android:name=".MoodSpaceAlias"
+            android:label="MoodSpace"
+            android:icon="@mipmap/ic_mood"
             android:targetActivity=".MainActivity"
             android:enabled="false"
             android:exported="true">

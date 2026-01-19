@@ -17,7 +17,7 @@ enum DisguiseType {
   calculator('calculator', 'Calculator', Icons.calculate),
   notes('notes', 'Notes', Icons.note_alt),
   clock('clock', 'Clock', Icons.access_time),
-  weather('weather', 'Weather', Icons.cloud);
+  moodspace('moodspace', 'MoodSpace', Icons.emoji_emotions);
 
   final String id;
   final String displayName;

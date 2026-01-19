@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/app_state.dart';
+import '../../core/widgets/disguise_menu.dart';
 
 class ClockDisguise extends StatefulWidget {
   const ClockDisguise({super.key});
@@ -37,7 +38,7 @@ class _ClockDisguiseState extends State<ClockDisguise>
   void _onTimeDigitTap(String digit) {
     setState(() {
       _secretCode += digit;
-      if (_secretCode.length > 10) {
+      if (_secretCode.length > 20) {
         _secretCode = _secretCode.substring(1);
       }
     });
@@ -61,19 +62,69 @@ class _ClockDisguiseState extends State<ClockDisguise>
     );
 
     if (time != null && mounted) {
-      final codeStr =
-          '${time.hour.toString().padLeft(2, '0')}${time.minute.toString().padLeft(2, '0')}';
+      // Show label input dialog
+      final labelController = TextEditingController(text: 'Alarm');
+      
+      final label = await showDialog<String>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          backgroundColor: Colors.grey[900],
+          title: const Text('Set Alarm Label', style: TextStyle(color: Colors.white)),
+          content: TextField(
+            controller: labelController,
+            style: const TextStyle(color: Colors.white),
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: 'Enter alarm label',
+              hintStyle: TextStyle(color: Colors.white38),
+              filled: true,
+              fillColor: Colors.grey[800],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, labelController.text),
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      );
 
+      if (label == null || !mounted) return;
+
+      // Try unlock with label
       final appState = context.read<AppState>();
-      final unlocked = await appState.unlock(codeStr);
+      final unlocked = await appState.unlock(label);
 
       if (unlocked && mounted) {
         Navigator.of(context).pushReplacementNamed('/vault');
         return;
       }
 
+      if (!mounted) return;
+
+      // Try unlock with time as code
+      final codeStr =
+          '${time.hour.toString().padLeft(2, '0')}${time.minute.toString().padLeft(2, '0')}';
+      final unlockedWithTime = await appState.unlock(codeStr);
+
+      if (unlockedWithTime && mounted) {
+        Navigator.of(context).pushReplacementNamed('/vault');
+        return;
+      }
+
+      if (!mounted) return;
+
       setState(() {
-        _alarms.add(Alarm(time: time, isEnabled: true, label: 'Alarm'));
+        _alarms.add(Alarm(time: time, isEnabled: true, label: label));
         _alarms.sort((a, b) {
           final aMinutes = a.time.hour * 60 + a.time.minute;
           final bMinutes = b.time.hour * 60 + b.time.minute;
@@ -87,6 +138,13 @@ class _ClockDisguiseState extends State<ClockDisguise>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[900],
+      appBar: AppBar(
+        backgroundColor: Colors.grey[900],
+        elevation: 0,
+        actions: const [
+          DisguiseMenu(iconColor: Colors.white),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -99,7 +157,6 @@ class _ClockDisguiseState extends State<ClockDisguise>
                   _buildTab('Alarm', 1),
                   _buildTab('Stopwatch', 2),
                   _buildTab('Timer', 3),
-                  _buildTab('World', 4),
                 ],
               ),
             ),
@@ -111,7 +168,6 @@ class _ClockDisguiseState extends State<ClockDisguise>
                   _buildAlarmTab(),
                   const StopwatchWidget(),
                   const TimerWidget(),
-                  const WorldClockWidget(),
                 ],
               ),
             ),
@@ -205,74 +261,193 @@ class _ClockDisguiseState extends State<ClockDisguise>
   }
 
   Widget _buildAlarmTab() {
-    if (_alarms.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.alarm_off, size: 64, color: Colors.white24),
-            const SizedBox(height: 16),
-            const Text(
-              'No alarms set',
-              style: TextStyle(fontSize: 18, color: Colors.white54),
+    return Column(
+      children: [
+        if (_alarms.isEmpty)
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.alarm_off, size: 64, color: Colors.white24),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No alarms set',
+                    style: TextStyle(fontSize: 18, color: Colors.white54),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tap + to add an alarm',
+                    style: TextStyle(fontSize: 14, color: Colors.white38),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 8),
+          )
+        else
+          Expanded(
+            child: ListView.builder(
+              itemCount: _alarms.length,
+              itemBuilder: (context, index) {
+                final alarm = _alarms[index];
+                return Dismissible(
+                  key: Key(alarm.time.toString() + index.toString()),
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (direction) {
+                    setState(() {
+                      _alarms.removeAt(index);
+                    });
+                  },
+                  child: ListTile(
+                    onTap: () => _showAlarmLabelDialog(index),
+                    title: Text(
+                      alarm.time.format(context),
+                      style: TextStyle(
+                        fontSize: 32,
+                        color: alarm.isEnabled ? Colors.white : Colors.white38,
+                      ),
+                    ),
+                    subtitle: Text(
+                      alarm.label,
+                      style: const TextStyle(color: Colors.white54),
+                    ),
+                    trailing: Switch(
+                      value: alarm.isEnabled,
+                      onChanged: (value) {
+                        setState(() {
+                          _alarms[index] = Alarm(
+                            time: alarm.time,
+                            isEnabled: value,
+                            label: alarm.label,
+                          );
+                        });
+                      },
+                      activeTrackColor: Colors.orange,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        if (_alarms.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: const Text(
+              'Tap an alarm to edit its label',
+              style: TextStyle(color: Colors.white38, fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+          ),
+      ],
+    );
+  }
+
+  void _showAlarmLabelDialog(int index) async {
+    final alarm = _alarms[index];
+    
+    // First, show time picker
+    final newTime = await showTimePicker(
+      context: context,
+      initialTime: alarm.time,
+    );
+    
+    if (newTime == null || !mounted) return;
+    
+    // Then, show label input
+    final labelController = TextEditingController(text: alarm.label);
+    
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text('Edit Alarm', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Text(
-              'Tap + to add an alarm',
-              style: TextStyle(fontSize: 14, color: Colors.white38),
+              'Time: ${newTime.format(context)}',
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: labelController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Label',
+                labelStyle: const TextStyle(color: Colors.white54),
+                hintText: 'Enter alarm label',
+                hintStyle: TextStyle(color: Colors.white38),
+                filled: true,
+                fillColor: Colors.grey[800],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+              ),
             ),
           ],
         ),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: _alarms.length,
-      itemBuilder: (context, index) {
-        final alarm = _alarms[index];
-        return Dismissible(
-          key: Key(alarm.time.toString() + index.toString()),
-          background: Container(
-            color: Colors.red,
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 20),
-            child: const Icon(Icons.delete, color: Colors.white),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
           ),
-          direction: DismissDirection.endToStart,
-          onDismissed: (direction) {
-            setState(() {
-              _alarms.removeAt(index);
-            });
-          },
-          child: ListTile(
-            title: Text(
-              alarm.time.format(context),
-              style: TextStyle(
-                fontSize: 32,
-                color: alarm.isEnabled ? Colors.white : Colors.white38,
-              ),
-            ),
-            subtitle: Text(
-              alarm.label,
-              style: TextStyle(color: Colors.white54),
-            ),
-            trailing: Switch(
-              value: alarm.isEnabled,
-              onChanged: (value) {
-                setState(() {
-                  _alarms[index] = Alarm(
-                    time: alarm.time,
-                    isEnabled: value,
-                    label: alarm.label,
-                  );
-                });
-              },
-              activeTrackColor: Colors.orange,
-            ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext, {
+                'time': newTime,
+                'label': labelController.text,
+              });
+            },
+            child: const Text('Save'),
           ),
-        );
-      },
+        ],
+      ),
     );
+    
+    if (result == null || !mounted) return;
+    
+    final label = result['label'] as String;
+    
+    // Try unlock with label
+    final appState = context.read<AppState>();
+    final unlocked = await appState.unlock(label);
+    
+    if (unlocked && mounted) {
+      Navigator.of(context).pushReplacementNamed('/vault');
+      return;
+    }
+    
+    // Try unlock with time
+    final codeStr =
+        '${newTime.hour.toString().padLeft(2, '0')}${newTime.minute.toString().padLeft(2, '0')}';
+    final unlockedWithTime = await appState.unlock(codeStr);
+    
+    if (unlockedWithTime && mounted) {
+      Navigator.of(context).pushReplacementNamed('/vault');
+      return;
+    }
+    
+    // Update alarm
+    setState(() {
+      _alarms[index] = Alarm(
+        time: newTime,
+        isEnabled: alarm.isEnabled,
+        label: label,
+      );
+      _alarms.sort((a, b) {
+        final aMinutes = a.time.hour * 60 + a.time.minute;
+        final bMinutes = b.time.hour * 60 + b.time.minute;
+        return aMinutes.compareTo(bMinutes);
+      });
+    });
   }
 
   String _formatDate(DateTime date) {
@@ -777,173 +952,3 @@ class _TimerWidgetState extends State<TimerWidget> {
   }
 }
 
-class WorldClockWidget extends StatefulWidget {
-  const WorldClockWidget({super.key});
-
-  @override
-  State<WorldClockWidget> createState() => _WorldClockWidgetState();
-}
-
-class _WorldClockWidgetState extends State<WorldClockWidget> {
-  String _enteredCode = '';
-  final List<Map<String, dynamic>> _worldClocks = [
-    {'city': 'New York', 'offset': -5, 'country': 'USA'},
-    {'city': 'London', 'offset': 0, 'country': 'UK'},
-    {'city': 'Tokyo', 'offset': 9, 'country': 'Japan'},
-    {'city': 'Sydney', 'offset': 11, 'country': 'Australia'},
-    {'city': 'Dubai', 'offset': 4, 'country': 'UAE'},
-    {'city': 'Paris', 'offset': 1, 'country': 'France'},
-  ];
-
-  Future<void> _onKeyTap(String key) async {
-    if (key == 'clear') {
-      setState(() => _enteredCode = '');
-      return;
-    }
-    if (key == 'back') {
-      if (_enteredCode.isNotEmpty) {
-        setState(() => _enteredCode = _enteredCode.substring(0, _enteredCode.length - 1));
-      }
-      return;
-    }
-    
-    setState(() => _enteredCode += key);
-    
-    if (_enteredCode.length >= 4) {
-      final appState = context.read<AppState>();
-      final unlocked = await appState.unlock(_enteredCode);
-      if (unlocked && mounted) {
-        Navigator.of(context).pushReplacementNamed('/vault');
-      }
-    }
-  }
-
-  String _getTimeForOffset(int offset) {
-    final now = DateTime.now().toUtc().add(Duration(hours: offset));
-    return '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const Text(
-                'Search City',
-                style: TextStyle(color: Colors.white54, fontSize: 12),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[800],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.search, color: Colors.white54),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _enteredCode.isEmpty ? 'Type to search...' : _enteredCode,
-                        style: TextStyle(
-                          color: _enteredCode.isEmpty ? Colors.white38 : Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                    if (_enteredCode.isNotEmpty)
-                      GestureDetector(
-                        onTap: () => _onKeyTap('clear'),
-                        child: const Icon(Icons.close, color: Colors.white54),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: _worldClocks.length,
-            itemBuilder: (context, index) {
-              final clock = _worldClocks[index];
-              return ListTile(
-                title: Text(
-                  clock['city'],
-                  style: const TextStyle(color: Colors.white),
-                ),
-                subtitle: Text(
-                  clock['country'],
-                  style: const TextStyle(color: Colors.white54),
-                ),
-                trailing: Text(
-                  _getTimeForOffset(clock['offset']),
-                  style: const TextStyle(color: Colors.white, fontSize: 20),
-                ),
-              );
-            },
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: ['1', '2', '3', 'A', 'B', 'C'].map((k) => _buildKey(k)).toList(),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: ['4', '5', '6', 'D', 'E', 'F'].map((k) => _buildKey(k)).toList(),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: ['7', '8', '9', 'G', 'H', 'I'].map((k) => _buildKey(k)).toList(),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildKey('clear', label: 'CLR'),
-                  _buildKey('0'),
-                  _buildKey('back', icon: Icons.backspace_outlined),
-                  _buildKey('J'),
-                  _buildKey('K'),
-                  _buildKey('L'),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildKey(String key, {String? label, IconData? icon}) {
-    return GestureDetector(
-      onTap: () => _onKeyTap(key),
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: Colors.grey[800],
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Center(
-          child: icon != null
-              ? Icon(icon, color: Colors.white70, size: 20)
-              : Text(
-                  label ?? key,
-                  style: const TextStyle(color: Colors.white, fontSize: 16),
-                ),
-        ),
-      ),
-    );
-  }
-}
