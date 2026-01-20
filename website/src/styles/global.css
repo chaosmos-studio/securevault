@@ -1,21 +1,37 @@
 /*
-  The CSS in this style tag is based off of Bear Blog's default CSS.
-  https://github.com/HermanMartinus/bearblog/blob/297026a877bc2ab2b3bdfbd6b9f7961c350917dd/templates/styles/blog/default.css
-  License MIT: https://github.com/HermanMartinus/bearblog/blob/master/LICENSE.md
+  Holographic Theme Global Styles
  */
 
 :root {
-	--accent: #2337ff;
-	--accent-dark: #000d8a;
-	--black: 15, 18, 25;
-	--gray: 96, 115, 159;
-	--gray-light: 229, 233, 240;
-	--gray-dark: 34, 41, 57;
-	--gray-gradient: rgba(var(--gray-light), 50%), #fff;
-	--box-shadow:
-		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%), 0 16px 32px
-		rgba(var(--gray), 33%);
+	/* Holographic Color Palette */
+	--holo-bg-dark: #050510;
+	--holo-bg-light: #0a0a20;
+
+	--holo-accent: #00f3ff;
+	/* Cyan */
+	--holo-secondary: #ff00ff;
+	/* Magenta */
+	--holo-tertiary: #7000ff;
+	/* Purple */
+
+	--text-main: #e0e6ed;
+	--text-muted: #94a3b8;
+
+	/* Glassmorphism */
+	--glass-bg: rgba(255, 255, 255, 0.03);
+	--glass-border: rgba(255, 255, 255, 0.1);
+	--glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	--backdrop-blur: blur(10px);
+
+	/* Glows */
+	--glow-cyan: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3);
+	--glow-magenta: 0 0 10px rgba(255, 0, 255, 0.5), 0 0 20px rgba(255, 0, 255, 0.3);
+
+	/* Layout */
+	--max-width: 1200px;
+	/* Wider for modern feel */
 }
+
 @font-face {
 	font-family: "Atkinson";
 	src: url("/fonts/atkinson-regular.woff") format("woff");
@@ -23,6 +39,7 @@
 	font-style: normal;
 	font-display: swap;
 }
+
 @font-face {
 	font-family: "Atkinson";
 	src: url("/fonts/atkinson-bold.woff") format("woff");
@@ -30,25 +47,48 @@
 	font-style: normal;
 	font-display: swap;
 }
+
 body {
-	font-family: "Atkinson", sans-serif;
+	font-family: 'Inter', 'Atkinson', sans-serif;
+	/* Prefer Inter if available, mostly likely system or import later */
 	margin: 0;
 	padding: 0;
 	text-align: left;
-	background: linear-gradient(var(--gray-gradient)) no-repeat;
-	background-size: 100% 600px;
-	word-wrap: break-word;
-	overflow-wrap: break-word;
-	color: rgb(var(--gray-dark));
-	font-size: 20px;
-	line-height: 1.7;
+	background-color: var(--holo-bg-dark);
+	background-image:
+		radial-gradient(circle at 15% 50%, rgba(112, 0, 255, 0.15), transparent 25%),
+		radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.15), transparent 25%);
+	background-attachment: fixed;
+	color: var(--text-main);
+	font-size: 18px;
+	/* Slightly smaller base than 20 for cleaner tech look */
+	line-height: 1.6;
+	overflow-x: hidden;
 }
+
+/* Scanline Effect Overlay */
+body::after {
+	content: "";
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: linear-gradient(to bottom,
+			rgba(255, 255, 255, 0.03) 50%,
+			rgba(0, 0, 0, 0.03) 50%);
+	background-size: 100% 4px;
+	pointer-events: none;
+	z-index: 9999;
+}
+
 main {
-	width: 720px;
+	width: var(--max-width);
 	max-width: calc(100% - 2em);
 	margin: auto;
 	padding: 3em 1em;
 }
+
 h1,
 h2,
 h3,
@@ -56,84 +96,127 @@ h4,
 h5,
 h6 {
 	margin: 0 0 0.5rem 0;
-	color: rgb(var(--black));
+	color: var(--holo-accent);
 	line-height: 1.2;
+	text-shadow: var(--glow-cyan);
+	font-weight: 700;
+	letter-spacing: -0.02em;
 }
+
 h1 {
-	font-size: 3.052em;
+	font-size: 3.5em;
 }
+
 h2 {
-	font-size: 2.441em;
+	font-size: 2.5em;
 }
+
 h3 {
-	font-size: 1.953em;
+	font-size: 2em;
 }
+
 h4 {
-	font-size: 1.563em;
+	font-size: 1.5em;
 }
-h5 {
-	font-size: 1.25em;
-}
+
 strong,
 b {
 	font-weight: 700;
+	color: #fff;
 }
+
 a {
-	color: var(--accent);
+	color: var(--holo-accent);
+	text-decoration: none;
+	transition: all 0.3s ease;
+	position: relative;
 }
+
 a:hover {
-	color: var(--accent);
+	color: #fff;
+	text-shadow: var(--glow-cyan);
 }
+
 p {
 	margin-bottom: 1em;
 }
+
 .prose p {
 	margin-bottom: 2em;
 }
-textarea {
-	width: 100%;
-	font-size: 16px;
-}
+
+/* Form Elements */
+textarea,
 input {
-	font-size: 16px;
-}
-table {
 	width: 100%;
+	font-size: 16px;
+	background: rgba(255, 255, 255, 0.05);
+	border: 1px solid var(--glass-border);
+	color: var(--text-main);
+	padding: 0.8em;
+	border-radius: 8px;
+	outline: none;
+	transition: 0.3s;
 }
+
+textarea:focus,
+input:focus {
+	border-color: var(--holo-accent);
+	box-shadow: var(--glow-cyan);
+}
+
+/* Images */
 img {
 	max-width: 100%;
 	height: auto;
-	border-radius: 8px;
+	border-radius: 12px;
+	border: 1px solid var(--glass-border);
 }
+
+/* Code Blocks */
 code {
-	padding: 2px 5px;
-	background-color: rgb(var(--gray-light));
-	border-radius: 2px;
+	padding: 2px 6px;
+	background-color: rgba(0, 243, 255, 0.1);
+	color: var(--holo-accent);
+	border-radius: 4px;
+	font-family: 'Fira Code', monospace;
+	font-size: 0.9em;
 }
+
 pre {
 	padding: 1.5em;
-	border-radius: 8px;
+	border-radius: 12px;
+	background: #0d1117;
+	border: 1px solid var(--glass-border);
 }
-pre > code {
+
+pre>code {
 	all: unset;
+	color: #e6edf3;
 }
+
 blockquote {
-	border-left: 4px solid var(--accent);
-	padding: 0 0 0 20px;
-	margin: 0;
-	font-size: 1.333em;
+	border-left: 4px solid var(--holo-secondary);
+	padding: 1em 0 1em 20px;
+	margin: 1.5em 0;
+	background: linear-gradient(90deg, rgba(255, 0, 255, 0.1), transparent);
+	border-radius: 0 8px 8px 0;
 }
+
 hr {
 	border: none;
-	border-top: 1px solid rgb(var(--gray-light));
+	border-top: 1px solid var(--glass-border);
+	margin: 2em 0;
 }
-@media (max-width: 720px) {
-	body {
-		font-size: 18px;
-	}
-	main {
-		padding: 1em;
-	}
+
+/* Utilities */
+.glass-panel {
+	background: var(--glass-bg);
+	backdrop-filter: var(--backdrop-blur);
+	-webkit-backdrop-filter: var(--backdrop-blur);
+	border: 1px solid var(--glass-border);
+	border-radius: 16px;
+	box-shadow: var(--glass-shadow);
 }
 
 .sr-only {
@@ -144,12 +227,22 @@ hr {
 	height: 1px;
 	width: 1px;
 	overflow: hidden;
-	/* IE6, IE7 - a 0 height clip, off to the bottom right of the visible 1px box */
 	clip: rect(1px 1px 1px 1px);
-	/* maybe deprecated but we need to support legacy browsers */
 	clip: rect(1px, 1px, 1px, 1px);
-	/* modern browsers, clip-path works inwards from each corner */
 	clip-path: inset(50%);
-	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
 	white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+	body {
+		font-size: 16px;
+	}
+
+	main {
+		padding: 1em;
+	}
+
+	h1 {
+		font-size: 2.5em;
+	}
 }
