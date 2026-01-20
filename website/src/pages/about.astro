@@ -22,7 +22,8 @@ import SiteFooter from "../components/SiteFooter.astro";
                 <h2>Why We Exist</h2>
                 <p>
                     SecureVault was born from a simple belief: <strong
-                        >privacy is a right, not a privilege.</strong>
+                        >privacy is a right, not a privilege.</strong
+                    >
                 </p>
                 <p>
                     In an age where digital footprints are permanent and data is
@@ -81,12 +82,17 @@ import SiteFooter from "../components/SiteFooter.astro";
 
 <style>
     main {
-        padding: 10rem 5% 4rem;
+        padding: 6rem 5% 2rem; /* Reduced for mobile */
         max-width: 1000px;
         margin: 0 auto;
         z-index: 2;
         position: relative;
         min-height: 80vh;
+    }
+    @media (min-width: 768px) {
+        main {
+            padding: 10rem 5% 4rem;
+        }
     }
 
     .page-header {

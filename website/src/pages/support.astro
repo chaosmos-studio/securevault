@@ -98,11 +98,16 @@ import { BookOpen, ShieldAlert, Mail, Lightbulb } from "lucide-astro";
 
 <style>
     main {
-        padding: 10rem 5% 4rem;
+        padding: 6rem 5% 2rem; /* Reduced for mobile */
         max-width: 1200px;
         margin: 0 auto;
         z-index: 2;
         position: relative;
+    }
+    @media (min-width: 768px) {
+        main {
+            padding: 10rem 5% 4rem;
+        }
     }
 
     .page-header {
