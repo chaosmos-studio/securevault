@@ -78,43 +78,32 @@ import { Shield, Sun, Moon, Menu, X } from "lucide-astro";
 </nav>
 
 <script>
-    const themeBtn = document.getElementById("theme-toggle");
-    const mobileThemeBtn = document.getElementById("mobile-theme-toggle");
+    const buttons = document.querySelectorAll(".theme-btn");
     const root = document.documentElement;
 
-    function applyTheme(theme: string | null) {
-        if (!theme) return;
+    function setTheme(theme: string) {
         root.setAttribute("data-theme", theme);
         localStorage.setItem("theme", theme);
-
-        // Update all sun/moon icons visibility
-        const suns = document.querySelectorAll(".sun-icon");
-        const moons = document.querySelectorAll(".moon-icon");
-
-        if (theme === "light") {
-            suns.forEach((el) => ((el as HTMLElement).style.display = "block"));
-            moons.forEach((el) => ((el as HTMLElement).style.display = "none"));
-        } else {
-            suns.forEach((el) => ((el as HTMLElement).style.display = "none"));
-            moons.forEach(
-                (el) => ((el as HTMLElement).style.display = "block"),
-            );
-        }
     }
 
-    // Init Theme
+    // Initialize Theme
     const savedTheme = localStorage.getItem("theme");
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
         .matches
         ? "dark"
         : "light";
-    applyTheme(savedTheme || systemTheme);
 
-    // Event Listeners for Theme
-    [themeBtn, mobileThemeBtn].forEach((btn) => {
-        btn?.addEventListener("click", () => {
+    // Default to dark if nothing saved
+    setTheme(savedTheme || systemTheme);
+
+    // Event Listeners
+    buttons.forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent issues if inside other clickables
             const currentTheme = root.getAttribute("data-theme");
-            applyTheme(currentTheme === "dark" ? "light" : "dark");
+            // Toggle: If dark, go light. If light, go dark.
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            setTheme(newTheme);
         });
     });
 
@@ -128,7 +117,7 @@ import { Shield, Sun, Moon, Menu, X } from "lucide-astro";
         menuToggle.setAttribute("aria-expanded", (!isExpanded).toString());
         menuToggle.classList.toggle("active");
         mobileNav?.classList.toggle("active");
-        body.style.overflow = isExpanded ? "" : "hidden"; // Prevent scroll when menu open
+        body.style.overflow = isExpanded ? "" : "hidden";
     });
 
     // Close menu on link click
@@ -153,6 +142,7 @@ import { Shield, Sun, Moon, Menu, X } from "lucide-astro";
 </script>
 
 <style>
+    /* ... (Existing styles unchanged up to theme-btn) ... */
     .nav {
         position: fixed;
         top: 0;
@@ -177,7 +167,7 @@ import { Shield, Sun, Moon, Menu, X } from "lucide-astro";
         background: var(--bg-glass);
         backdrop-filter: blur(12px);
         border-bottom: 1px solid var(--border);
-        padding: 0.8rem 5%; /* Slight shrink for effect */
+        padding: 0.8rem 5%;
     }
 
     .logo {
@@ -188,13 +178,12 @@ import { Shield, Sun, Moon, Menu, X } from "lucide-astro";
         gap: 0.5rem;
         text-decoration: none;
         color: var(--text-main);
-        z-index: 102; /* Above mobile menu */
+        z-index: 102;
     }
     .logo-icon {
         color: var(--accent);
     }
 
-    /* Desktop Navigation */
     .nav-right {
         display: flex;
         gap: 1.5rem;
@@ -240,11 +229,29 @@ import { Shield, Sun, Moon, Menu, X } from "lucide-astro";
         background: var(--bg-surface-2, rgba(255, 255, 255, 0.1));
     }
 
+    /* Icon Toggling Logic */
+    /* Default (Dark Mode) -> Show Sun (to switch to Light) */
     .sun-icon {
-        display: none;
+        display: block;
     }
     .moon-icon {
+        display: none;
+    }
+
+    /* Light Mode -> Show Moon (to switch to Dark) */
+    :global(html[data-theme="light"]) .sun-icon {
+        display: none;
+    }
+    :global(html[data-theme="light"]) .moon-icon {
         display: block;
+    }
+
+    /* Explicit Dark Mode override if needed (handled by default mainly) */
+    :global(html[data-theme="dark"]) .sun-icon {
+        display: block;
+    }
+    :global(html[data-theme="dark"]) .moon-icon {
+        display: none;
     }
 
     /* Mobile Navigation */
