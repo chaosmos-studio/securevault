@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import BackToTop from '../components/BackToTop.astro';
 import { Image } from 'astro:assets';
 import luffyImg from '../assets/luffy.png';
 import zoroImg from '../assets/zoro.png';
@@ -98,6 +99,7 @@ const developersList = Object.values(authors);
       </div>
     </main>
 
+    <BackToTop />
     <SiteFooter />
   </div>
 </Layout>
