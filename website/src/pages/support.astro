@@ -2,53 +2,85 @@
 import Layout from "../layouts/Layout.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
+import { BookOpen, ShieldAlert, Mail, Lightbulb } from "lucide-astro";
 ---
 
 <Layout title="Support - SecureVault">
     <div class="premium-container" id="main-container">
         <div class="spotlight-overlay"></div>
-        
+
         <SiteHeader />
 
         <main>
             <section class="page-header">
-                <h1 class="headline">Help & <span class="text-gradient">Support</span></h1>
+                <h1 class="headline">
+                    Help & <span class="text-gradient">Support</span>
+                </h1>
                 <p class="subheadline">Got questions? We've got answers.</p>
             </section>
 
             <div class="support-grid">
                 <div class="support-card glow-card">
-                    <div class="card-icon">📖</div>
+                    <div class="card-icon"><BookOpen size={40} /></div>
                     <h3>FAQs</h3>
-                    <p>Find answers to common questions about setting up disguises, managing vaults, and more.</p>
+                    <p>
+                        Find answers to common questions about setting up
+                        disguises, managing vaults, and more.
+                    </p>
                 </div>
-                
+
                 <div class="support-card glow-card">
-                    <div class="card-icon">🔐</div>
+                    <div class="card-icon"><ShieldAlert size={40} /></div>
                     <h3>Password Recovery</h3>
-                    <p>Due to our zero-knowledge architecture, we cannot recover passwords. Please ensure you remember your credentials.</p>
+                    <p>
+                        Due to our zero-knowledge architecture, we cannot
+                        recover passwords. Please ensure you remember your
+                        credentials.
+                    </p>
                 </div>
-                
+
                 <div class="support-card glow-card" id="contact">
-                    <div class="card-icon">✉️</div>
+                    <div class="card-icon"><Mail size={40} /></div>
                     <h3>Contact Us</h3>
-                    <p>Need personal assistance? Reach out and we'll get back to you within 24 hours.</p>
-                    <a href="mailto:hello@chaosmos.studio" class="card-link">hello@chaosmos.studio</a>
+                    <p>
+                        Need personal assistance? Reach out and we'll get back
+                        to you within 24 hours.
+                    </p>
+                    <a href="mailto:hello@chaosmos.studio" class="card-link"
+                        >hello@chaosmos.studio</a
+                    >
                 </div>
-                
+
                 <div class="support-card glow-card" id="request">
-                    <div class="card-icon">💡</div>
+                    <div class="card-icon"><Lightbulb size={40} /></div>
                     <h3>Request a Feature</h3>
-                    <p>Have an idea to make SecureVault even better? We'd love to hear from you.</p>
-                    <a href="mailto:hello@chaosmos.studio" class="card-link">Submit Idea →</a>
+                    <p>
+                        Have an idea to make SecureVault even better? We'd love
+                        to hear from you.
+                    </p>
+                    <a href="mailto:hello@chaosmos.studio" class="card-link"
+                        >Submit Idea →</a
+                    >
                 </div>
             </div>
 
             <section class="about-section">
                 <h2>About SecureVault</h2>
-                <p>SecureVault was born from a simple belief: <strong>privacy is a right, not a privilege.</strong></p>
-                <p>We built an app that doesn't just hide your files—it makes them invisible. With multiple disguises, decoy vaults, and military-grade AES-256 encryption, your private moments stay exactly that: private.</p>
-                <p>We don't collect your data. We don't track you. We simply provide the tools, and you hold all the keys.</p>
+                <p>
+                    SecureVault was born from a simple belief: <strong
+                        >privacy is a right, not a privilege.</strong
+                    >
+                </p>
+                <p>
+                    We built an app that doesn't just hide your files—it makes
+                    them invisible. With multiple disguises, decoy vaults, and
+                    military-grade AES-256 encryption, your private moments stay
+                    exactly that: private.
+                </p>
+                <p>
+                    We don't collect your data. We don't track you. We simply
+                    provide the tools, and you hold all the keys.
+                </p>
             </section>
         </main>
 
@@ -57,38 +89,53 @@ import SiteFooter from "../components/SiteFooter.astro";
 </Layout>
 
 <script>
-    const wrapper = document.getElementById('main-container');
-    if(wrapper) {
-        wrapper.addEventListener('mousemove', (e) => {
+    const wrapper = document.getElementById("main-container");
+    if (wrapper) {
+        wrapper.addEventListener("mousemove", (e) => {
             const rect = wrapper.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            wrapper.style.setProperty('--mouse-x', `${x}px`);
-            wrapper.style.setProperty('--mouse-y', `${y}px`);
+            wrapper.style.setProperty("--mouse-x", `${x}px`);
+            wrapper.style.setProperty("--mouse-y", `${y}px`);
 
-            document.querySelectorAll('.glow-card').forEach(card => {
+            document.querySelectorAll(".glow-card").forEach((card) => {
                 const cardRect = card.getBoundingClientRect();
                 const cardX = e.clientX - cardRect.left;
                 const cardY = e.clientY - cardRect.top;
-                (card as HTMLElement).style.setProperty('--card-x', `${cardX}px`);
-                (card as HTMLElement).style.setProperty('--card-y', `${cardY}px`);
+                (card as HTMLElement).style.setProperty(
+                    "--card-x",
+                    `${cardX}px`,
+                );
+                (card as HTMLElement).style.setProperty(
+                    "--card-y",
+                    `${cardY}px`,
+                );
             });
         });
     }
 </script>
 
 <style>
-    main { 
-        padding: 10rem 5% 4rem; 
-        max-width: 1200px; 
-        margin: 0 auto; 
-        z-index: 2; 
-        position: relative; 
+    main {
+        padding: 10rem 5% 4rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        z-index: 2;
+        position: relative;
     }
 
-    .page-header { text-align: center; margin-bottom: 4rem; }
-    .headline { font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 0.5rem; }
-    .subheadline { color: var(--text-muted); font-size: 1.2rem; }
+    .page-header {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+    .headline {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        margin-bottom: 0.5rem;
+    }
+    .subheadline {
+        color: var(--text-muted);
+        font-size: 1.2rem;
+    }
 
     .support-grid {
         display: grid;
@@ -103,25 +150,41 @@ import SiteFooter from "../components/SiteFooter.astro";
         border-radius: 16px;
         padding: 2rem;
         backdrop-filter: blur(12px);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
     }
     .support-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 40px -12px rgba(0,0,0,0.4);
+        box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.4);
     }
 
-    .card-icon { font-size: 2.5rem; margin-bottom: 1rem; }
-    .support-card h3 { font-size: 1.3rem; margin: 0 0 0.75rem; color: var(--text-main); }
-    .support-card p { color: var(--text-muted); line-height: 1.6; margin: 0 0 1rem; font-size: 0.95rem; }
-    .card-link { 
-        color: var(--accent); 
-        font-weight: 600; 
+    .card-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    .support-card h3 {
+        font-size: 1.3rem;
+        margin: 0 0 0.75rem;
+        color: var(--text-main);
+    }
+    .support-card p {
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin: 0 0 1rem;
+        font-size: 0.95rem;
+    }
+    .card-link {
+        color: var(--accent);
+        font-weight: 600;
         font-size: 0.9rem;
         display: inline-block;
         border-bottom: 1px solid transparent;
         transition: border-color 0.2s;
     }
-    .card-link:hover { border-color: var(--accent); }
+    .card-link:hover {
+        border-color: var(--accent);
+    }
 
     .about-section {
         max-width: 700px;
@@ -133,13 +196,23 @@ import SiteFooter from "../components/SiteFooter.astro";
         border-radius: 20px;
         backdrop-filter: blur(12px);
     }
-    .about-section h2 { 
-        font-size: 1.8rem; 
+    .about-section h2 {
+        font-size: 1.8rem;
         margin-bottom: 1.5rem;
-        background: linear-gradient(135deg, var(--accent), var(--accent-purple)); 
-        -webkit-background-clip: text; 
+        background: linear-gradient(
+            135deg,
+            var(--accent),
+            var(--accent-purple)
+        );
+        -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
-    .about-section p { color: var(--text-muted); line-height: 1.8; margin-bottom: 1rem; }
-    .about-section strong { color: var(--text-main); }
+    .about-section p {
+        color: var(--text-muted);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+    }
+    .about-section strong {
+        color: var(--text-main);
+    }
 </style>
