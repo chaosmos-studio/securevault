@@ -638,8 +638,11 @@ import {
 
     /* Controls */
     /* Controls */
+    /* Controls */
     .disguise-section .disguise-container.grid-2 {
-        gap: 2rem;
+        gap: 2.5rem;
+        grid-template-columns: 1fr; /* Force 1 column on mobile */
+        justify-items: center; /* Center content vertically in stack */
     }
 
     @media (min-width: 768px) {
@@ -648,6 +651,7 @@ import {
             /* Bring columns closer by not using full 1fr 1fr if max-width is limiting */
             grid-template-columns: minmax(300px, 450px) minmax(300px, 450px);
             justify-content: center;
+            justify-items: start; /* Reset alignment for grid */
         }
     }
 
