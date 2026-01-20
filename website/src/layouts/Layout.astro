@@ -41,16 +41,16 @@ const { title } = Astro.props;
 			}
 
 			[data-theme="light"] {
-				--bg-main: #f5f5f7;
-				--bg-glass: rgba(255, 255, 255, 0.85);
-				--bg-surface: rgba(255, 255, 255, 0.9);
-				--bg-surface-2: rgba(0, 0, 0, 0.03);
+				--bg-main: #fcfcfd;
+				--bg-glass: rgba(255, 255, 255, 0.75);
+				--bg-surface: #ffffff;
+				--bg-surface-2: #f2f2f7;
 				--text-main: #1d1d1f;
-				--text-muted: #6e6e73;
-				--accent: #0066cc;
-				--accent-purple: #8b5cf6;
-				--border: rgba(0, 0, 0, 0.08);
-				--glow: rgba(0, 0, 0, 0.03);
+				--text-muted: #86868b;
+				--accent: #2997ff;
+				--accent-purple: #9e64e8;
+				--border: rgba(0, 0, 0, 0.1);
+				--glow: rgba(0, 0, 0, 0.12);
 				--card-bg: #ffffff;
 			}
 
@@ -75,25 +75,29 @@ const { title } = Astro.props;
 				position: relative;
 				width: 100%;
 				min-height: 100vh;
-				overflow: hidden;
+				/* Remove overflow hidden to allow sticky elements if needed, but ensure no horiz scroll */
 			}
 
 			.spotlight-overlay {
 				position: fixed;
 				top: 0; left: 0; 
-				width: 100%; height: 100%;
+				width: 100vw; height: 100vh;
 				pointer-events: none;
 				background: radial-gradient(
 					600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-					var(--glow),
+					rgba(255, 255, 255, 0.1),
 					transparent 40%
 				);
-				z-index: 1;
+				z-index: 9999;
 				mix-blend-mode: screen; 
 			}
 			[data-theme="light"] .spotlight-overlay { 
-				mix-blend-mode: multiply;
-				opacity: 0.5;
+				mix-blend-mode: normal; 
+                background: radial-gradient(
+					600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+					rgba(59, 130, 246, 0.15), /* Subtle Blue Glow */
+					transparent 50%
+				);
 			}
 
 			.glow-card { position: relative; }
@@ -102,17 +106,19 @@ const { title } = Astro.props;
 				position: absolute; 
 				top: 0; left: 0; right: 0; bottom: 0;
 				border-radius: inherit; 
-				padding: 1px;
-				background: radial-gradient(600px circle at var(--card-x, 50%) var(--card-y, 50%), rgba(255, 255, 255, 0.15), transparent 40%);
+				padding: 1px; /* border width */
+                /* Use a gradient mask to show the background only at the cursor position */
+				background: radial-gradient(800px circle at var(--card-x, 50%) var(--card-y, 50%), rgba(255, 255, 255, 0.3), transparent 40%);
 				-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
 				-webkit-mask-composite: xor; 
 				mask-composite: exclude;
 				pointer-events: none; 
 				z-index: 10; 
-				opacity: 0.8;
+				opacity: 1;
+                transition: opacity 0.3s ease;
 			}
 			[data-theme="light"] .glow-card::before {
-				background: radial-gradient(600px circle at var(--card-x, 50%) var(--card-y, 50%), rgba(0, 0, 0, 0.06), transparent 40%);
+				background: radial-gradient(800px circle at var(--card-x, 50%) var(--card-y, 50%), rgba(0, 0, 0, 0.1), transparent 40%);
 			}
 			
 			.text-gradient { 
@@ -124,6 +130,48 @@ const { title } = Astro.props;
 		</style>
 	</head>
 	<body>
+        <div class="spotlight-overlay"></div>
 		<slot />
+        <script>
+            // Optimized Global Mouse Tracking for Spotlight and Glow Cards
+            let x = 0;
+            let y = 0;
+            let ticking = false;
+
+            document.addEventListener('mousemove', (e) => {
+                x = e.clientX;
+                y = e.clientY;
+
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        updateUI();
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            });
+
+            function updateUI() {
+                // Update Spotlight Position (Fixed to viewport)
+                const spotlight = document.querySelector('.spotlight-overlay');
+                if (spotlight) {
+                    (spotlight as HTMLElement).style.setProperty('--mouse-x', `${x}px`);
+                    (spotlight as HTMLElement).style.setProperty('--mouse-y', `${y}px`);
+                }
+
+                // Update Glow Cards (Relative to card)
+                // Select generic glow cards AND specific interactive elements
+                const cards = document.querySelectorAll('.glow-card, .btn-primary, .disguise-btn, .vault-card, .menu-mockup, .blog-card, .support-card, .faq-item, .blog-item');
+                
+                cards.forEach(card => {
+                    const rect = card.getBoundingClientRect();
+                    const cardX = x - rect.left;
+                    const cardY = y - rect.top;
+                    
+                    (card as HTMLElement).style.setProperty('--card-x', `${cardX}px`);
+                    (card as HTMLElement).style.setProperty('--card-y', `${cardY}px`);
+                });
+            }
+        </script>
 	</body>
 </html>
