@@ -11,7 +11,7 @@ type Props = CollectionEntry<"blog">["data"];
 const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 ---
 
-<Layout title={`${title} - SecureVault Blog`} description={description}>
+<Layout title={`${title} - SecureVault Blog`}>
     <div class="premium-container" id="main-container">
         <div class="spotlight-overlay"></div>
         
@@ -60,84 +60,91 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 </script>
 
 <style>
-    :root {
-        --text-article: #e5e5e5;
-        --prose-width: 800px;
+    main { 
+        padding: 8rem 5% 4rem; 
+        width: 100%; 
+        display: flex; 
+        justify-content: center; 
+        z-index: 2; 
+        position: relative; 
     }
-
-    [data-theme="light"] {
-        --text-article: #333;
-    }
-
-    .premium-container { width: 100%; min-height: 100vh; position: relative; overflow-x: hidden; }
-    
-    .spotlight-overlay {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;
-        background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.05), transparent 40%);
-        mix-blend-mode: screen;
-    }
-    
-    main { padding-top: 6rem; padding-bottom: 4rem; width: 100%; display: flex; justify-content: center; z-index: 2; position: relative; }
 
     .blog-article {
-        width: 100%; max-width: 900px;
-        background: rgba(10, 10, 10, 0.4);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px;
+        width: 100%; 
+        max-width: 800px;
+        background: var(--bg-surface);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border);
+        border-radius: 20px;
         overflow: hidden;
-        margin: 2rem;
     }
 
     .hero-section { position: relative; width: 100%; }
-    .hero-image-wrapper { position: relative; width: 100%; aspect-ratio: 2/1; overflow: hidden; }
+    .hero-image-wrapper { 
+        position: relative; 
+        width: 100%; 
+        aspect-ratio: 2/1; 
+        overflow: hidden; 
+        background: var(--bg-surface-2);
+    }
     .hero-image { width: 100%; height: 100%; object-fit: cover; }
-    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 0%, rgba(10,10,10,1) 100%); }
+    .hero-overlay { 
+        position: absolute; 
+        inset: 0; 
+        background: linear-gradient(to bottom, transparent 30%, var(--bg-main) 100%); 
+    }
     
     .hero-content { 
-        padding: 0 3rem 2rem 3rem; 
-        margin-top: -4rem; 
+        padding: 0 2.5rem 2rem; 
+        margin-top: -3rem; 
         position: relative; 
         z-index: 10; 
         text-align: center; 
     }
 
-    h1.headline { font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.1; margin-bottom: 1rem; color: #fff; text-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    h1.headline { 
+        font-size: clamp(1.8rem, 4vw, 2.5rem); 
+        line-height: 1.2; 
+        margin: 0;
+    }
     
     .date { 
-        display: inline-flex; gap: 1rem; 
-        color: #3b82f6; 
+        display: inline-flex; 
+        gap: 0.75rem; 
+        color: var(--accent); 
         font-weight: 600; 
-        background: rgba(0,0,0,0.5); 
-        padding: 0.5rem 1rem; 
+        font-size: 0.85rem;
+        background: var(--bg-surface); 
+        padding: 0.4rem 1rem; 
         border-radius: 50px; 
         margin-bottom: 1rem; 
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        border: 1px solid var(--border);
     }
-    .last-updated-on { color: #888; font-weight: 400; }
+    .last-updated-on { color: var(--text-muted); font-weight: 400; }
 
     .prose {
-        padding: 3rem;
-        font-size: 1.1rem;
+        padding: 2.5rem;
+        font-size: 1.05rem;
         line-height: 1.8;
-        color: var(--text-article);
-        margin: 0 auto;
+        color: var(--text-muted);
     }
-    /* Simple Prose Styling */
-    .prose :global(h2) { font-size: 1.8rem; margin-top: 2.5rem; margin-bottom: 1rem; color: #fff; }
-    .prose :global(h3) { font-size: 1.4rem; margin-top: 2rem; margin-bottom: 0.8rem; color: #eee; }
-    .prose :global(p) { margin-bottom: 1.5rem; }
-    .prose :global(ul) { margin-bottom: 1.5rem; padding-left: 1.5rem; }
-    .prose :global(li) { margin-bottom: 0.5rem; }
-    .prose :global(strong) { color: #3b82f6; }
-    .prose :global(a) { color: #3b82f6; text-decoration: underline; text-underline-offset: 4px; }
-    .prose :global(blockquote) { border-left: 4px solid #3b82f6; padding-left: 1.5rem; color: #aaa; margin: 2rem 0; font-style: italic; }
-    .prose :global(img) { border-radius: 12px; margin: 2rem 0; width: 100%; }
+    .prose :global(h2) { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 0.75rem; color: var(--text-main); }
+    .prose :global(h3) { font-size: 1.2rem; margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--text-main); }
+    .prose :global(p) { margin-bottom: 1.25rem; }
+    .prose :global(ul) { margin-bottom: 1.25rem; padding-left: 1.25rem; }
+    .prose :global(li) { margin-bottom: 0.4rem; }
+    .prose :global(strong) { color: var(--text-main); }
+    .prose :global(a) { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+    .prose :global(blockquote) { border-left: 3px solid var(--accent); padding-left: 1.25rem; color: var(--text-muted); margin: 1.5rem 0; font-style: italic; }
+    .prose :global(img) { border-radius: 12px; margin: 1.5rem 0; width: 100%; }
 
     @media (max-width: 768px) {
-        .blog-article { margin: 1rem; border-radius: 12px; }
+        .blog-article { border-radius: 0; }
+        main { padding: 6rem 0 2rem; }
         .prose, .hero-content { padding: 1.5rem; }
         .hero-image-wrapper { aspect-ratio: 16/9; }
+    }
+</style>
     }
 </style>
 
