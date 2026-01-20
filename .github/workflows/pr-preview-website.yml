@@ -60,7 +60,7 @@ jobs:
           message: |
             <!-- preview-url-comment -->
             A preview of this pull request has been deployed.
-            **[https://shravanngoswamii.github.io/SecureVault/pr-previews/${{ github.event.pull_request.number }}](https://shravanngoswamii.github.io/securevault/pr-previews/${{ github.event.pull_request.number }})**
+            **[https://shravanngoswamii.github.io/SecureVault/pr-previews/${{ github.event.pull_request.number }}](https://shravanngoswamii.github.io/SecureVault/pr-previews/${{ github.event.pull_request.number }})**
           comment_tag: preview-url-comment
 
   cleanup-preview:
