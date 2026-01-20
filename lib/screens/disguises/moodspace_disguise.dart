@@ -154,7 +154,7 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
           ),
           const SizedBox(width: 12),
           const Text(
-            'Mood Logger',
+            'MoodSpace',
             style: TextStyle(
               color: Colors.white,
               fontSize: 24,

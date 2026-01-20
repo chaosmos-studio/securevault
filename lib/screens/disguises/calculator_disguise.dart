@@ -156,15 +156,13 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        backgroundColor: Colors.black,
         elevation: 0,
         actions: [
-          DisguiseMenu(iconColor: isDark ? Colors.white : Colors.black),
+          DisguiseMenu(iconColor: Colors.white70),
         ],
       ),
       body: SafeArea(
@@ -182,17 +180,17 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
                     if (_operator.isNotEmpty)
                       Text(
                         '${_formatResult(_firstOperand)} $_operator',
-                        style: TextStyle(
-                          color: isDark ? Colors.white54 : Colors.black45,
+                        style: const TextStyle(
+                          color: Colors.white54,
                           fontSize: 24,
                         ),
                       ),
                     Text(
                       _display,
                       style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black,
-                        fontSize: _display.length > 10 ? 48 : 64,
-                        fontWeight: FontWeight.w400,
+                        color: Colors.white,
+                        fontSize: _display.length > 8 ? 56 : (_display.length > 6 ? 72 : 88),
+                        fontWeight: FontWeight.w200,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -201,21 +199,17 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
                 ),
               ),
             ),
-            Container(
-              height: 1,
-              color: isDark ? Colors.white12 : Colors.black12,
-            ),
             Expanded(
               flex: 4,
-              child: Container(
-                padding: const EdgeInsets.all(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Column(
                   children: [
-                    _buildAndroidRow(['C', '⌫', '%', '÷'], isDark),
-                    _buildAndroidRow(['7', '8', '9', '×'], isDark),
-                    _buildAndroidRow(['4', '5', '6', '-'], isDark),
-                    _buildAndroidRow(['1', '2', '3', '+'], isDark),
-                    _buildAndroidRow(['±', '0', '.', '='], isDark),
+                    _buildIOSRow(['C', '±', '%', '÷']),
+                    _buildIOSRow(['7', '8', '9', '×']),
+                    _buildIOSRow(['4', '5', '6', '-']),
+                    _buildIOSRow(['1', '2', '3', '+']),
+                    _buildIOSBottomRow(),
                   ],
                 ),
               ),
@@ -226,56 +220,150 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
     );
   }
 
-  Widget _buildAndroidRow(List<String> buttons, bool isDark) {
+  Widget _buildIOSRow(List<String> buttons) {
     return Expanded(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: buttons.map((btn) {
-          final isOperator = ['÷', '×', '-', '+'].contains(btn);
-          final isEquals = btn == '=';
-          final isFunction = ['C', '⌫', '%', '±'].contains(btn);
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: buttons.map((btn) {
+            final isOperator = ['÷', '×', '-', '+', '='].contains(btn);
+            final isFunction = ['C', '±', '%'].contains(btn);
 
-          Color bgColor;
-          Color textColor;
-          
-          if (isEquals) {
-            bgColor = const Color(0xFF4285F4);
-            textColor = Colors.white;
-          } else if (isOperator) {
-            bgColor = isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE8E8E8);
-            textColor = const Color(0xFF4285F4);
-          } else if (isFunction) {
-            bgColor = isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE8E8E8);
-            textColor = isDark ? Colors.white : Colors.black87;
-          } else {
-            bgColor = isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF5F5F5);
-            textColor = isDark ? Colors.white : Colors.black87;
-          }
+            Color bgColor;
+            Color textColor;
+            
+            if (isOperator) {
+              bgColor = const Color(0xFFFF9F0A);
+              textColor = Colors.white;
+            } else if (isFunction) {
+              bgColor = const Color(0xFFA5A5A5);
+              textColor = Colors.black;
+            } else {
+              bgColor = const Color(0xFF333333);
+              textColor = Colors.white;
+            }
 
-          return Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(4),
-              child: Material(
-                color: bgColor,
-                borderRadius: BorderRadius.circular(24),
-                child: InkWell(
-                  onTap: () => _handleButtonPress(btn),
-                  borderRadius: BorderRadius.circular(24),
-                  child: Center(
-                    child: Text(
-                      btn,
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: isOperator || isEquals ? FontWeight.w500 : FontWeight.w400,
-                        color: textColor,
+            return Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Material(
+                    color: bgColor,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      onTap: () => _handleButtonPress(btn),
+                      customBorder: const CircleBorder(),
+                      child: Center(
+                        child: Text(
+                          btn,
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w400,
+                            color: textColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIOSBottomRow() {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: [
+            // 0 button - wider
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Material(
+                  color: const Color(0xFF333333),
+                  borderRadius: BorderRadius.circular(40),
+                  child: InkWell(
+                    onTap: () => _handleButtonPress('0'),
+                    borderRadius: BorderRadius.circular(40),
+                    child: Container(
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.only(left: 28),
+                      child: const Text(
+                        '0',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          );
-        }).toList(),
+            // Backspace button
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Material(
+                    color: const Color(0xFF333333),
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      onTap: () => _handleButtonPress('⌫'),
+                      customBorder: const CircleBorder(),
+                      child: const Center(
+                        child: Text(
+                          '⌫',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // = button
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Material(
+                    color: const Color(0xFFFF9F0A),
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      onTap: () => _handleButtonPress('='),
+                      customBorder: const CircleBorder(),
+                      child: const Center(
+                        child: Text(
+                          '=',
+                          style: TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

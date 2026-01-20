@@ -20,7 +20,7 @@ All notable changes to SecureVault will be documented in this file.
 ### Disguise Modes
 - **Calculator**: Enter password as numbers and press =, use ⌫ for backspace, or use "Request a Feature" menu
 - **Clock**: Tap time digits to enter password, add alarm with time and label (both try unlock), tap alarm to edit, or use "Request a Feature" menu
-- **Mood Logger**: Tap mood emoji area or type password in mood input field, or use "Request a Feature" menu
+- **MoodSpace**: Tap mood emoji area or type password in mood input field, or use "Request a Feature" menu
 - **Notes**: Type password in notes area, or use "Request a Feature" menu
 
 ### Security Features
