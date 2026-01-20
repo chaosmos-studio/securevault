@@ -3,7 +3,6 @@ import Layout from "../layouts/Layout.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import {
-    Download,
     Calculator,
     Clock,
     Smile,
@@ -20,7 +19,6 @@ import {
         <SiteHeader />
 
         <main>
-            <!-- Hero Section -->
             <section class="hero full-width">
                 <div class="content-wrapper grid-2">
                     <div class="hero-content">
@@ -40,7 +38,12 @@ import {
                                 href="https://play.google.com/store"
                                 class="btn-primary"
                             >
-                                <Download size={20} />
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="google-play-icon">
+                                    <path d="M3 20.5V3.5C3 2.91 3.34 2.39 3.84 2.15L13.69 12L3.84 21.85C3.34 21.61 3 21.09 3 20.5Z"/>
+                                    <path d="M16.81 15.12L6.05 21.34L14.54 12.85L16.81 15.12Z"/>
+                                    <path d="M20.16 10.81C20.5 11.08 20.75 11.53 20.75 12C20.75 12.47 20.5 12.92 20.16 13.19L17.89 14.5L15.39 12L17.89 9.5L20.16 10.81Z"/>
+                                    <path d="M6.05 2.66L16.81 8.88L14.54 11.15L6.05 2.66Z"/>
+                                </svg>
                                 <span>Download on Google Play</span>
                             </a>
                             <a href="#disguises" class="btn-text"
@@ -68,7 +71,6 @@ import {
                 </div>
             </section>
 
-            <!-- Disguise Selector Section -->
             <section id="disguises" class="disguise-section full-width">
                 <div class="content-wrapper">
                     <div class="section-header">
@@ -79,7 +81,6 @@ import {
                     </div>
 
                     <div class="disguise-container grid-2">
-                        <!-- Text / Triggers Side -->
                         <div class="disguise-controls">
                             <button
                                 class="disguise-btn active"
@@ -123,7 +124,6 @@ import {
                             </button>
                         </div>
 
-                        <!-- Visual Side -->
                         <div class="disguise-visual">
                             <div class="phone-frame glow-card small">
                                 <div class="phone-screen bg-black">
@@ -143,7 +143,6 @@ import {
                 </div>
             </section>
 
-            <!-- Multiple Vaults Feature -->
             <section class="feature-section full-width">
                 <div class="content-wrapper grid-2-imbalanced-left">
                     <div class="feature-visual">
@@ -172,7 +171,6 @@ import {
                 </div>
             </section>
 
-            <!-- Backdoor / Special Feature -->
             <section class="feature-section full-width">
                 <div class="content-wrapper grid-2-imbalanced-right">
                     <div class="feature-text">
@@ -231,13 +229,11 @@ import {
 </Layout>
 
 <script>
-    // 1. DISGUISE TAB SWITCHER (Hover & Click)
     const buttons = document.querySelectorAll(".disguise-btn");
     const previewImg = document.getElementById(
         "preview-img",
     ) as HTMLImageElement;
 
-    // Map IDs to Filenames
     const images: Record<string, string> = {
         calc: `${import.meta.env.BASE_URL}/screenshots/calculator-disguise.png`.replace(
             /\/\//g,
@@ -259,7 +255,7 @@ import {
 
     function updateImage(target: string) {
         if (target && images[target] && previewImg.src !== images[target]) {
-            previewImg.style.opacity = "0.5"; // partial fade to indicate change
+            previewImg.style.opacity = "0.5";
             setTimeout(() => {
                 previewImg.src = images[target];
                 previewImg.style.opacity = "1";
@@ -268,7 +264,6 @@ import {
     }
 
     buttons.forEach((btn) => {
-        // Click Handler (Make it sticking)
         btn.addEventListener("click", () => {
             buttons.forEach((b) => b.classList.remove("active"));
             btn.classList.add("active");
@@ -276,18 +271,12 @@ import {
             if (target) updateImage(target);
         });
 
-        // Hover Handler (Preview)
         btn.addEventListener("mouseenter", () => {
             const target = btn.getAttribute("data-target");
             if (target) updateImage(target);
         });
     });
 
-    // 2. MOUSE SPOTLIGHT & GLOW (Moved to Global Layout)
-    // Legacy specific overrides for index if needed, but for now relying on global layout script 
-    // to ensure consistency.
-    
-    // 3. Vault Stack Click Animation
     const vaultStack = document.querySelector(".vault-stack");
     vaultStack?.addEventListener("click", () => {
         vaultStack.classList.toggle("expanded");
@@ -295,7 +284,6 @@ import {
 </script>
 
 <style>
-    /* ==================== GLOBAL ==================== */
     * {
         box-sizing: border-box;
     }
@@ -327,13 +315,12 @@ import {
         position: relative;
         width: 100%;
         min-height: 100vh;
-        overflow: hidden; /* For spotlight containment */
+        overflow: hidden;
     }
 
-    /* Utility: Content Constraint (No gaps on sides of sections, but gaps for content) */
     .full-width {
         width: 100%;
-        padding: 2rem 1.5rem; /* Mobile default */
+        padding: 2rem 1.5rem;
         position: relative;
         z-index: 2;
     }
@@ -344,7 +331,7 @@ import {
     }
 
     .content-wrapper {
-        max-width: 1400px;
+        max-width: 1150px;
         margin: 0 auto;
     }
 
@@ -384,7 +371,6 @@ import {
         }
     }
 
-    /* Glow Cards */
     .glow-card {
         position: relative;
     }
@@ -412,9 +398,8 @@ import {
         opacity: 0.7;
     }
 
-    /* ==================== HERO ==================== */
     .hero {
-        padding-top: 6rem !important; /* Reduced for mobile */
+        padding-top: 6rem !important;
         min-height: auto;
         padding-bottom: 4rem;
         display: flex;
@@ -464,19 +449,26 @@ import {
         align-items: center;
     }
     .btn-primary {
-        background: var(--text-main);
-        color: var(--bg-main);
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--text-main);
         padding: 0.9rem 1.8rem;
         border-radius: 50px;
         font-weight: 600;
         display: flex;
         gap: 0.5rem;
         align-items: center;
-        transition: transform 0.2s;
+        transition: all 0.3s ease;
         z-index: 2;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
     .btn-primary:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
         transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
     }
     .btn-text {
         font-weight: 600;
@@ -487,7 +479,10 @@ import {
         opacity: 0.8;
     }
 
-    /* Phone Device */
+    .google-play-icon {
+        flex-shrink: 0;
+    }
+
     .phone-frame {
         width: 300px;
         height: 600px;
@@ -547,8 +542,6 @@ import {
         pointer-events: none;
     }
 
-    /* ==================== DISGUISE SECTION ==================== */
-    /* Remove borders as requested for "Connected" feel */
     .section-header {
         text-align: center;
         margin-bottom: 4rem;
@@ -562,22 +555,18 @@ import {
         font-size: 1.2rem;
     }
 
-    /* Controls */
-    /* Controls */
-    /* Controls */
     .disguise-section .disguise-container.grid-2 {
         gap: 2.5rem;
-        grid-template-columns: 1fr; /* Force 1 column on mobile */
-        justify-items: center; /* Center content vertically in stack */
+        grid-template-columns: 1fr;
+        justify-items: center;
     }
 
     @media (min-width: 768px) {
         .disguise-section .disguise-container.grid-2 {
             gap: 3rem;
-            /* Bring columns closer by not using full 1fr 1fr if max-width is limiting */
             grid-template-columns: minmax(300px, 450px) minmax(300px, 450px);
             justify-content: center;
-            justify-items: start; /* Reset alignment for grid */
+            justify-items: start;
         }
     }
 
@@ -589,7 +578,7 @@ import {
     }
 
     .disguise-btn {
-        background: transparent; /* No background by default */
+        background: transparent;
         border: 1px solid transparent;
         padding: 1.5rem;
         border-radius: 1rem;
@@ -631,7 +620,6 @@ import {
         font-size: 0.9rem;
     }
 
-    /* ==================== FEATURES ==================== */
     .feature-text h2 {
         font-size: 2.5rem;
         margin-bottom: 1rem;
@@ -656,7 +644,6 @@ import {
         margin-top: 1rem;
     }
 
-    /* Vault Stack Visual */
     .vault-stack {
         position: relative;
         height: 300px;
@@ -666,7 +653,7 @@ import {
         perspective: 1000px;
         display: flex;
         justify-content: center;
-        align-items: center; /* Center content */
+        align-items: center;
     }
     .vault-card {
         width: 100%;
@@ -686,7 +673,6 @@ import {
         transform-origin: center bottom;
     }
 
-    /* Default Stack State - Stacked behind each other with slight vertical offset for depth */
     .v3 {
         transform: scale(0.9) translateY(-10px);
         opacity: 0.6;
@@ -705,24 +691,23 @@ import {
         font-weight: bold;
     }
 
-    /* Hover / Expanded State - Fan out Left and Right */
     .vault-stack:hover .v3,
     .vault-stack.expanded .v3 {
         transform: translateX(110px) rotate(5deg) scale(0.95);
         opacity: 1;
-        border-color: rgba(255, 100, 100, 0.5); /* Red for iso */
-        z-index: 4; /* Bring forward slightly to see */
+        border-color: rgba(255, 100, 100, 0.5);
+        z-index: 4;
     }
     .vault-stack:hover .v2,
     .vault-stack.expanded .v2 {
         transform: translateX(-110px) rotate(-5deg) scale(0.95);
         opacity: 1;
-        border-color: rgba(255, 255, 100, 0.5); /* Yellow for decoy */
+        border-color: rgba(255, 255, 100, 0.5);
         z-index: 4;
     }
     .vault-stack:hover .v1,
     .vault-stack.expanded .v1 {
-        transform: scale(1); /* Stay center */
+        transform: scale(1);
         box-shadow: 0 20px 50px rgba(59, 130, 246, 0.2);
     }
 
@@ -731,7 +716,6 @@ import {
         margin-bottom: 0.5rem;
     }
 
-    /* Menu Mockup */
     .menu-mockup {
         background: var(--card-bg);
         border: 1px solid var(--border);
