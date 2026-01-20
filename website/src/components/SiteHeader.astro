@@ -12,8 +12,12 @@ import { Shield, Sun, Moon } from "lucide-astro";
             class="nav-link">Blog</a
         >
         <a
+            href={`${import.meta.env.BASE_URL}/about`.replace(/\/\//g, "/")}
+            class="nav-link">About Us</a
+        >
+        <a
             href={`${import.meta.env.BASE_URL}/support`.replace(/\/\//g, "/")}
-            class="nav-link">About & Support</a
+            class="nav-link">Help Center</a
         >
         <a href="https://play.google.com/store" class="download-link"
             >Get the App</a

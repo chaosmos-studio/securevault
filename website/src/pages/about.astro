@@ -1,0 +1,144 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+---
+
+<Layout title="About Us - SecureVault">
+    <div class="premium-container" id="main-container">
+        <div class="spotlight-overlay"></div>
+
+        <SiteHeader />
+
+        <main>
+            <section class="page-header">
+                <h1 class="headline">
+                    About <span class="text-gradient">SecureVault</span>
+                </h1>
+                <p class="subheadline">Our mission to reclaim privacy.</p>
+            </section>
+
+            <section class="about-section glow-card">
+                <h2>Why We Exist</h2>
+                <p>
+                    SecureVault was born from a simple belief: <strong
+                        >privacy is a right, not a privilege.</strong>
+                </p>
+                <p>
+                    In an age where digital footprints are permanent and data is
+                    the new currency, we wanted to build a sanctuary. A place
+                    where your personal moments remain truly personal.
+                </p>
+
+                <h2>Invisible Protection</h2>
+                <p>
+                    We built an app that doesn't just hide your files—it makes
+                    them invisible. With multiple disguises, decoy vaults, and
+                    military-grade AES-256 encryption, your private moments stay
+                    exactly that: private.
+                </p>
+
+                <h2>Our Promise</h2>
+                <p>
+                    We don't collect your data. We don't track you. We simply
+                    provide the tools, and you hold all the keys. Our
+                    zero-knowledge architecture means even we cannot access your
+                    stored files.
+                </p>
+            </section>
+        </main>
+
+        <SiteFooter />
+    </div>
+</Layout>
+
+<script>
+    const wrapper = document.getElementById("main-container");
+    if (wrapper) {
+        wrapper.addEventListener("mousemove", (e) => {
+            const rect = wrapper.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            wrapper.style.setProperty("--mouse-x", `${x}px`);
+            wrapper.style.setProperty("--mouse-y", `${y}px`);
+
+            document.querySelectorAll(".glow-card").forEach((card) => {
+                const cardRect = card.getBoundingClientRect();
+                const cardX = e.clientX - cardRect.left;
+                const cardY = e.clientY - cardRect.top;
+                (card as HTMLElement).style.setProperty(
+                    "--card-x",
+                    `${cardX}px`,
+                );
+                (card as HTMLElement).style.setProperty(
+                    "--card-y",
+                    `${cardY}px`,
+                );
+            });
+        });
+    }
+</script>
+
+<style>
+    main {
+        padding: 10rem 5% 4rem;
+        max-width: 1000px;
+        margin: 0 auto;
+        z-index: 2;
+        position: relative;
+        min-height: 80vh;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+    .headline {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        margin-bottom: 0.5rem;
+    }
+    .subheadline {
+        color: var(--text-muted);
+        font-size: 1.2rem;
+    }
+
+    .text-gradient {
+        background: linear-gradient(90deg, var(--accent), #a855f7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .about-section {
+        padding: 4rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        backdrop-filter: blur(12px);
+    }
+
+    .about-section h2 {
+        font-size: 1.8rem;
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--text-main);
+    }
+    .about-section h2:first-child {
+        margin-top: 0;
+    }
+
+    .about-section p {
+        color: var(--text-muted);
+        line-height: 1.8;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+    .about-section strong {
+        color: var(--text-main);
+    }
+
+    @media (max-width: 768px) {
+        .about-section {
+            padding: 2rem;
+        }
+    }
+</style>

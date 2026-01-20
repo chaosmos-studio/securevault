@@ -63,25 +63,6 @@ import { BookOpen, ShieldAlert, Mail, Lightbulb } from "lucide-astro";
                     >
                 </div>
             </div>
-
-            <section class="about-section">
-                <h2>About SecureVault</h2>
-                <p>
-                    SecureVault was born from a simple belief: <strong
-                        >privacy is a right, not a privilege.</strong
-                    >
-                </p>
-                <p>
-                    We built an app that doesn't just hide your files—it makes
-                    them invisible. With multiple disguises, decoy vaults, and
-                    military-grade AES-256 encryption, your private moments stay
-                    exactly that: private.
-                </p>
-                <p>
-                    We don't collect your data. We don't track you. We simply
-                    provide the tools, and you hold all the keys.
-                </p>
-            </section>
         </main>
 
         <SiteFooter />
@@ -139,9 +120,15 @@ import { BookOpen, ShieldAlert, Mail, Lightbulb } from "lucide-astro";
 
     .support-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: 1fr;
         gap: 1.5rem;
         margin-bottom: 5rem;
+    }
+
+    @media (min-width: 768px) {
+        .support-grid {
+            grid-template-columns: 1fr 1fr;
+        }
     }
 
     .support-card {
@@ -184,35 +171,5 @@ import { BookOpen, ShieldAlert, Mail, Lightbulb } from "lucide-astro";
     }
     .card-link:hover {
         border-color: var(--accent);
-    }
-
-    .about-section {
-        max-width: 700px;
-        margin: 0 auto;
-        text-align: center;
-        padding: 3rem;
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        backdrop-filter: blur(12px);
-    }
-    .about-section h2 {
-        font-size: 1.8rem;
-        margin-bottom: 1.5rem;
-        background: linear-gradient(
-            135deg,
-            var(--accent),
-            var(--accent-purple)
-        );
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .about-section p {
-        color: var(--text-muted);
-        line-height: 1.8;
-        margin-bottom: 1rem;
-    }
-    .about-section strong {
-        color: var(--text-main);
     }
 </style>
