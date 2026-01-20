@@ -197,15 +197,25 @@ import {
                                 >
                             </div>
                             <div class="menu-dropdown">
-                                <a href="/about" class="menu-item clickable"
-                                    >About Us</a
+                                <a
+                                    href={`${import.meta.env.BASE_URL}/about`.replace(
+                                        /\/\//g,
+                                        "/",
+                                    )}
+                                    class="menu-item clickable">About Us</a
                                 >
                                 <a
-                                    href="/support#contact"
+                                    href={`${import.meta.env.BASE_URL}/support#contact`.replace(
+                                        /\/\//g,
+                                        "/",
+                                    )}
                                     class="menu-item clickable">Contact Us</a
                                 >
                                 <a
-                                    href="/support#request"
+                                    href={`${import.meta.env.BASE_URL}/support#request`.replace(
+                                        /\/\//g,
+                                        "/",
+                                    )}
                                     class="menu-item highlight clickable"
                                     >Request a Feature</a
                                 >
