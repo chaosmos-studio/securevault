@@ -4,12 +4,12 @@ Marketing website for SecureVault - a privacy vault app that disguises itself as
 
 ## Commands
 
-| Command           | Action                      |
-| :---------------- | :-------------------------- |
-| `npm install`     | Install dependencies        |
-| `npm run dev`     | Start dev server            |
-| `npm run build`   | Build for production        |
-| `npm run preview` | Preview production build    |
+| Command           | Action                   |
+| :---------------- | :----------------------- |
+| `npm install`     | Install dependencies     |
+| `npm run dev`     | Start dev server         |
+| `npm run build`   | Build for production     |
+| `npm run preview` | Preview production build |
 
 ## About
 
