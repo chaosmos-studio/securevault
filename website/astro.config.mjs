@@ -7,7 +7,7 @@ import { defineConfig } from 'astro/config';
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://shravangoswami.com',
-	base: '/SecureVault',
+	base: process.env.PR_PREVIEW_BASE_URL || '/SecureVault',
 	integrations: [mdx(), sitemap()],
 	vite: {
 		build: {

@@ -40,7 +40,7 @@ jobs:
         run: npm run build
         working-directory: ./website
         env:
-          VITE_APP_BASE_URL: /SecureVault/pr-previews/${{ github.event.pull_request.number }}/
+          PR_PREVIEW_BASE_URL: /SecureVault/pr-previews/${{ github.event.pull_request.number }}/
 
       - name: Add .nojekyll file
         run: touch ./website/dist/.nojekyll

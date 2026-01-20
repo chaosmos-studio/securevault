@@ -20,14 +20,14 @@ import { BookOpen, ShieldAlert, Mail, Lightbulb } from "lucide-astro";
             </section>
 
             <div class="support-grid">
-                <div class="support-card glow-card">
+                <a href="#faqs" class="support-card glow-card no-decoration">
                     <div class="card-icon"><BookOpen size={40} /></div>
                     <h3>FAQs</h3>
                     <p>
-                        Find answers to common questions about setting up
-                        disguises, managing vaults, and more.
+                        Find answers to common questions about encryption,
+                        disguise mode, and account recovery.
                     </p>
-                </div>
+                </a>
 
                 <div class="support-card glow-card">
                     <div class="card-icon"><ShieldAlert size={40} /></div>
@@ -58,11 +58,62 @@ import { BookOpen, ShieldAlert, Mail, Lightbulb } from "lucide-astro";
                         Have an idea to make SecureVault even better? We'd love
                         to hear from you.
                     </p>
-                    <a href="mailto:hello@chaosmos.studio" class="card-link"
-                        >Submit Idea →</a
+                    <a
+                        href="mailto:hello@chaosmos.studio?subject=Requesting%20a%20Feature%20for%20SecureVault"
+                        class="card-link">Submit Idea →</a
                     >
                 </div>
             </div>
+
+            <section id="faqs" class="faq-section">
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <div class="faq-list">
+                    <details class="faq-item glow-card">
+                        <summary>Is my data really secure?</summary>
+                        <p>
+                            Absolutely. SecureVault uses military-grade AES-256
+                            encryption to protect your files. Your data is
+                            stored locally on your device and is never uploaded
+                            to any server, ensuring complete privacy.
+                        </p>
+                    </details>
+
+                    <details class="faq-item glow-card">
+                        <summary>What happens if I forget my password?</summary>
+                        <p>
+                            For your security, SecureVault does not store your
+                            password. This means we cannot reset it for you. We
+                            strongly recommend keeping a backup of your password
+                            in a safe place.
+                        </p>
+                    </details>
+
+                    <details class="faq-item glow-card">
+                        <summary>What is Disguise Mode?</summary>
+                        <p>
+                            Disguise Mode allows you to change the app's icon
+                            and name (e.g., to a Calculator) to hide it from
+                            prying eyes.
+                        </p>
+                    </details>
+
+                    <details class="faq-item glow-card">
+                        <summary>Does SecureVault support FaceID/TouchID?</summary>
+                        <p>
+                            No, our app does not support this. We believe in providing the highest level of security through master password authentication only.
+                        </p>
+                    </details>
+
+                    <details class="faq-item glow-card">
+                        <summary>Can I hide photos and videos?</summary>
+                        <p>
+                            Yes. You can import photos and videos directly from
+                            your gallery into SecureVault. Once imported, they
+                            are encrypted and hidden from your main gallery.
+                        </p>
+                    </details>
+                </div>
+            </section>
         </main>
 
         <SiteFooter />
@@ -176,5 +227,88 @@ import { BookOpen, ShieldAlert, Mail, Lightbulb } from "lucide-astro";
     }
     .card-link:hover {
         border-color: var(--accent);
+    }
+
+    .no-decoration {
+        text-decoration: none;
+        display: block;
+        color: inherit;
+    }
+
+    .faq-section {
+        margin-top: 6rem;
+        border-top: 1px solid var(--border);
+        padding-top: 4rem;
+    }
+
+    .section-title {
+        text-align: center;
+        font-size: 2rem;
+        margin-bottom: 3rem;
+        color: var(--text-main);
+    }
+
+    .faq-list {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .faq-item {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .faq-item:hover {
+        border-color: var(--accent);
+    }
+    
+    .faq-item[open] {
+        background: rgba(var(--accent-rgb), 0.05);
+        border-color: var(--accent);
+    }
+
+    .faq-item summary {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-main);
+        list-style: none; /* Hide default triangle */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Custom marker */
+    .faq-item summary::-webkit-details-marker {
+        display: none;
+    }
+    .faq-item summary::after {
+        content: '+';
+        font-size: 1.5rem;
+        font-weight: 300;
+        line-height: 1;
+        transition: transform 0.2s;
+    }
+    .faq-item[open] summary::after {
+        transform: rotate(45deg);
+    }
+
+    .faq-item p {
+        margin-top: 1rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        padding-right: 2rem;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
