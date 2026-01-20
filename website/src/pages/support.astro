@@ -117,12 +117,11 @@ import { BookOpen, ShieldAlert, Mail, Lightbulb } from '@lucide/astro';
 </Layout>
 
 <script>
-  // Spotlight Logic is now handled globally in Layout.astro
 </script>
 
 <style>
   main {
-    padding: 6rem 5% 2rem; /* Reduced for mobile */
+    padding: 6rem 5% 2rem;
     max-width: 1200px;
     margin: 0 auto;
     z-index: 2;
@@ -240,7 +239,7 @@ import { BookOpen, ShieldAlert, Mail, Lightbulb } from '@lucide/astro';
   }
 
   .faq-item:hover {
-    background: rgba(var(--bg-surface-rgb), 0.3); /* Subtle hover bg */
+    background: rgba(var(--bg-surface-rgb), 0.3);
   }
 
   .faq-item:last-child {
@@ -253,7 +252,7 @@ import { BookOpen, ShieldAlert, Mail, Lightbulb } from '@lucide/astro';
   }
 
   .faq-item summary {
-    padding: 1.5rem 1rem; /* Added horizontal padding for cleaner look */
+    padding: 1.5rem 1rem;
     font-size: 1.15rem;
     font-weight: 500;
     color: var(--text-main);
@@ -272,7 +271,6 @@ import { BookOpen, ShieldAlert, Mail, Lightbulb } from '@lucide/astro';
     color: var(--accent);
   }
 
-  /* Custom marker */
   .faq-item summary::-webkit-details-marker {
     display: none;
   }
@@ -293,10 +291,10 @@ import { BookOpen, ShieldAlert, Mail, Lightbulb } from '@lucide/astro';
 
   .faq-item p {
     margin: 0;
-    padding: 0 1rem 1.5rem 1rem; /* Added horizontal padding here */
+    padding: 0 1rem 1.5rem 1rem;
     color: var(--text-muted);
     line-height: 1.7;
-    width: 100%; /* Use full width with padding */
+    width: 100%;
     max-width: 90%;
     animation: fadeIn 0.3s ease-out;
   }

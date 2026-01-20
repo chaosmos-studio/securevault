@@ -90,7 +90,6 @@ const { title, description, pubDate, updatedDate, heroImage, authors } =
   }
 
   [data-theme='light'] .blog-article {
-    /* No Background */
   }
 
   .hero-section {
@@ -98,11 +97,10 @@ const { title, description, pubDate, updatedDate, heroImage, authors } =
     width: 100%;
     border-radius: 20px;
     overflow: hidden;
-    /* box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3); */
     background: var(--bg-main);
   }
   [data-theme='light'] .hero-section {
-    box-shadow: none; /* Remove shadow to avoid "border" look at bottom */
+    box-shadow: none;
     background: transparent;
   }
   .hero-image-wrapper {
@@ -118,11 +116,9 @@ const { title, description, pubDate, updatedDate, heroImage, authors } =
     object-fit: cover;
   }
 
-  /* Image overlay that adapts to theme to hide bottom border edge */
   .hero-overlay {
     position: absolute;
     inset: 0;
-    /* Gradient fades to match the card/body background at the bottom */
     background: linear-gradient(
       to bottom,
       transparent 50%,

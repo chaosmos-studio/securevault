@@ -1,7 +1,7 @@
 ---
 title: 'Why Privacy Matters in 2026'
 description: 'In an age of constant surveillance, reclaiming your digital privacy is an act of freedom.'
-pubDate: 'Jan 20 2026'
+pubDate: 'Jan 21 2026'
 heroImage: '../../assets/blog-placeholder-2.jpg'
 authors:
   - shravan

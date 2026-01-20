@@ -1,7 +1,7 @@
 ---
 title: 'Encryption Explained: How SecureVault Protects You'
 description: 'A deep dive into the AES-256 encryption that powers SecureVault’s security.'
-pubDate: 'Jan 15 2026'
+pubDate: 'Jan 21 2026'
 heroImage: '../../assets/blog-placeholder-3.jpg'
 authors:
   - shravan

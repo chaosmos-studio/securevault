@@ -87,7 +87,6 @@ const posts = (await getCollection('blog')).sort(
 </Layout>
 
 <script>
-  // Spotlight Logic handled in Layout.astro
 </script>
 
 <style>
@@ -120,14 +119,13 @@ const posts = (await getCollection('blog')).sort(
 
   .blog-item {
     border-bottom: 1px solid var(--border);
-    padding: 2rem; /* Added padding to contain the hover glow properly */
-    border-radius: 16px; /* Smooth corners for the hover effect */
+    padding: 2rem;
+    border-radius: 16px;
     transition: transform 0.3s ease;
     background: transparent;
-    margin: 0 -2rem; /* Negative margin to counteract padding and keep alignment with text */
+    margin: 0 -2rem;
   }
 
-  /* Remove border bottom on hover so outline looks clean */
   .blog-item:hover {
     border-bottom-color: transparent;
   }
@@ -193,7 +191,6 @@ const posts = (await getCollection('blog')).sort(
     transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* Hover Effects */
   .blog-item:hover .blog-image-container {
     transform: translateY(-4px);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
@@ -209,7 +206,7 @@ const posts = (await getCollection('blog')).sort(
     font-size: 0.85rem;
     color: var(--text-muted);
     letter-spacing: 0.5px;
-    font-family: monospace; /* Tech feel */
+    font-family: monospace;
     display: flex;
     align-items: center;
     gap: 0.5rem;

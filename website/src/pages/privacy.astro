@@ -17,7 +17,6 @@ import SiteFooter from '../components/SiteFooter.astro';
       </section>
 
       <div class="legal-content hover-section">
-        <!-- Play Store Compliance Box -->
         <div class="compliance-box glow-card">
           <div class="compliance-icon">✓</div>
           <div class="compliance-text">
@@ -119,7 +118,6 @@ import SiteFooter from '../components/SiteFooter.astro';
 </Layout>
 
 <script>
-  // Spotlight Logic
   const wrapper = document.getElementById('main-container');
   if (wrapper) {
     wrapper.addEventListener('mousemove', e => {
@@ -129,7 +127,6 @@ import SiteFooter from '../components/SiteFooter.astro';
       wrapper.style.setProperty('--mouse-x', `${x}px`);
       wrapper.style.setProperty('--mouse-y', `${y}px`);
 
-      // Glow logic for compliance box
       const box = document.querySelector('.glow-card');
       if (box) {
         const cardRect = box.getBoundingClientRect();
