@@ -1,0 +1,173 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+---
+
+<Layout title="Privacy Policy - SecureVault">
+    <div class="premium-container" id="main-container">
+        <div class="spotlight-overlay"></div>
+        
+        <SiteHeader />
+
+        <main>
+            <section class="page-header">
+                <h1 class="headline">Privacy <span class="text-gradient">Policy</span></h1>
+                <p class="subheadline">We don't want your data. Period.</p>
+            </section>
+
+            <div class="legal-content hover-section">
+                <!-- Play Store Compliance Box -->
+                <div class="compliance-box glow-card">
+                    <div class="compliance-icon">✓</div>
+                    <div class="compliance-text">
+                        <h3>Google Play Data Safety Declaration</h3>
+                        <p>SecureVault <strong>does not collect, share, or transmit</strong> any user personal data to external servers. All encrypted files (photos, videos, notes) are stored strictly locally on your device. We have no access to your vault passwords or contents.</p>
+                    </div>
+                </div>
+
+                <div class="text-block">
+                    <h2>1. Data Collection</h2>
+                    <p>SecureVault is designed with a "Zero-Knowledge" architecture. This means:</p>
+                    <ul>
+                        <li>We do not collect personal usage data.</li>
+                        <li>We do not collect your device information.</li>
+                        <li>We do not collect your photos, videos, or notes.</li>
+                        <li>We do not track your location.</li>
+                    </ul>
+                </div>
+
+                <div class="text-block">
+                    <h2>2. Local Storage</h2>
+                    <p>All data you import into SecureVault is encrypted (AES-256) and stored in your device's internal storage. This data never leaves your device unless you manually perform a backup to your own personal cloud storage (if applicable).</p>
+                </div>
+
+                <div class="text-block">
+                    <h2>3. Permissions</h2>
+                    <p>The app requests the following permissions strictly for functionality:</p>
+                    <ul>
+                        <li><strong>Storage / Media:</strong> Required to encrypt and hide your photos and videos.</li>
+                        <li><strong>Camera:</strong> Required to take photos directly into the vault.</li>
+                        <li><strong>Biometrics:</strong> Required effectively verify your identity for unlocking (optional).</li>
+                    </ul>
+                </div>
+
+                <div class="text-block">
+                    <h2>4. Third-Party Services</h2>
+                    <p>We do not use third-party analytics SDKs that track user behavior. We prioritize privacy over metrics.</p>
+                </div>
+
+                <div class="text-block">
+                    <h2>Terms & Conditions</h2>
+                    <p>By downloading or using SecureVault, you agree to these terms:</p>
+                    <ul>
+                        <li><strong>License:</strong> SecureVault is proprietary software. You are granted a license for personal use only. Unauthorized redistribution, modification, or reverse engineering is prohibited.</li>
+                        <li><strong>No Warranty:</strong> The software is provided "as is" without warranties of any kind. We are not liable for any data loss or damages arising from its use.</li>
+                        <li><strong>User Responsibility:</strong> You are responsible for managing your passwords and data backups. Since we do not store your data, <strong>we cannot recover lost passwords or deleted data.</strong></li>
+                        <li><strong>Copyright:</strong> All rights reserved. &copy; 2026.</li>
+                    </ul>
+                </div>
+                
+                <div class="updated-date">Last Updated: January 20, 2026</div>
+            </div>
+        </main>
+
+        <SiteFooter />
+    </div>
+</Layout>
+
+<script>
+    // Spotlight Logic
+    const wrapper = document.getElementById('main-container');
+    if(wrapper) {
+        wrapper.addEventListener('mousemove', (e) => {
+            const rect = wrapper.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            wrapper.style.setProperty('--mouse-x', `${x}px`);
+            wrapper.style.setProperty('--mouse-y', `${y}px`);
+
+            // Glow logic for compliance box
+            const box = document.querySelector('.glow-card');
+            if(box) {
+                const cardRect = box.getBoundingClientRect();
+                const cardX = e.clientX - cardRect.left;
+                const cardY = e.clientY - cardRect.top;
+                (box as HTMLElement).style.setProperty('--card-x', `${cardX}px`);
+                (box as HTMLElement).style.setProperty('--card-y', `${cardY}px`);
+            }
+        });
+    }
+</script>
+
+<style>
+    /* Styling consistent with Support & Index */
+   :root {
+        --bg-main: #050505;
+        --bg-glass: rgba(20, 20, 20, 0.6);
+        --text-main: #ffffff;
+        --text-muted: #888888;
+        --accent: #3b82f6;
+        --border: rgba(255, 255, 255, 0.1);
+        --glow: rgba(255, 255, 255, 0.)
+        --card-bg: #0a0a0a;
+    }
+    
+    [data-theme="light"] {
+        --bg-main: #f0f2f5;
+        --text-main: #111111;
+        --text-muted: #555555;
+        --accent: #0066cc;
+        --border: rgba(0, 0, 0, 0.1);
+        --card-bg: #ffffff;
+    }
+
+    /* Layout */
+    .premium-container { width: 100%; min-height: 100vh; position: relative; overflow: hidden; }
+    .spotlight-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;
+        background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.05), transparent 40%);
+        mix-blend-mode: screen;
+    }
+    [data-theme="light"] .spotlight-overlay { mix-blend-mode: plus-lighter; }
+
+    main { padding-top: 10rem; padding-bottom: 4rem; width: 90%; max-width: 800px; margin: 0 auto; z-index: 2; position: relative; }
+
+    .page-header { text-align: center; margin-bottom: 4rem; }
+    .headline { font-size: clamp(2rem, 4vw, 3.5rem); margin-bottom: 1rem; }
+    .subheadline { color: var(--text-muted); font-size: 1.2rem; }
+    .text-gradient { background: linear-gradient(90deg, var(--accent), #a855f7); -webkit-background-clip: text; color: transparent; }
+
+    /* Compliance Box */
+    .compliance-box {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid var(--accent);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 3rem;
+        display: flex; gap: 1rem; align-items: flex-start;
+        position: relative;
+    }
+    .compliance-box h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; color: var(--accent); }
+    .compliance-box p { margin: 0; font-size: 0.95rem; line-height: 1.5; color: var(--text-main); }
+    .compliance-icon { background: var(--accent); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; flex-shrink: 0; margin-top: 2px;}
+
+    /* Glow Effect for compliance box */
+    .glow-card::before {
+        content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: inherit; padding: 1px;
+        background: radial-gradient(400px circle at var(--card-x, 50%) var(--card-y, 50%), rgba(59, 130, 246, 0.4), transparent 40%);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+        pointer-events: none; opacity: 1;
+    }
+
+    /* Content */
+    .text-block { margin-bottom: 2.5rem; }
+    h2 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-main); }
+    p, li { line-height: 1.7; color: var(--text-muted); margin-bottom: 1rem; font-size: 1.05rem; }
+    ul { padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    strong { color: var(--text-main); }
+
+    .updated-date { margin-top: 4rem; font-style: italic; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+
+</style>

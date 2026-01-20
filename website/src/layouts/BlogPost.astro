@@ -1,97 +1,143 @@
 ---
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
-import BaseHead from "../components/BaseHead.astro";
-import Footer from "../components/Footer.astro";
+import Layout from "./Layout.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
 import FormattedDate from "../components/FormattedDate.astro";
-import Header from "../components/Header.astro";
 
 type Props = CollectionEntry<"blog">["data"];
 
 const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 ---
 
-<html lang="en">
-	<head>
-		<BaseHead title={title} description={description} />
-		<style>
-			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
-			}
-			.hero-image {
-				width: 100%;
-			}
-			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--glass-shadow);
-				border: 1px solid var(--glass-border);
-			}
-			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: var(--text-main);
-			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
-			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
-			}
-			.date {
-				margin-bottom: 0.5em;
-				color: var(--text-muted);
-			}
-			.last-updated-on {
-				font-style: italic;
-			}
-		</style>
-	</head>
+<Layout title={`${title} - SecureVault Blog`} description={description}>
+    <div class="premium-container" id="main-container">
+        <div class="spotlight-overlay"></div>
+        
+        <SiteHeader />
 
-	<body>
-		<Header />
-		<main>
-			<article>
-				<div class="hero-image">
-					{
-						heroImage && (
-							<Image
-								width={1020}
-								height={510}
-								src={heroImage}
-								alt=""
-							/>
-						)
-					}
-				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on{" "}
-										<FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
-						</div>
-						<h1>{title}</h1>
-						<hr />
-					</div>
-					<slot />
-				</div>
-			</article>
-		</main>
-		<Footer />
-	</body>
-</html>
+        <main>
+            <article class="blog-article skew-monitor-effect">
+                <div class="hero-section">
+                    {heroImage && (
+                        <div class="hero-image-wrapper">
+                            <Image width={1020} height={510} src={heroImage} alt="" class="hero-image" />
+                            <div class="hero-overlay"></div>
+                        </div>
+                    )}
+                    <div class="hero-content">
+                        <div class="date">
+                            <FormattedDate date={pubDate} />
+                            {updatedDate && <div class="last-updated-on">Updated: <FormattedDate date={updatedDate} /></div>}
+                        </div>
+                        <h1 class="headline">{title}</h1>
+                    </div>
+                </div>
+
+                <div class="prose">
+                    <slot />
+                </div>
+            </article>
+        </main>
+
+        <SiteFooter />
+    </div>
+</Layout>
+
+<script>
+    // Spotlight Logic - consistent throughout site
+    const wrapper = document.getElementById('main-container');
+    if(wrapper) {
+        wrapper.addEventListener('mousemove', (e) => {
+            const rect = wrapper.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            wrapper.style.setProperty('--mouse-x', `${x}px`);
+            wrapper.style.setProperty('--mouse-y', `${y}px`);
+        });
+    }
+</script>
+
+<style>
+    :root {
+        --text-article: #e5e5e5;
+        --prose-width: 800px;
+    }
+
+    [data-theme="light"] {
+        --text-article: #333;
+    }
+
+    .premium-container { width: 100%; min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .spotlight-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;
+        background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.05), transparent 40%);
+        mix-blend-mode: screen;
+    }
+    
+    main { padding-top: 6rem; padding-bottom: 4rem; width: 100%; display: flex; justify-content: center; z-index: 2; position: relative; }
+
+    .blog-article {
+        width: 100%; max-width: 900px;
+        background: rgba(10, 10, 10, 0.4);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        overflow: hidden;
+        margin: 2rem;
+    }
+
+    .hero-section { position: relative; width: 100%; }
+    .hero-image-wrapper { position: relative; width: 100%; aspect-ratio: 2/1; overflow: hidden; }
+    .hero-image { width: 100%; height: 100%; object-fit: cover; }
+    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 0%, rgba(10,10,10,1) 100%); }
+    
+    .hero-content { 
+        padding: 0 3rem 2rem 3rem; 
+        margin-top: -4rem; 
+        position: relative; 
+        z-index: 10; 
+        text-align: center; 
+    }
+
+    h1.headline { font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.1; margin-bottom: 1rem; color: #fff; text-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    
+    .date { 
+        display: inline-flex; gap: 1rem; 
+        color: #3b82f6; 
+        font-weight: 600; 
+        background: rgba(0,0,0,0.5); 
+        padding: 0.5rem 1rem; 
+        border-radius: 50px; 
+        margin-bottom: 1rem; 
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .last-updated-on { color: #888; font-weight: 400; }
+
+    .prose {
+        padding: 3rem;
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: var(--text-article);
+        margin: 0 auto;
+    }
+    /* Simple Prose Styling */
+    .prose :global(h2) { font-size: 1.8rem; margin-top: 2.5rem; margin-bottom: 1rem; color: #fff; }
+    .prose :global(h3) { font-size: 1.4rem; margin-top: 2rem; margin-bottom: 0.8rem; color: #eee; }
+    .prose :global(p) { margin-bottom: 1.5rem; }
+    .prose :global(ul) { margin-bottom: 1.5rem; padding-left: 1.5rem; }
+    .prose :global(li) { margin-bottom: 0.5rem; }
+    .prose :global(strong) { color: #3b82f6; }
+    .prose :global(a) { color: #3b82f6; text-decoration: underline; text-underline-offset: 4px; }
+    .prose :global(blockquote) { border-left: 4px solid #3b82f6; padding-left: 1.5rem; color: #aaa; margin: 2rem 0; font-style: italic; }
+    .prose :global(img) { border-radius: 12px; margin: 2rem 0; width: 100%; }
+
+    @media (max-width: 768px) {
+        .blog-article { margin: 1rem; border-radius: 12px; }
+        .prose, .hero-content { padding: 1.5rem; }
+        .hero-image-wrapper { aspect-ratio: 16/9; }
+    }
+</style>
+
