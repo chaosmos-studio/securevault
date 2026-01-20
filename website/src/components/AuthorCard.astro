@@ -1,0 +1,334 @@
+---
+import { Image } from "astro:assets";
+import { Github, Linkedin, Globe, Mail, Heart } from "@lucide/astro";
+import authors from "../data/authors.json";
+
+import luffyImg from "../assets/luffy.png";
+import zoroImg from "../assets/zoro.png";
+
+interface Props {
+    authorId: string;
+    showCard?: boolean;
+}
+
+const { authorId, showCard = true } = Astro.props;
+const author = authors[authorId as keyof typeof authors];
+
+if (!author) {
+    throw new Error(`Author with id "${authorId}" not found`);
+}
+
+const imageMap: Record<string, ImageMetadata> = {
+    shravan: luffyImg,
+    jash: zoroImg,
+};
+
+const authorImage = imageMap[authorId];
+---
+
+<div class="author-wrapper">
+    <button class="author-trigger" type="button" aria-expanded="false">
+        {authorImage && (
+            <Image 
+                src={authorImage} 
+                alt={author.name} 
+                class="author-avatar" 
+                width={28} 
+                height={28} 
+            />
+        )}
+        <span class="author-name">{author.name}</span>
+    </button>
+    
+    {showCard && (
+        <div class="author-card">
+            <div class="card-arrow"></div>
+            <div class="card-content">
+                {authorImage && (
+                    <div class="card-image-wrapper">
+                        <Image 
+                            src={authorImage} 
+                            alt={author.name} 
+                            class="card-image" 
+                            width={80} 
+                            height={80} 
+                        />
+                        <div class="role-badge">{author.role}</div>
+                    </div>
+                )}
+                <h4 class="card-name">{author.name}</h4>
+                <div class="card-social">
+                    {author.social.github && (
+                        <a href={author.social.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                            <Github size={18} />
+                        </a>
+                    )}
+                    {author.social.linkedin && (
+                        <a href={author.social.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                            <Linkedin size={18} />
+                        </a>
+                    )}
+                    {author.social.website && (
+                        <a href={author.social.website} target="_blank" rel="noopener noreferrer" aria-label="Website">
+                            <Globe size={18} />
+                        </a>
+                    )}
+                    {author.social.email && (
+                        <a href={`mailto:${author.social.email}`} aria-label="Email">
+                            <Mail size={18} />
+                        </a>
+                    )}
+                </div>
+                {author.sponsor && (
+                    <a href={author.sponsor} target="_blank" rel="noopener noreferrer" class="sponsor-btn">
+                        <Heart size={14} class="heart-icon" /> Sponsor
+                    </a>
+                )}
+            </div>
+        </div>
+    )}
+</div>
+
+<script>
+    function initAuthorCards() {
+        document.querySelectorAll('.author-wrapper').forEach((wrapper) => {
+            const trigger = wrapper.querySelector('.author-trigger');
+            const card = wrapper.querySelector('.author-card');
+            
+            if (!trigger || !card) return;
+            
+            let isOpen = false;
+            let hoverTimeout: ReturnType<typeof setTimeout>;
+            
+            const openCard = () => {
+                clearTimeout(hoverTimeout);
+                card.classList.add('visible');
+                trigger.setAttribute('aria-expanded', 'true');
+                isOpen = true;
+            };
+            
+            const closeCard = () => {
+                hoverTimeout = setTimeout(() => {
+                    card.classList.remove('visible');
+                    trigger.setAttribute('aria-expanded', 'false');
+                    isOpen = false;
+                }, 150);
+            };
+            
+            wrapper.addEventListener('mouseenter', openCard);
+            wrapper.addEventListener('mouseleave', closeCard);
+            
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isOpen) {
+                    card.classList.remove('visible');
+                    trigger.setAttribute('aria-expanded', 'false');
+                    isOpen = false;
+                } else {
+                    openCard();
+                }
+            });
+            
+            card.addEventListener('mouseenter', () => clearTimeout(hoverTimeout));
+            card.addEventListener('mouseleave', closeCard);
+        });
+        
+        document.addEventListener('click', (e) => {
+            document.querySelectorAll('.author-wrapper').forEach((wrapper) => {
+                if (!wrapper.contains(e.target as Node)) {
+                    const card = wrapper.querySelector('.author-card');
+                    const trigger = wrapper.querySelector('.author-trigger');
+                    card?.classList.remove('visible');
+                    trigger?.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+    }
+    
+    initAuthorCards();
+    document.addEventListener('astro:page-load', initAuthorCards);
+</script>
+
+<style>
+    .author-wrapper {
+        position: relative;
+        display: inline-flex;
+    }
+    
+    .author-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 50px;
+        padding: 0.3rem 0.75rem 0.3rem 0.3rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+        font-size: 0.85rem;
+    }
+    
+    .author-trigger:hover {
+        background: var(--bg-surface-2);
+        border-color: var(--accent);
+    }
+    
+    .author-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    .author-name {
+        color: var(--text-main);
+        font-weight: 500;
+    }
+    
+    .author-card {
+        position: absolute;
+        bottom: calc(100% + 10px);
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        z-index: 100;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: all 0.25s ease;
+    }
+    
+    .author-card.visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateX(-50%) translateY(0);
+    }
+    
+    .card-arrow {
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%) rotate(45deg);
+        width: 12px;
+        height: 12px;
+        background: var(--bg-surface-2);
+        border-right: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .card-content {
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        min-width: 220px;
+        text-align: center;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-theme="light"] .card-content {
+        background: #ffffff;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-image-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 0.75rem;
+    }
+    
+    .card-image {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--bg-surface);
+    }
+    
+    .role-badge {
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--accent);
+        color: white;
+        padding: 0.15rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    
+    .card-name {
+        margin: 0.75rem 0 0.5rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+    
+    .card-social {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin: 0.75rem 0;
+    }
+    
+    .card-social a {
+        color: var(--text-muted);
+        padding: 0.4rem;
+        border-radius: 8px;
+        background: var(--bg-surface);
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .card-social a:hover {
+        color: var(--accent);
+        transform: translateY(-2px);
+        background: var(--bg-main);
+    }
+    
+    .sponsor-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.9rem;
+        background: rgba(236, 72, 153, 0.1);
+        color: #ec4899;
+        border: 1px solid rgba(236, 72, 153, 0.2);
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        margin-top: 0.5rem;
+    }
+    
+    .sponsor-btn:hover {
+        background: rgba(236, 72, 153, 0.2);
+        transform: translateY(-2px);
+    }
+    
+    .heart-icon {
+        fill: #ec4899;
+    }
+    
+    @media (max-width: 480px) {
+        .author-card {
+            left: 0;
+            transform: translateX(0) translateY(10px);
+        }
+        
+        .author-card.visible {
+            transform: translateX(0) translateY(0);
+        }
+        
+        .card-arrow {
+            left: 30px;
+        }
+    }
+</style>

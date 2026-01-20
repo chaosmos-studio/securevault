@@ -3,6 +3,8 @@ title: 'Why Privacy Matters in 2026'
 description: 'In an age of constant surveillance, reclaiming your digital privacy is an act of freedom.'
 pubDate: 'Jan 20 2026'
 heroImage: '../../assets/blog-placeholder-2.jpg'
+authors:
+  - shravan
 ---
 
 We live in an era where data is the new oil. Every click, every like, every message is tracked, analyzed, and monetized. But why should you care? If you have nothing to hide, do you have nothing to fear?

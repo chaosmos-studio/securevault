@@ -3,6 +3,8 @@ title: 'Encryption Explained: How SecureVault Protects You'
 description: 'A deep dive into the AES-256 encryption that powers SecureVault’s security.'
 pubDate: 'Jan 15 2026'
 heroImage: '../../assets/blog-placeholder-3.jpg'
+authors:
+  - shravan
 ---
 
 "Military-grade encryption" is a marketing buzzword thrown around by many companies. But what does it actually mean, and how does it keep your files safe inside SecureVault?

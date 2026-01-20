@@ -6,6 +6,14 @@ import { Image } from "astro:assets";
 import luffyImg from "../assets/luffy.png";
 import zoroImg from "../assets/zoro.png";
 import { Github, Linkedin, Globe, Mail, Heart } from "@lucide/astro";
+import authors from "../data/authors.json";
+
+const imageMap: Record<string, ImageMetadata> = {
+    shravan: luffyImg,
+    jash: zoroImg,
+};
+
+const developersList = Object.values(authors);
 ---
 
 <Layout title="Meet the Developers - SecureVault">
@@ -21,55 +29,50 @@ import { Github, Linkedin, Globe, Mail, Heart } from "@lucide/astro";
             </section>
 
             <div class="developers-grid">
-                <!-- Shravan Goswami -->
-                <div class="dev-card glow-card">
-                    <div class="dev-image-wrapper">
-                        <Image src={luffyImg} alt="Shravan Goswami" class="dev-image" width={200} height={200} />
-                        <div class="role-badge">Lead Developer</div>
-                    </div>
-                    <div class="dev-content">
-                        <h2>Shravan Goswami</h2>
-                        <div class="social-links">
-                            <a href="https://github.com/shravanngoswamii" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                                <Github size={20} />
-                            </a>
-                            <a href="https://www.linkedin.com/in/shravangoswami/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                                <Linkedin size={20} />
-                            </a>
-                            <a href="https://shravangoswami.com/" target="_blank" rel="noopener noreferrer" aria-label="Website">
-                                <Globe size={20} />
-                            </a>
-                            <a href="mailto:hello@chaosmos.studio" aria-label="Email">
-                                <Mail size={20} />
-                            </a>
+                {developersList.map((dev) => (
+                    <div class="dev-card glow-card">
+                        <div class="dev-image-wrapper">
+                            <Image 
+                                src={imageMap[dev.id]} 
+                                alt={dev.name} 
+                                class="dev-image" 
+                                width={200} 
+                                height={200} 
+                            />
+                            <div class="role-badge">{dev.role}</div>
                         </div>
-                        <a href="https://github.com/sponsors/shravanngoswamii" target="_blank" rel="noopener noreferrer" class="sponsor-btn">
-                            <Heart size={16} class="heart-icon" /> Sponsor
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Jash Ambaliya -->
-                <div class="dev-card glow-card">
-                    <div class="dev-image-wrapper">
-                        <Image src={zoroImg} alt="Jash Ambaliya" class="dev-image" width={200} height={200} />
-                        <div class="role-badge">Co Developer</div>
-                    </div>
-                    <div class="dev-content">
-                        <h2>Jash Ambaliya</h2>
-                        <div class="social-links">
-                            <a href="https://github.com/AJ0070/" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                                <Github size={20} />
-                            </a>
-                            <a href="https://www.linkedin.com/in/jash0070/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                                <Linkedin size={20} />
-                            </a>
+                        <div class="dev-content">
+                            <h2>{dev.name}</h2>
+                            <div class="social-links">
+                                {dev.social.github && (
+                                    <a href={dev.social.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                                        <Github size={20} />
+                                    </a>
+                                )}
+                                {dev.social.linkedin && (
+                                    <a href={dev.social.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                                        <Linkedin size={20} />
+                                    </a>
+                                )}
+                                {dev.social.website && (
+                                    <a href={dev.social.website} target="_blank" rel="noopener noreferrer" aria-label="Website">
+                                        <Globe size={20} />
+                                    </a>
+                                )}
+                                {dev.social.email && (
+                                    <a href={`mailto:${dev.social.email}`} aria-label="Email">
+                                        <Mail size={20} />
+                                    </a>
+                                )}
+                            </div>
+                            {dev.sponsor && (
+                                <a href={dev.sponsor} target="_blank" rel="noopener noreferrer" class="sponsor-btn">
+                                    <Heart size={16} class="heart-icon" /> Sponsor
+                                </a>
+                            )}
                         </div>
-                        <a href="https://github.com/sponsors/AJ0070/" target="_blank" rel="noopener noreferrer" class="sponsor-btn">
-                            <Heart size={16} class="heart-icon" /> Sponsor
-                        </a>
                     </div>
-                </div>
+                ))}
             </div>
         </main>
 

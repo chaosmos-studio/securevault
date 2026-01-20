@@ -1,0 +1,28 @@
+{
+  "shravan": {
+    "id": "shravan",
+    "name": "Shravan Goswami",
+    "role": "Lead Developer",
+    "image": "/src/assets/luffy.png",
+    "social": {
+      "github": "https://github.com/shravanngoswamii",
+      "linkedin": "https://www.linkedin.com/in/shravangoswami/",
+      "website": "https://shravangoswami.com/",
+      "email": "hello@chaosmos.studio"
+    },
+    "sponsor": "https://github.com/sponsors/shravanngoswamii"
+  },
+  "jash": {
+    "id": "jash",
+    "name": "Jash Ambaliya",
+    "role": "Co Developer",
+    "image": "/src/assets/zoro.png",
+    "social": {
+      "github": "https://github.com/AJ0070/",
+      "linkedin": "https://www.linkedin.com/in/jash0070/",
+      "website": null,
+      "email": null
+    },
+    "sponsor": "https://github.com/sponsors/AJ0070/"
+  }
+}
