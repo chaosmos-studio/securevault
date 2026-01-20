@@ -11,13 +11,13 @@ We live in an era where data is the new oil. Every click, every like, every mess
 
 ### The "Nothing to Hide" Fallacy
 
-The argument "I have nothing to hide" stems from a fundamental misunderstanding of privacy. Privacy isn't about hiding crimes; it's about protecting autonomy. We close the bathroom door not because we are doing something illegal, but because some things are meant to be private. 
+The argument "I have nothing to hide" stems from a fundamental misunderstanding of privacy. Privacy isn't about hiding crimes; it's about protecting autonomy. We close the bathroom door not because we are doing something illegal, but because some things are meant to be private.
 
 When you lose privacy, you lose the freedom to be yourself without judgment. You lose the ability to explore ideas, make mistakes, and grow without the world watching.
 
 ### The Real Cost of Free Apps
 
-Most apps are free because *you* are the product. Your location history, your photos, your contacts—they are all harvested to build a profile of who you are. This profile is sold to advertisers, insurance companies, and sometimes even government agencies.
+Most apps are free because _you_ are the product. Your location history, your photos, your contacts—they are all harvested to build a profile of who you are. This profile is sold to advertisers, insurance companies, and sometimes even government agencies.
 
 SecureVault was built to challenge this status quo. We believe that privacy is a human right, not a luxury feature.
 

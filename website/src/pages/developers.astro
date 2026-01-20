@@ -1,289 +1,307 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import SiteHeader from "../components/SiteHeader.astro";
-import SiteFooter from "../components/SiteFooter.astro";
-import { Image } from "astro:assets";
-import luffyImg from "../assets/luffy.png";
-import zoroImg from "../assets/zoro.png";
-import { Github, Linkedin, Globe, Mail, Heart } from "@lucide/astro";
-import authors from "../data/authors.json";
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { Image } from 'astro:assets';
+import luffyImg from '../assets/luffy.png';
+import zoroImg from '../assets/zoro.png';
+import { Github, Linkedin, Globe, Mail, Heart } from '@lucide/astro';
+import authors from '../data/authors.json';
 
 const imageMap: Record<string, ImageMetadata> = {
-    shravan: luffyImg,
-    jash: zoroImg,
+  shravan: luffyImg,
+  jash: zoroImg,
 };
 
 const developersList = Object.values(authors);
 ---
 
 <Layout title="Meet the Developers - SecureVault">
-    <div class="premium-container" id="main-container">
-        <SiteHeader />
+  <div class="premium-container" id="main-container">
+    <SiteHeader />
 
-        <main>
-            <section class="page-header">
-                <h1 class="headline">
-                    Meet the <span class="text-gradient">Developers</span>
-                </h1>
-                <p class="subheadline">The minds behind the privacy.</p>
-            </section>
+    <main>
+      <section class="page-header">
+        <h1 class="headline">
+          Meet the <span class="text-gradient">Developers</span>
+        </h1>
+        <p class="subheadline">The minds behind the privacy.</p>
+      </section>
 
-            <div class="developers-grid">
-                {developersList.map((dev) => (
-                    <div class="dev-card glow-card">
-                        <div class="dev-image-wrapper">
-                            <Image 
-                                src={imageMap[dev.id]} 
-                                alt={dev.name} 
-                                class="dev-image" 
-                                width={200} 
-                                height={200} 
-                            />
-                            <div class="role-badge">{dev.role}</div>
-                        </div>
-                        <div class="dev-content">
-                            <h2>{dev.name}</h2>
-                            <div class="social-links">
-                                {dev.social.github && (
-                                    <a href={dev.social.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                                        <Github size={20} />
-                                    </a>
-                                )}
-                                {dev.social.linkedin && (
-                                    <a href={dev.social.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                                        <Linkedin size={20} />
-                                    </a>
-                                )}
-                                {dev.social.website && (
-                                    <a href={dev.social.website} target="_blank" rel="noopener noreferrer" aria-label="Website">
-                                        <Globe size={20} />
-                                    </a>
-                                )}
-                                {dev.social.email && (
-                                    <a href={`mailto:${dev.social.email}`} aria-label="Email">
-                                        <Mail size={20} />
-                                    </a>
-                                )}
-                            </div>
-                            {dev.sponsor && (
-                                <a href={dev.sponsor} target="_blank" rel="noopener noreferrer" class="sponsor-btn">
-                                    <Heart size={16} class="heart-icon" /> Sponsor
-                                </a>
-                            )}
-                        </div>
-                    </div>
-                ))}
+      <div class="developers-grid">
+        {
+          developersList.map(dev => (
+            <div class="dev-card glow-card">
+              <div class="dev-image-wrapper">
+                <Image
+                  src={imageMap[dev.id]}
+                  alt={dev.name}
+                  class="dev-image"
+                  width={200}
+                  height={200}
+                />
+                <div class="role-badge">{dev.role}</div>
+              </div>
+              <div class="dev-content">
+                <h2>{dev.name}</h2>
+                <div class="social-links">
+                  {dev.social.github && (
+                    <a
+                      href={dev.social.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="GitHub"
+                    >
+                      <Github size={20} />
+                    </a>
+                  )}
+                  {dev.social.linkedin && (
+                    <a
+                      href={dev.social.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="LinkedIn"
+                    >
+                      <Linkedin size={20} />
+                    </a>
+                  )}
+                  {dev.social.website && (
+                    <a
+                      href={dev.social.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Website"
+                    >
+                      <Globe size={20} />
+                    </a>
+                  )}
+                  {dev.social.email && (
+                    <a href={`mailto:${dev.social.email}`} aria-label="Email">
+                      <Mail size={20} />
+                    </a>
+                  )}
+                </div>
+                {dev.sponsor && (
+                  <a
+                    href={dev.sponsor}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="sponsor-btn"
+                  >
+                    <Heart size={16} class="heart-icon" /> Sponsor
+                  </a>
+                )}
+              </div>
             </div>
-        </main>
+          ))
+        }
+      </div>
+    </main>
 
-        <SiteFooter />
-    </div>
+    <SiteFooter />
+  </div>
 </Layout>
 
 <script>
-    const wrapper = document.getElementById("main-container");
-    if (wrapper) {
-        wrapper.addEventListener("mousemove", (e) => {
-            const rect = wrapper.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            wrapper.style.setProperty("--mouse-x", `${x}px`);
-            wrapper.style.setProperty("--mouse-y", `${y}px`);
+  const wrapper = document.getElementById('main-container');
+  if (wrapper) {
+    wrapper.addEventListener('mousemove', e => {
+      const rect = wrapper.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      wrapper.style.setProperty('--mouse-x', `${x}px`);
+      wrapper.style.setProperty('--mouse-y', `${y}px`);
 
-            document.querySelectorAll(".glow-card").forEach((card) => {
-                const cardRect = card.getBoundingClientRect();
-                const cardX = e.clientX - cardRect.left;
-                const cardY = e.clientY - cardRect.top;
-                (card as HTMLElement).style.setProperty(
-                    "--card-x",
-                    `${cardX}px`,
-                );
-                (card as HTMLElement).style.setProperty(
-                    "--card-y",
-                    `${cardY}px`,
-                );
-            });
-        });
-    }
+      document.querySelectorAll('.glow-card').forEach(card => {
+        const cardRect = card.getBoundingClientRect();
+        const cardX = e.clientX - cardRect.left;
+        const cardY = e.clientY - cardRect.top;
+        (card as HTMLElement).style.setProperty('--card-x', `${cardX}px`);
+        (card as HTMLElement).style.setProperty('--card-y', `${cardY}px`);
+      });
+    });
+  }
 </script>
 
 <style>
+  main {
+    padding: 6rem 5% 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    z-index: 2;
+    position: relative;
+    min-height: 80vh;
+  }
+
+  @media (min-width: 768px) {
     main {
-        padding: 6rem 5% 4rem;
-        max-width: 1200px;
-        margin: 0 auto;
-        z-index: 2;
-        position: relative;
-        min-height: 80vh;
+      padding: 8rem 5% 6rem;
     }
+  }
 
-    @media (min-width: 768px) {
-        main {
-            padding: 8rem 5% 6rem;
-        }
-    }
+  .page-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
 
-    .page-header {
-        text-align: center;
-        margin-bottom: 4rem;
-    }
+  .developers-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
 
+  @media (min-width: 768px) {
     .developers-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 2rem;
-        max-width: 900px;
-        margin: 0 auto;
+      grid-template-columns: repeat(2, 1fr);
     }
+  }
 
-    @media (min-width: 768px) {
-        .developers-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
+  .dev-card {
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
 
-    .dev-card {
-        background: var(--bg-surface-2);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        padding: 2.5rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        transition: transform 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
+  .dev-card:hover {
+    transform: translateY(-5px);
+  }
 
-    .dev-card:hover {
-        transform: translateY(-5px);
-    }
+  .dev-image-wrapper {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
 
-    .dev-image-wrapper {
-        position: relative;
-        margin-bottom: 1.5rem;
-    }
+  .dev-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--bg-surface);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  }
 
-    .dev-image {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 4px solid var(--bg-surface);
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-    }
+  .role-badge {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(50%);
+    background: var(--accent);
+    color: white;
+    padding: 0.25rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
 
-    .role-badge {
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%) translateY(50%);
-        background: var(--accent);
-        color: white;
-        padding: 0.25rem 1rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        white-space: nowrap;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
+  .dev-content h2 {
+    margin: 1rem 0 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
 
-    .dev-content h2 {
-        margin: 1rem 0 0.5rem;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-main);
-    }
+  .social-links {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
 
-    .social-links {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        margin: 1.5rem 0;
-    }
+  .social-links a {
+    color: var(--text-muted);
+    transition:
+      color 0.2s ease,
+      transform 0.2s ease;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: var(--bg-surface);
+  }
 
-    .social-links a {
-        color: var(--text-muted);
-        transition: color 0.2s ease, transform 0.2s ease;
-        padding: 0.5rem;
-        border-radius: 8px;
-        background: var(--bg-surface);
-    }
+  .social-links a:hover {
+    color: var(--accent);
+    transform: translateY(-2px);
+    background: var(--bg-surface-2);
+  }
 
-    .social-links a:hover {
-        color: var(--accent);
-        transform: translateY(-2px);
-        background: var(--bg-surface-2);
-    }
+  .sponsor-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background: rgba(236, 72, 153, 0.1);
+    color: #ec4899;
+    border: 1px solid rgba(236, 72, 153, 0.2);
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
 
-    .sponsor-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.6rem 1.2rem;
-        background: rgba(236, 72, 153, 0.1);
-        color: #ec4899;
-        border: 1px solid rgba(236, 72, 153, 0.2);
-        border-radius: 50px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        transition: all 0.2s ease;
-        text-decoration: none;
-    }
+  .sponsor-btn:hover {
+    background: rgba(236, 72, 153, 0.2);
+    transform: translateY(-2px);
+  }
 
-    .sponsor-btn:hover {
-        background: rgba(236, 72, 153, 0.2);
-        transform: translateY(-2px);
-    }
+  .heart-icon {
+    fill: #ec4899;
+  }
 
-    .heart-icon {
-        fill: #ec4899;
-    }
-
-    /* Reuse glow card styles locally or rely on global CSS if available. 
+  /* Reuse glow card styles locally or rely on global CSS if available. 
        Adding specific glow effect for independent file functionality */
-    .glow-card {
-        background: rgba(255, 255, 255, 0.03);
-    }
-    
-    .glow-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        border-radius: 20px;
-        padding: 2px;
-        background: radial-gradient(
-            800px circle at var(--card-x, 0) var(--card-y, 0),
-            rgba(255, 255, 255, 0.3),
-            transparent 40%
-        );
-        -webkit-mask:
-            linear-gradient(#fff 0 0) content-box,
-            linear-gradient(#fff 0 0);
-        mask:
-            linear-gradient(#fff 0 0) content-box,
-            linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        pointer-events: none;
-        opacity: 0.5;
-    }
+  .glow-card {
+    background: rgba(255, 255, 255, 0.03);
+  }
 
-    [data-theme="light"] .dev-card {
-        background: #ffffff;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    }
-    
-    [data-theme="light"] .glow-card::before {
-        background: radial-gradient(
-            800px circle at var(--card-x, 0) var(--card-y, 0),
-            var(--accent),
-            transparent 40%
-        );
-        opacity: 0.3;
-    }
+  .glow-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 20px;
+    padding: 2px;
+    background: radial-gradient(
+      800px circle at var(--card-x, 0) var(--card-y, 0),
+      rgba(255, 255, 255, 0.3),
+      transparent 40%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  [data-theme='light'] .dev-card {
+    background: #ffffff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  [data-theme='light'] .glow-card::before {
+    background: radial-gradient(
+      800px circle at var(--card-x, 0) var(--card-y, 0),
+      var(--accent),
+      transparent 40%
+    );
+    opacity: 0.3;
+  }
 </style>

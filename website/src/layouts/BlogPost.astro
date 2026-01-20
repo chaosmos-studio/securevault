@@ -1,15 +1,16 @@
 ---
-import { Image } from "astro:assets";
-import type { CollectionEntry } from "astro:content";
-import Layout from "./Layout.astro";
-import SiteHeader from "../components/SiteHeader.astro";
-import SiteFooter from "../components/SiteFooter.astro";
-import FormattedDate from "../components/FormattedDate.astro";
-import AuthorCard from "../components/AuthorCard.astro";
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import Layout from './Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import AuthorCard from '../components/AuthorCard.astro';
 
-type Props = CollectionEntry<"blog">["data"];
+type Props = CollectionEntry<'blog'>['data'];
 
-const { title, description, pubDate, updatedDate, heroImage, authors } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, authors } =
+  Astro.props;
 ---
 
 <Layout title={`${title} - SecureVault Blog`}>
@@ -45,16 +46,18 @@ const { title, description, pubDate, updatedDate, heroImage, authors } = Astro.p
               }
             </div>
             <h1 class="headline">{title}</h1>
-            {authors && authors.length > 0 && (
-              <div class="authors-section">
-                <span class="authors-label">Written by</span>
-                <div class="authors-list">
-                  {authors.map((authorId: string) => (
-                    <AuthorCard authorId={authorId} />
-                  ))}
+            {
+              authors && authors.length > 0 && (
+                <div class="authors-section">
+                  <span class="authors-label">Written by</span>
+                  <div class="authors-list">
+                    {authors.map((authorId: string) => (
+                      <AuthorCard authorId={authorId} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )
+            }
           </div>
         </div>
 
@@ -86,7 +89,7 @@ const { title, description, pubDate, updatedDate, heroImage, authors } = Astro.p
     padding-bottom: 3rem;
   }
 
-  [data-theme="light"] .blog-article {
+  [data-theme='light'] .blog-article {
     /* No Background */
   }
 
@@ -98,7 +101,7 @@ const { title, description, pubDate, updatedDate, heroImage, authors } = Astro.p
     /* box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3); */
     background: var(--bg-main);
   }
-  [data-theme="light"] .hero-section {
+  [data-theme='light'] .hero-section {
     box-shadow: none; /* Remove shadow to avoid "border" look at bottom */
     background: transparent;
   }
@@ -128,7 +131,7 @@ const { title, description, pubDate, updatedDate, heroImage, authors } = Astro.p
     pointer-events: none;
     z-index: 2;
   }
-  [data-theme="light"] .hero-overlay {
+  [data-theme='light'] .hero-overlay {
     background: linear-gradient(to bottom, transparent 30%, var(--bg-main) 95%);
   }
 
@@ -186,7 +189,7 @@ const { title, description, pubDate, updatedDate, heroImage, authors } = Astro.p
 
   .prose {
     padding: 2.5rem;
-    padding-top: 0;;
+    padding-top: 0;
     font-size: 1.05rem;
     line-height: 1.8;
     color: var(--text-muted);

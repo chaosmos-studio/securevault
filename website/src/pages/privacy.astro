@@ -1,165 +1,243 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import SiteHeader from "../components/SiteHeader.astro";
-import SiteFooter from "../components/SiteFooter.astro";
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
 ---
 
 <Layout title="Privacy Policy - SecureVault">
-    <div class="premium-container" id="main-container">
-                
-        <SiteHeader />
+  <div class="premium-container" id="main-container">
+    <SiteHeader />
 
-        <main>
-            <section class="page-header">
-                <h1 class="headline">Privacy <span class="text-gradient">Policy</span></h1>
-                <p class="subheadline">We don't want your data. Period.</p>
-            </section>
+    <main>
+      <section class="page-header">
+        <h1 class="headline">
+          Privacy <span class="text-gradient">Policy</span>
+        </h1>
+        <p class="subheadline">We don't want your data. Period.</p>
+      </section>
 
-            <div class="legal-content hover-section">
-                <!-- Play Store Compliance Box -->
-                <div class="compliance-box glow-card">
-                    <div class="compliance-icon">✓</div>
-                    <div class="compliance-text">
-                        <h3>Google Play Data Safety Declaration</h3>
-                        <p>SecureVault <strong>does not collect, share, or transmit</strong> any user personal data to external servers. All encrypted files (photos, videos, notes) are stored strictly locally on your device. We have no access to your vault passwords or contents.</p>
-                    </div>
-                </div>
+      <div class="legal-content hover-section">
+        <!-- Play Store Compliance Box -->
+        <div class="compliance-box glow-card">
+          <div class="compliance-icon">✓</div>
+          <div class="compliance-text">
+            <h3>Google Play Data Safety Declaration</h3>
+            <p>
+              SecureVault <strong>does not collect, share, or transmit</strong> any
+              user personal data to external servers. All encrypted files (photos,
+              videos, notes) are stored strictly locally on your device. We have no
+              access to your vault passwords or contents.
+            </p>
+          </div>
+        </div>
 
-                <div class="text-block">
-                    <h2>1. Data Collection</h2>
-                    <p>SecureVault is designed with a "Zero-Knowledge" architecture. This means:</p>
-                    <ul>
-                        <li>We do not collect personal usage data.</li>
-                        <li>We do not collect your device information.</li>
-                        <li>We do not collect your photos, videos, or notes.</li>
-                        <li>We do not track your location.</li>
-                    </ul>
-                </div>
+        <div class="text-block">
+          <h2>1. Data Collection</h2>
+          <p>
+            SecureVault is designed with a "Zero-Knowledge" architecture. This
+            means:
+          </p>
+          <ul>
+            <li>We do not collect personal usage data.</li>
+            <li>We do not collect your device information.</li>
+            <li>We do not collect your photos, videos, or notes.</li>
+            <li>We do not track your location.</li>
+          </ul>
+        </div>
 
-                <div class="text-block">
-                    <h2>2. Local Storage</h2>
-                    <p>All data you import into SecureVault is encrypted (AES-256) and stored in your device's internal storage. This data never leaves your device unless you manually perform a backup to your own personal cloud storage (if applicable).</p>
-                </div>
+        <div class="text-block">
+          <h2>2. Local Storage</h2>
+          <p>
+            All data you import into SecureVault is encrypted (AES-256) and
+            stored in your device's internal storage. This data never leaves
+            your device unless you manually perform a backup to your own
+            personal cloud storage (if applicable).
+          </p>
+        </div>
 
-                <div class="text-block">
-                    <h2>3. Permissions</h2>
-                    <p>The app requests the following permissions strictly for functionality:</p>
-                    <ul>
-                        <li><strong>Storage / Media:</strong> Required to encrypt and hide your photos and videos.</li>
-                        <li><strong>Camera:</strong> Required to take photos directly into the vault.</li>
-                        <li><strong>Biometrics:</strong> Required effectively verify your identity for unlocking (optional).</li>
-                    </ul>
-                </div>
+        <div class="text-block">
+          <h2>3. Permissions</h2>
+          <p>
+            The app requests the following permissions strictly for
+            functionality:
+          </p>
+          <ul>
+            <li>
+              <strong>Storage / Media:</strong> Required to encrypt and hide your
+              photos and videos.
+            </li>
+            <li>
+              <strong>Camera:</strong> Required to take photos directly into the vault.
+            </li>
+            <li>
+              <strong>Biometrics:</strong> Required effectively verify your identity
+              for unlocking (optional).
+            </li>
+          </ul>
+        </div>
 
-                <div class="text-block">
-                    <h2>4. Third-Party Services</h2>
-                    <p>We do not use third-party analytics SDKs that track user behavior. We prioritize privacy over metrics.</p>
-                </div>
+        <div class="text-block">
+          <h2>4. Third-Party Services</h2>
+          <p>
+            We do not use third-party analytics SDKs that track user behavior.
+            We prioritize privacy over metrics.
+          </p>
+        </div>
 
-                <div class="text-block">
-                    <h2>Terms & Conditions</h2>
-                    <p>By downloading or using SecureVault, you agree to these terms:</p>
-                    <ul>
-                        <li><strong>License:</strong> SecureVault is proprietary software. You are granted a license for personal use only. Unauthorized redistribution, modification, or reverse engineering is prohibited.</li>
-                        <li><strong>No Warranty:</strong> The software is provided "as is" without warranties of any kind. We are not liable for any data loss or damages arising from its use.</li>
-                        <li><strong>User Responsibility:</strong> You are responsible for managing your passwords and data backups. Since we do not store your data, <strong>we cannot recover lost passwords or deleted data.</strong></li>
-                        <li><strong>Copyright:</strong> All rights reserved. &copy; 2026.</li>
-                    </ul>
-                </div>
-                
-                <div class="updated-date">Last Updated: January 20, 2026</div>
-            </div>
-        </main>
+        <div class="text-block">
+          <h2>Terms & Conditions</h2>
+          <p>By downloading or using SecureVault, you agree to these terms:</p>
+          <ul>
+            <li>
+              <strong>License:</strong> SecureVault is proprietary software. You are
+              granted a license for personal use only. Unauthorized redistribution,
+              modification, or reverse engineering is prohibited.
+            </li>
+            <li>
+              <strong>No Warranty:</strong> The software is provided "as is" without
+              warranties of any kind. We are not liable for any data loss or damages
+              arising from its use.
+            </li>
+            <li>
+              <strong>User Responsibility:</strong> You are responsible for managing
+              your passwords and data backups. Since we do not store your data, <strong
+                >we cannot recover lost passwords or deleted data.</strong
+              >
+            </li>
+            <li>
+              <strong>Copyright:</strong> All rights reserved. &copy; 2026.
+            </li>
+          </ul>
+        </div>
 
-        <SiteFooter />
-    </div>
+        <div class="updated-date">Last Updated: January 20, 2026</div>
+      </div>
+    </main>
+
+    <SiteFooter />
+  </div>
 </Layout>
 
 <script>
-    // Spotlight Logic
-    const wrapper = document.getElementById('main-container');
-    if(wrapper) {
-        wrapper.addEventListener('mousemove', (e) => {
-            const rect = wrapper.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            wrapper.style.setProperty('--mouse-x', `${x}px`);
-            wrapper.style.setProperty('--mouse-y', `${y}px`);
+  // Spotlight Logic
+  const wrapper = document.getElementById('main-container');
+  if (wrapper) {
+    wrapper.addEventListener('mousemove', e => {
+      const rect = wrapper.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      wrapper.style.setProperty('--mouse-x', `${x}px`);
+      wrapper.style.setProperty('--mouse-y', `${y}px`);
 
-            // Glow logic for compliance box
-            const box = document.querySelector('.glow-card');
-            if(box) {
-                const cardRect = box.getBoundingClientRect();
-                const cardX = e.clientX - cardRect.left;
-                const cardY = e.clientY - cardRect.top;
-                (box as HTMLElement).style.setProperty('--card-x', `${cardX}px`);
-                (box as HTMLElement).style.setProperty('--card-y', `${cardY}px`);
-            }
-        });
-    }
+      // Glow logic for compliance box
+      const box = document.querySelector('.glow-card');
+      if (box) {
+        const cardRect = box.getBoundingClientRect();
+        const cardX = e.clientX - cardRect.left;
+        const cardY = e.clientY - cardRect.top;
+        (box as HTMLElement).style.setProperty('--card-x', `${cardX}px`);
+        (box as HTMLElement).style.setProperty('--card-y', `${cardY}px`);
+      }
+    });
+  }
 </script>
 
 <style>
-    main { 
-        padding:6rem 5% 4rem; 
-        max-width: 800px; 
-        margin: 0 auto; 
-        z-index: 2; 
-        position: relative; 
-    }
+  main {
+    padding: 6rem 5% 4rem;
+    max-width: 800px;
+    margin: 0 auto;
+    z-index: 2;
+    position: relative;
+  }
 
-    .page-header { text-align: center; margin-bottom: 4rem; }
-    .headline { font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 0.5rem; }
-    .subheadline { color: var(--text-muted); font-size: 1.2rem; }
+  .page-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .headline {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    margin-bottom: 0.5rem;
+  }
+  .subheadline {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+  }
 
-    .legal-content {
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        padding: 2.5rem;
-        backdrop-filter: blur(12px);
-    }
+  .legal-content {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    backdrop-filter: blur(12px);
+  }
 
-    .compliance-box {
-        background: rgba(59, 130, 246, 0.08);
-        border: 1px solid var(--accent);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 2.5rem;
-        display: flex; 
-        gap: 1rem; 
-        align-items: flex-start;
-    }
-    .compliance-box h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; color: var(--accent); }
-    .compliance-box p { margin: 0; font-size: 0.95rem; line-height: 1.6; }
-    .compliance-icon { 
-        background: var(--accent); 
-        color: white; 
-        border-radius: 50%; 
-        width: 24px; height: 24px; 
-        display: flex; align-items: center; justify-content: center; 
-        font-size: 0.8rem; 
-        flex-shrink: 0; 
-        margin-top: 2px;
-    }
+  .compliance-box {
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .compliance-box h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: var(--accent);
+  }
+  .compliance-box p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .compliance-icon {
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
 
-    .text-block { margin-bottom: 2rem; }
-    h2 { 
-        font-size: 1.3rem; 
-        margin-bottom: 0.75rem; 
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid var(--border);
-    }
-    p, li { line-height: 1.7; color: var(--text-muted); margin-bottom: 0.75rem; font-size: 1rem; }
-    ul { padding-left: 1.25rem; margin: 0; }
-    li { margin-bottom: 0.4rem; }
-    strong { color: var(--text-main); }
+  .text-block {
+    margin-bottom: 2rem;
+  }
+  h2 {
+    font-size: 1.3rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  p,
+  li {
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+  }
+  ul {
+    padding-left: 1.25rem;
+    margin: 0;
+  }
+  li {
+    margin-bottom: 0.4rem;
+  }
+  strong {
+    color: var(--text-main);
+  }
 
-    .updated-date { 
-        margin-top: 2.5rem; 
-        font-size: 0.85rem; 
-        color: var(--text-muted); 
-        text-align: center;
-        opacity: 0.7;
-    }
+  .updated-date {
+    margin-top: 2.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: center;
+    opacity: 0.7;
+  }
 </style>

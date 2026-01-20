@@ -1,308 +1,314 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import SiteHeader from "../components/SiteHeader.astro";
-import SiteFooter from "../components/SiteFooter.astro";
-import { BookOpen, ShieldAlert, Mail, Lightbulb } from "@lucide/astro";
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { BookOpen, ShieldAlert, Mail, Lightbulb } from '@lucide/astro';
 ---
 
 <Layout title="Support - SecureVault">
-    <div class="premium-container" id="main-container">
-        <SiteHeader />
+  <div class="premium-container" id="main-container">
+    <SiteHeader />
 
-        <main>
-            <section class="page-header">
-                <h1 class="headline">
-                    Help & <span class="text-gradient">Support</span>
-                </h1>
-                <p class="subheadline">Got questions? We've got answers.</p>
-            </section>
+    <main>
+      <section class="page-header">
+        <h1 class="headline">
+          Help & <span class="text-gradient">Support</span>
+        </h1>
+        <p class="subheadline">Got questions? We've got answers.</p>
+      </section>
 
-            <div class="support-grid">
-                <a href="#faqs" class="support-card glow-card no-decoration">
-                    <div class="card-icon"><BookOpen size={40} /></div>
-                    <h3>FAQs</h3>
-                    <p>
-                        Find answers to common questions about encryption,
-                        disguise mode, and account recovery.
-                    </p>
-                </a>
+      <div class="support-grid">
+        <a href="#faqs" class="support-card glow-card no-decoration">
+          <div class="card-icon"><BookOpen size={40} /></div>
+          <h3>FAQs</h3>
+          <p>
+            Find answers to common questions about encryption, disguise mode,
+            and account recovery.
+          </p>
+        </a>
 
-                <div class="support-card glow-card">
-                    <div class="card-icon"><ShieldAlert size={40} /></div>
-                    <h3>Password Recovery</h3>
-                    <p>
-                        Due to our zero-knowledge architecture, we cannot
-                        recover passwords. Please ensure you remember your
-                        credentials.
-                    </p>
-                </div>
+        <div class="support-card glow-card">
+          <div class="card-icon"><ShieldAlert size={40} /></div>
+          <h3>Password Recovery</h3>
+          <p>
+            Due to our zero-knowledge architecture, we cannot recover passwords.
+            Please ensure you remember your credentials.
+          </p>
+        </div>
 
-                <div class="support-card glow-card" id="contact">
-                    <div class="card-icon"><Mail size={40} /></div>
-                    <h3>Contact Us</h3>
-                    <p>
-                        Need personal assistance? Reach out and we'll get back
-                        to you within 24 hours.
-                    </p>
-                    <a href="mailto:hello@chaosmos.studio" class="card-link"
-                        >hello@chaosmos.studio</a
-                    >
-                </div>
+        <div class="support-card glow-card" id="contact">
+          <div class="card-icon"><Mail size={40} /></div>
+          <h3>Contact Us</h3>
+          <p>
+            Need personal assistance? Reach out and we'll get back to you within
+            24 hours.
+          </p>
+          <a href="mailto:hello@chaosmos.studio" class="card-link"
+            >hello@chaosmos.studio</a
+          >
+        </div>
 
-                <div class="support-card glow-card" id="request">
-                    <div class="card-icon"><Lightbulb size={40} /></div>
-                    <h3>Request a Feature</h3>
-                    <p>
-                        Have an idea to make SecureVault even better? We'd love
-                        to hear from you.
-                    </p>
-                    <a
-                        href="mailto:hello@chaosmos.studio?subject=Requesting%20a%20Feature%20for%20SecureVault"
-                        class="card-link">Submit Idea →</a
-                    >
-                </div>
-            </div>
+        <div class="support-card glow-card" id="request">
+          <div class="card-icon"><Lightbulb size={40} /></div>
+          <h3>Request a Feature</h3>
+          <p>
+            Have an idea to make SecureVault even better? We'd love to hear from
+            you.
+          </p>
+          <a
+            href="mailto:hello@chaosmos.studio?subject=Requesting%20a%20Feature%20for%20SecureVault"
+            class="card-link">Submit Idea →</a
+          >
+        </div>
+      </div>
 
-            <section id="faqs" class="faq-section">
-                <h2 class="section-title">Frequently Asked Questions</h2>
-                <div class="faq-list">
-                    <details class="faq-item glow-card">
-                        <summary>Is my data really secure?</summary>
-                        <p>
-                            Absolutely. SecureVault uses military-grade AES-256
-                            encryption to protect your files. Your data is
-                            stored locally on your device and is never uploaded
-                            to any server, ensuring complete privacy.
-                        </p>
-                    </details>
+      <section id="faqs" class="faq-section">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <div class="faq-list">
+          <details class="faq-item glow-card">
+            <summary>Is my data really secure?</summary>
+            <p>
+              Absolutely. SecureVault uses military-grade AES-256 encryption to
+              protect your files. Your data is stored locally on your device and
+              is never uploaded to any server, ensuring complete privacy.
+            </p>
+          </details>
 
-                    <details class="faq-item glow-card">
-                        <summary>What happens if I forget my password?</summary>
-                        <p>
-                            For your security, SecureVault does not store your
-                            password. This means we cannot reset it for you. We
-                            strongly recommend keeping a backup of your password
-                            in a safe place.
-                        </p>
-                    </details>
+          <details class="faq-item glow-card">
+            <summary>What happens if I forget my password?</summary>
+            <p>
+              For your security, SecureVault does not store your password. This
+              means we cannot reset it for you. We strongly recommend keeping a
+              backup of your password in a safe place.
+            </p>
+          </details>
 
-                    <details class="faq-item glow-card">
-                        <summary>What is Disguise Mode?</summary>
-                        <p>
-                            Disguise Mode allows you to change the app's icon
-                            and name (e.g., to a Calculator) to hide it from
-                            prying eyes.
-                        </p>
-                    </details>
+          <details class="faq-item glow-card">
+            <summary>What is Disguise Mode?</summary>
+            <p>
+              Disguise Mode allows you to change the app's icon and name (e.g.,
+              to a Calculator) to hide it from prying eyes.
+            </p>
+          </details>
 
-                    <details class="faq-item glow-card">
-                        <summary>Does SecureVault support FaceID/TouchID?</summary>
-                        <p>
-                            No, our app does not support this. We believe in providing the highest level of security through master password authentication only.
-                        </p>
-                    </details>
+          <details class="faq-item glow-card">
+            <summary>Does SecureVault support FaceID/TouchID?</summary>
+            <p>
+              No, our app does not support this. We believe in providing the
+              highest level of security through master password authentication
+              only.
+            </p>
+          </details>
 
-                    <details class="faq-item glow-card">
-                        <summary>Can I hide photos and videos?</summary>
-                        <p>
-                            Yes. You can import photos and videos directly from
-                            your gallery into SecureVault. Once imported, they
-                            are encrypted and hidden from your main gallery.
-                        </p>
-                    </details>
-                </div>
-            </section>
-        </main>
+          <details class="faq-item glow-card">
+            <summary>Can I hide photos and videos?</summary>
+            <p>
+              Yes. You can import photos and videos directly from your gallery
+              into SecureVault. Once imported, they are encrypted and hidden
+              from your main gallery.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
 
-        <SiteFooter />
-    </div>
+    <SiteFooter />
+  </div>
 </Layout>
 
 <script>
-    // Spotlight Logic is now handled globally in Layout.astro
+  // Spotlight Logic is now handled globally in Layout.astro
 </script>
 
 <style>
+  main {
+    padding: 6rem 5% 2rem; /* Reduced for mobile */
+    max-width: 1200px;
+    margin: 0 auto;
+    z-index: 2;
+    position: relative;
+  }
+  @media (min-width: 768px) {
     main {
-        padding: 6rem 5% 2rem; /* Reduced for mobile */
-        max-width: 1200px;
-        margin: 0 auto;
-        z-index: 2;
-        position: relative;
+      padding: 8rem 5% 4rem;
     }
-    @media (min-width: 768px) {
-        main {
-            padding: 8rem 5% 4rem;
-        }
-    }
+  }
 
-    .page-header {
-        text-align: center;
-        margin-bottom: 4rem;
-    }
-    .headline {
-        font-size: clamp(2.5rem, 5vw, 4rem);
-        margin-bottom: 0.5rem;
-    }
-    .subheadline {
-        color: var(--text-muted);
-        font-size: 1.2rem;
-    }
+  .page-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .headline {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    margin-bottom: 0.5rem;
+  }
+  .subheadline {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+  }
 
+  .support-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 5rem;
+  }
+
+  @media (min-width: 768px) {
     .support-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-        margin-bottom: 5rem;
+      grid-template-columns: 1fr 1fr;
     }
+  }
 
-    @media (min-width: 768px) {
-        .support-grid {
-            grid-template-columns: 1fr 1fr;
-        }
-    }
+  .support-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    backdrop-filter: blur(12px);
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+  .support-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.4);
+  }
 
-    .support-card {
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 2rem;
-        backdrop-filter: blur(12px);
-        transition:
-            transform 0.3s ease,
-            box-shadow 0.3s ease;
-    }
-    .support-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.4);
-    }
+  .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  .support-card h3 {
+    font-size: 1.3rem;
+    margin: 0 0 0.75rem;
+    color: var(--text-main);
+  }
+  .support-card p {
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+  }
+  .card-link {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-block;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .card-link:hover {
+    border-color: var(--accent);
+  }
 
-    .card-icon {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-    }
-    .support-card h3 {
-        font-size: 1.3rem;
-        margin: 0 0 0.75rem;
-        color: var(--text-main);
-    }
-    .support-card p {
-        color: var(--text-muted);
-        line-height: 1.6;
-        margin: 0 0 1rem;
-        font-size: 0.95rem;
-    }
-    .card-link {
-        color: var(--accent);
-        font-weight: 600;
-        font-size: 0.9rem;
-        display: inline-block;
-        border-bottom: 1px solid transparent;
-        transition: border-color 0.2s;
-    }
-    .card-link:hover {
-        border-color: var(--accent);
-    }
+  .no-decoration {
+    text-decoration: none;
+    display: block;
+    color: inherit;
+  }
 
-    .no-decoration {
-        text-decoration: none;
-        display: block;
-        color: inherit;
-    }
+  .faq-section {
+    margin-top: 6rem;
+    border-top: 1px solid var(--border);
+    padding-top: 4rem;
+  }
 
-    .faq-section {
-        margin-top: 6rem;
-        border-top: 1px solid var(--border);
-        padding-top: 4rem;
-    }
+  .section-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 3rem;
+    color: var(--text-main);
+  }
 
-    .section-title {
-        text-align: center;
-        font-size: 2rem;
-        margin-bottom: 3rem;
-        color: var(--text-main);
-    }
+  .faq-list {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
 
-    .faq-list {
-        max-width: 800px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
+  .faq-item {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
 
-    .faq-item {
-        background: transparent;
-        border: none;
-        border-bottom: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 0; 
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
+  .faq-item:hover {
+    background: rgba(var(--bg-surface-rgb), 0.3); /* Subtle hover bg */
+  }
 
-    .faq-item:hover {
-        background: rgba(var(--bg-surface-rgb), 0.3); /* Subtle hover bg */
-    }
-    
-    .faq-item:last-child {
-        border-bottom: none;
-    }
-    
-    .faq-item[open] {
-        background: transparent;
-        border-bottom-color: var(--accent);
-    }
+  .faq-item:last-child {
+    border-bottom: none;
+  }
 
-    .faq-item summary {
-        padding: 1.5rem 1rem; /* Added horizontal padding for cleaner look */
-        font-size: 1.15rem;
-        font-weight: 500;
-        color: var(--text-main);
-        list-style: none;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        user-select: none;
-        position: relative;
-        z-index: 20;
-        transition: color 0.2s;
-    }
+  .faq-item[open] {
+    background: transparent;
+    border-bottom-color: var(--accent);
+  }
 
-    .faq-item:hover summary {
-        color: var(--accent);
-    }
+  .faq-item summary {
+    padding: 1.5rem 1rem; /* Added horizontal padding for cleaner look */
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--text-main);
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    z-index: 20;
+    transition: color 0.2s;
+  }
 
-    /* Custom marker */
-    .faq-item summary::-webkit-details-marker {
-        display: none;
-    }
-    .faq-item summary::after {
-        content: '+';
-        font-size: 1.5rem;
-        font-weight: 300;
-        line-height: 1;
-        transition: transform 0.2s, color 0.2s;
-        color: var(--text-muted);
-    }
-    .faq-item[open] summary::after {
-        transform: rotate(45deg);
-        color: var(--accent);
-    }
+  .faq-item:hover summary {
+    color: var(--accent);
+  }
 
-    .faq-item p {
-        margin: 0;
-        padding: 0 1rem 1.5rem 1rem; /* Added horizontal padding here */
-        color: var(--text-muted);
-        line-height: 1.7;
-        width: 100%; /* Use full width with padding */
-        max-width: 90%;
-        animation: fadeIn 0.3s ease-out;
-    }
+  /* Custom marker */
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq-item summary::after {
+    content: '+';
+    font-size: 1.5rem;
+    font-weight: 300;
+    line-height: 1;
+    transition:
+      transform 0.2s,
+      color 0.2s;
+    color: var(--text-muted);
+  }
+  .faq-item[open] summary::after {
+    transform: rotate(45deg);
+    color: var(--accent);
+  }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-5px); }
-        to { opacity: 1; transform: translateY(0); }
+  .faq-item p {
+    margin: 0;
+    padding: 0 1rem 1.5rem 1rem; /* Added horizontal padding here */
+    color: var(--text-muted);
+    line-height: 1.7;
+    width: 100%; /* Use full width with padding */
+    max-width: 90%;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
     }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>

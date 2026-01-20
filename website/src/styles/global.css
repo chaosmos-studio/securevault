@@ -3,90 +3,97 @@
  */
 
 :root {
-	/* Holographic Color Palette */
-	--holo-bg-dark: #050510;
-	--holo-bg-light: #0a0a20;
+  /* Holographic Color Palette */
+  --holo-bg-dark: #050510;
+  --holo-bg-light: #0a0a20;
 
-	--holo-accent: #00f3ff;
-	/* Cyan */
-	--holo-secondary: #ff00ff;
-	/* Magenta */
-	--holo-tertiary: #7000ff;
-	/* Purple */
+  --holo-accent: #00f3ff;
+  /* Cyan */
+  --holo-secondary: #ff00ff;
+  /* Magenta */
+  --holo-tertiary: #7000ff;
+  /* Purple */
 
-	--text-main: #e0e6ed;
-	--text-muted: #94a3b8;
+  --text-main: #e0e6ed;
+  --text-muted: #94a3b8;
 
-	/* Glassmorphism */
-	--glass-bg: rgba(255, 255, 255, 0.03);
-	--glass-border: rgba(255, 255, 255, 0.1);
-	--glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-	--backdrop-blur: blur(10px);
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  --backdrop-blur: blur(10px);
 
-	/* Glows */
-	--glow-cyan: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3);
-	--glow-magenta: 0 0 10px rgba(255, 0, 255, 0.5), 0 0 20px rgba(255, 0, 255, 0.3);
+  /* Glows */
+  --glow-cyan: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3);
+  --glow-magenta:
+    0 0 10px rgba(255, 0, 255, 0.5), 0 0 20px rgba(255, 0, 255, 0.3);
 
-	/* Layout */
-	--max-width: 1200px;
-	/* Wider for modern feel */
+  /* Layout */
+  --max-width: 1200px;
+  /* Wider for modern feel */
 }
 
 @font-face {
-	font-family: "Atkinson";
-	src: url("/fonts/atkinson-regular.woff") format("woff");
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: 'Atkinson';
+  src: url('/fonts/atkinson-regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: "Atkinson";
-	src: url("/fonts/atkinson-bold.woff") format("woff");
-	font-weight: 700;
-	font-style: normal;
-	font-display: swap;
+  font-family: 'Atkinson';
+  src: url('/fonts/atkinson-bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }
 
 body {
-	font-family: 'Inter', 'Atkinson', sans-serif;
-	/* Prefer Inter if available, mostly likely system or import later */
-	margin: 0;
-	padding: 0;
-	text-align: left;
-	background-color: var(--holo-bg-dark);
-	background-image:
-		radial-gradient(circle at 15% 50%, rgba(112, 0, 255, 0.15), transparent 25%),
-		radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.15), transparent 25%);
-	background-attachment: fixed;
-	color: var(--text-main);
-	font-size: 18px;
-	/* Slightly smaller base than 20 for cleaner tech look */
-	line-height: 1.6;
-	overflow-x: hidden;
+  font-family: 'Inter', 'Atkinson', sans-serif;
+  /* Prefer Inter if available, mostly likely system or import later */
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  background-color: var(--holo-bg-dark);
+  background-image:
+    radial-gradient(
+      circle at 15% 50%,
+      rgba(112, 0, 255, 0.15),
+      transparent 25%
+    ),
+    radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.15), transparent 25%);
+  background-attachment: fixed;
+  color: var(--text-main);
+  font-size: 18px;
+  /* Slightly smaller base than 20 for cleaner tech look */
+  line-height: 1.6;
+  overflow-x: hidden;
 }
 
 /* Scanline Effect Overlay */
 body::after {
-	content: "";
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100vw;
-	height: 100vh;
-	background: linear-gradient(to bottom,
-			rgba(255, 255, 255, 0.03) 50%,
-			rgba(0, 0, 0, 0.03) 50%);
-	background-size: 100% 4px;
-	pointer-events: none;
-	z-index: 9999;
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.03) 50%,
+    rgba(0, 0, 0, 0.03) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 9999;
 }
 
 main {
-	width: var(--max-width);
-	max-width: calc(100% - 2em);
-	margin: auto;
-	padding: 3em 1em;
+  width: var(--max-width);
+  max-width: calc(100% - 2em);
+  margin: auto;
+  padding: 3em 1em;
 }
 
 h1,
@@ -95,154 +102,154 @@ h3,
 h4,
 h5,
 h6 {
-	margin: 0 0 0.5rem 0;
-	color: var(--holo-accent);
-	line-height: 1.2;
-	text-shadow: var(--glow-cyan);
-	font-weight: 700;
-	letter-spacing: -0.02em;
+  margin: 0 0 0.5rem 0;
+  color: var(--holo-accent);
+  line-height: 1.2;
+  text-shadow: var(--glow-cyan);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 h1 {
-	font-size: 3.5em;
+  font-size: 3.5em;
 }
 
 h2 {
-	font-size: 2.5em;
+  font-size: 2.5em;
 }
 
 h3 {
-	font-size: 2em;
+  font-size: 2em;
 }
 
 h4 {
-	font-size: 1.5em;
+  font-size: 1.5em;
 }
 
 strong,
 b {
-	font-weight: 700;
-	color: #fff;
+  font-weight: 700;
+  color: #fff;
 }
 
 a {
-	color: var(--holo-accent);
-	text-decoration: none;
-	transition: all 0.3s ease;
-	position: relative;
+  color: var(--holo-accent);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
 }
 
 a:hover {
-	color: #fff;
-	text-shadow: var(--glow-cyan);
+  color: #fff;
+  text-shadow: var(--glow-cyan);
 }
 
 p {
-	margin-bottom: 1em;
+  margin-bottom: 1em;
 }
 
 .prose p {
-	margin-bottom: 2em;
+  margin-bottom: 2em;
 }
 
 /* Form Elements */
 textarea,
 input {
-	width: 100%;
-	font-size: 16px;
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid var(--glass-border);
-	color: var(--text-main);
-	padding: 0.8em;
-	border-radius: 8px;
-	outline: none;
-	transition: 0.3s;
+  width: 100%;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  padding: 0.8em;
+  border-radius: 8px;
+  outline: none;
+  transition: 0.3s;
 }
 
 textarea:focus,
 input:focus {
-	border-color: var(--holo-accent);
-	box-shadow: var(--glow-cyan);
+  border-color: var(--holo-accent);
+  box-shadow: var(--glow-cyan);
 }
 
 /* Images */
 img {
-	max-width: 100%;
-	height: auto;
-	border-radius: 12px;
-	border: 1px solid var(--glass-border);
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
 }
 
 /* Code Blocks */
 code {
-	padding: 2px 6px;
-	background-color: rgba(0, 243, 255, 0.1);
-	color: var(--holo-accent);
-	border-radius: 4px;
-	font-family: 'Fira Code', monospace;
-	font-size: 0.9em;
+  padding: 2px 6px;
+  background-color: rgba(0, 243, 255, 0.1);
+  color: var(--holo-accent);
+  border-radius: 4px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9em;
 }
 
 pre {
-	padding: 1.5em;
-	border-radius: 12px;
-	background: #0d1117;
-	border: 1px solid var(--glass-border);
+  padding: 1.5em;
+  border-radius: 12px;
+  background: #0d1117;
+  border: 1px solid var(--glass-border);
 }
 
-pre>code {
-	all: unset;
-	color: #e6edf3;
+pre > code {
+  all: unset;
+  color: #e6edf3;
 }
 
 blockquote {
-	border-left: 4px solid var(--holo-secondary);
-	padding: 1em 0 1em 20px;
-	margin: 1.5em 0;
-	background: linear-gradient(90deg, rgba(255, 0, 255, 0.1), transparent);
-	border-radius: 0 8px 8px 0;
+  border-left: 4px solid var(--holo-secondary);
+  padding: 1em 0 1em 20px;
+  margin: 1.5em 0;
+  background: linear-gradient(90deg, rgba(255, 0, 255, 0.1), transparent);
+  border-radius: 0 8px 8px 0;
 }
 
 hr {
-	border: none;
-	border-top: 1px solid var(--glass-border);
-	margin: 2em 0;
+  border: none;
+  border-top: 1px solid var(--glass-border);
+  margin: 2em 0;
 }
 
 /* Utilities */
 .glass-panel {
-	background: var(--glass-bg);
-	backdrop-filter: var(--backdrop-blur);
-	-webkit-backdrop-filter: var(--backdrop-blur);
-	border: 1px solid var(--glass-border);
-	border-radius: 16px;
-	box-shadow: var(--glass-shadow);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
 }
 
 .sr-only {
-	border: 0;
-	padding: 0;
-	margin: 0;
-	position: absolute !important;
-	height: 1px;
-	width: 1px;
-	overflow: hidden;
-	clip: rect(1px 1px 1px 1px);
-	clip: rect(1px, 1px, 1px, 1px);
-	clip-path: inset(50%);
-	white-space: nowrap;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  position: absolute !important;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px 1px 1px 1px);
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 @media (max-width: 720px) {
-	body {
-		font-size: 16px;
-	}
+  body {
+    font-size: 16px;
+  }
 
-	main {
-		padding: 1em;
-	}
+  main {
+    padding: 1em;
+  }
 
-	h1 {
-		font-size: 2.5em;
-	}
+  h1 {
+    font-size: 2.5em;
+  }
 }
