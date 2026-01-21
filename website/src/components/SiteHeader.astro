@@ -175,7 +175,7 @@ import { Shield, Sun, Moon, Menu, X } from '@lucide/astro';
     background: transparent;
     backdrop-filter: none;
     border-bottom: 1px solid transparent;
-    z-index: 100;
+    z-index: 1000; /* Increased z-index to ensure it stays on top */
     transition:
       background 0.3s ease,
       border-color 0.3s ease,
@@ -198,7 +198,7 @@ import { Shield, Sun, Moon, Menu, X } from '@lucide/astro';
     gap: 0.5rem;
     text-decoration: none;
     color: var(--text-main);
-    z-index: 102;
+    z-index: 1002; /* Ensure above mobile nav */
   }
   .logo-icon {
     color: var(--accent);
@@ -283,7 +283,7 @@ import { Shield, Sun, Moon, Menu, X } from '@lucide/astro';
     border: none;
     color: var(--text-main);
     cursor: pointer;
-    z-index: 102;
+    z-index: 1002; /* Ensure clickability */
   }
   .close-icon {
     display: none;
@@ -301,9 +301,9 @@ import { Shield, Sun, Moon, Menu, X } from '@lucide/astro';
     left: 0;
     right: 0;
     bottom: 0;
-    bottom: 0;
+    height: 100dvh; /* Use dynamic viewport height */
     background: var(--bg-main);
-    z-index: 101;
+    z-index: 1001; /* Between nav and toggles */
     padding: 6rem 2rem 2rem;
     transform: translateX(100%);
     transition: transform 0.3s ease-in-out;
