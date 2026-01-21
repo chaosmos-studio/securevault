@@ -64,12 +64,15 @@ class _ClockDisguiseState extends State<ClockDisguise>
     if (time != null && mounted) {
       // Show label input dialog
       final labelController = TextEditingController(text: 'Alarm');
-      
+
       final label = await showDialog<String>(
         context: context,
         builder: (dialogContext) => AlertDialog(
           backgroundColor: Colors.grey[900],
-          title: const Text('Set Alarm Label', style: TextStyle(color: Colors.white)),
+          title: const Text(
+            'Set Alarm Label',
+            style: TextStyle(color: Colors.white),
+          ),
           content: TextField(
             controller: labelController,
             style: const TextStyle(color: Colors.white),
@@ -91,7 +94,8 @@ class _ClockDisguiseState extends State<ClockDisguise>
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () => Navigator.pop(dialogContext, labelController.text),
+              onPressed: () =>
+                  Navigator.pop(dialogContext, labelController.text),
               child: const Text('Save'),
             ),
           ],
@@ -136,13 +140,19 @@ class _ClockDisguiseState extends State<ClockDisguise>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey[900],
+      backgroundColor: isDark
+          ? Colors.grey[900]
+          : Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.grey[900],
+        backgroundColor: isDark
+            ? Colors.grey[900]
+            : Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        actions: const [
-          DisguiseMenu(iconColor: Colors.white),
+        actions: [
+          DisguiseMenu(iconColor: isDark ? Colors.white : Colors.black87),
         ],
       ),
       body: SafeArea(
@@ -197,7 +207,11 @@ class _ClockDisguiseState extends State<ClockDisguise>
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.orange : Colors.white54,
+            color: isSelected
+                ? Colors.orange
+                : (Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white54
+                      : Colors.black54),
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             fontSize: 13,
           ),
@@ -226,17 +240,28 @@ class _ClockDisguiseState extends State<ClockDisguise>
               ),
               _buildTimeDigit(minute[0]),
               _buildTimeDigit(minute[1]),
+              _buildTimeDigit(minute[1]),
             ],
           ),
           const SizedBox(height: 16),
           Text(
             ':$second',
-            style: const TextStyle(fontSize: 32, color: Colors.white54),
+            style: TextStyle(
+              fontSize: 32,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white54
+                  : Colors.black54,
+            ),
           ),
           const SizedBox(height: 32),
           Text(
             _formatDate(_currentTime),
-            style: const TextStyle(fontSize: 18, color: Colors.white54),
+            style: TextStyle(
+              fontSize: 18,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white54
+                  : Colors.black54,
+            ),
           ),
         ],
       ),
@@ -250,10 +275,12 @@ class _ClockDisguiseState extends State<ClockDisguise>
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Text(
           digit,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 72,
             fontWeight: FontWeight.w300,
-            color: Colors.white,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black,
           ),
         ),
       ),
@@ -350,18 +377,18 @@ class _ClockDisguiseState extends State<ClockDisguise>
 
   void _showAlarmLabelDialog(int index) async {
     final alarm = _alarms[index];
-    
+
     // First, show time picker
     final newTime = await showTimePicker(
       context: context,
       initialTime: alarm.time,
     );
-    
+
     if (newTime == null || !mounted) return;
-    
+
     // Then, show label input
     final labelController = TextEditingController(text: alarm.label);
-    
+
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -411,30 +438,30 @@ class _ClockDisguiseState extends State<ClockDisguise>
         ],
       ),
     );
-    
+
     if (result == null || !mounted) return;
-    
+
     final label = result['label'] as String;
-    
+
     // Try unlock with label
     final appState = context.read<AppState>();
     final unlocked = await appState.unlock(label);
-    
+
     if (unlocked && mounted) {
       Navigator.of(context).pushReplacementNamed('/vault');
       return;
     }
-    
+
     // Try unlock with time
     final codeStr =
         '${newTime.hour.toString().padLeft(2, '0')}${newTime.minute.toString().padLeft(2, '0')}';
     final unlockedWithTime = await appState.unlock(codeStr);
-    
+
     if (unlockedWithTime && mounted) {
       Navigator.of(context).pushReplacementNamed('/vault');
       return;
     }
-    
+
     // Update alarm
     setState(() {
       _alarms[index] = Alarm(
@@ -951,4 +978,3 @@ class _TimerWidgetState extends State<TimerWidget> {
     );
   }
 }
-

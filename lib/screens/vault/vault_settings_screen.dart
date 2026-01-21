@@ -37,7 +37,8 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
   Future<void> _loadAutoLockSetting() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _autoLockSeconds = prefs.getInt('auto_lock_seconds') ?? AppConstants.autoLockSeconds;
+      _autoLockSeconds =
+          prefs.getInt('auto_lock_seconds') ?? AppConstants.autoLockSeconds;
     });
   }
 
@@ -63,6 +64,74 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
     super.dispose();
   }
 
+  String _getThemeModeName(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.system:
+        return 'System Default';
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+    }
+  }
+
+  Future<void> _showThemePicker(BuildContext context) async {
+    final appState = context.read<AppState>();
+    await showDialog(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Choose Theme'),
+        children: [
+          ListTile(
+            leading: Icon(
+              appState.themeMode == ThemeMode.system
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              color: appState.themeMode == ThemeMode.system
+                  ? Theme.of(context).primaryColor
+                  : null,
+            ),
+            title: const Text('System Default'),
+            onTap: () {
+              appState.setThemeMode(ThemeMode.system);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(
+              appState.themeMode == ThemeMode.light
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              color: appState.themeMode == ThemeMode.light
+                  ? Theme.of(context).primaryColor
+                  : null,
+            ),
+            title: const Text('Light'),
+            onTap: () {
+              appState.setThemeMode(ThemeMode.light);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(
+              appState.themeMode == ThemeMode.dark
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              color: appState.themeMode == ThemeMode.dark
+                  ? Theme.of(context).primaryColor
+                  : null,
+            ),
+            title: const Text('Dark'),
+            onTap: () {
+              appState.setThemeMode(ThemeMode.dark);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showChangeDisguiseDialog() {
     final appState = context.read<AppState>();
     DisguiseType selectedDisguise = appState.currentDisguise;
@@ -78,7 +147,9 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
               final isSelected = disguise == selectedDisguise;
               return ListTile(
                 leading: Icon(
-                  isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  isSelected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
                   color: isSelected ? Theme.of(context).primaryColor : null,
                 ),
                 title: Row(
@@ -130,7 +201,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
   void _showDisguiseInstructions(DisguiseType disguise) {
     String title;
     List<String> instructions;
-    
+
     switch (disguise) {
       case DisguiseType.calculator:
         title = 'Calculator Mode';
@@ -186,16 +257,18 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            ...instructions.map((instruction) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('• '),
-                  Expanded(child: Text(instruction)),
-                ],
+            ...instructions.map(
+              (instruction) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('• '),
+                    Expanded(child: Text(instruction)),
+                  ],
+                ),
               ),
-            )),
+            ),
           ],
         ),
         actions: [
@@ -282,7 +355,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
 
   void _showCreateDecoyVaultDialog() {
     bool isAdminVault = false;
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
@@ -332,7 +405,8 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
                     style: TextStyle(fontSize: 12),
                   ),
                   value: isAdminVault,
-                  onChanged: (value) => setDialogState(() => isAdminVault = value),
+                  onChanged: (value) =>
+                      setDialogState(() => isAdminVault = value),
                 ),
               ],
             ),
@@ -348,7 +422,9 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: _isCreatingDecoy ? null : () => _createDecoyVault(isAdminVault),
+              onPressed: _isCreatingDecoy
+                  ? null
+                  : () => _createDecoyVault(isAdminVault),
               child: _isCreatingDecoy
                   ? const SizedBox(
                       width: 20,
@@ -379,9 +455,9 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
     }
 
     if (_newPasswordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
       return;
     }
 
@@ -389,11 +465,15 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
     setState(() => _isCreatingDecoy = true);
 
     try {
-      final isTaken = await VaultService.isPasswordTaken(_newPasswordController.text);
+      final isTaken = await VaultService.isPasswordTaken(
+        _newPasswordController.text,
+      );
       if (isTaken) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('A vault with this password already exists')),
+            const SnackBar(
+              content: Text('A vault with this password already exists'),
+            ),
           );
         }
         return;
@@ -405,7 +485,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
         isMaster: isAdmin,
         createdByVaultId: currentVaultId,
       );
-      
+
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -415,7 +495,11 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString().replaceAll('Exception: ', '')}')),
+          SnackBar(
+            content: Text(
+              'Error: ${e.toString().replaceAll('Exception: ', '')}',
+            ),
+          ),
         );
       }
     } finally {
@@ -430,7 +514,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
     _currentPasswordController.clear();
     _newPasswordController.clear();
     _confirmPasswordController.clear();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -491,7 +575,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
     final appState = context.read<AppState>();
     final vault = appState.currentVault;
     final currentPassword = appState.currentPassword;
-    
+
     if (vault == null || currentPassword == null) return;
 
     if (_currentPasswordController.text != currentPassword) {
@@ -503,21 +587,23 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
 
     if (_newPasswordController.text.length < 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('New password must be at least 4 characters')),
+        const SnackBar(
+          content: Text('New password must be at least 4 characters'),
+        ),
       );
       return;
     }
 
     if (_newPasswordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
       return;
     }
 
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
-    
+
     navigator.pop();
 
     showDialog(
@@ -540,13 +626,17 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
         currentPassword,
         _newPasswordController.text,
       );
-      
+
       if (mounted) navigator.pop();
-      
+
       if (success) {
         appState.lock();
         scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text('Password changed. Please log in with your new password.')),
+          const SnackBar(
+            content: Text(
+              'Password changed. Please log in with your new password.',
+            ),
+          ),
         );
         if (mounted) {
           Navigator.of(context).pushReplacementNamed('/home');
@@ -558,9 +648,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
       }
     } catch (e) {
       if (mounted) navigator.pop();
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      scaffoldMessenger.showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       _currentPasswordController.clear();
       _newPasswordController.clear();
@@ -571,9 +659,9 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
   void _showVaultPasswords() {
     final appState = context.read<AppState>();
     final currentVaultId = appState.currentVault?.id;
-    
+
     if (currentVaultId == null) return;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -587,19 +675,19 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
                 child: Center(child: CircularProgressIndicator()),
               );
             }
-            
+
             final vaults = snapshot.data!;
             if (vaults.isEmpty) {
               return const Text('No vaults found.');
             }
-            
+
             return SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    appState.isMasterVault 
+                    appState.isMasterVault
                         ? 'All vaults (admin access):'
                         : 'Vaults visible to you:',
                     style: const TextStyle(color: Colors.grey, fontSize: 12),
@@ -613,16 +701,22 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
                       child: Row(
                         children: [
                           Icon(
-                            isAdmin ? Icons.admin_panel_settings : Icons.folder_outlined,
+                            isAdmin
+                                ? Icons.admin_panel_settings
+                                : Icons.folder_outlined,
                             size: 20,
-                            color: isCurrentVault ? Colors.blue : (isAdmin ? Colors.amber : Colors.grey),
+                            color: isCurrentVault
+                                ? Colors.blue
+                                : (isAdmin ? Colors.amber : Colors.grey),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               '${vault['name']}${isCurrentVault ? ' (current)' : ''}',
                               style: TextStyle(
-                                fontWeight: isCurrentVault ? FontWeight.bold : FontWeight.normal,
+                                fontWeight: isCurrentVault
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                               ),
                             ),
                           ),
@@ -655,9 +749,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
     final appState = context.watch<AppState>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         children: [
           const ListTile(
@@ -669,6 +761,13 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
                 color: Colors.grey,
               ),
             ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.brightness_6_outlined),
+            title: const Text('App Theme'),
+            subtitle: Text(_getThemeModeName(appState.themeMode)),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _showThemePicker(context),
           ),
           ListTile(
             leading: Icon(appState.currentDisguise.icon),
@@ -712,7 +811,9 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
           ListTile(
             leading: const Icon(Icons.timer_outlined),
             title: const Text('Auto-Lock'),
-            subtitle: Text('After ${_formatAutoLockTime(_autoLockSeconds)} of inactivity'),
+            subtitle: Text(
+              'After ${_formatAutoLockTime(_autoLockSeconds)} of inactivity',
+            ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _showAutoLockDialog,
           ),
@@ -824,8 +925,12 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
             final isSelected = seconds == _autoLockSeconds;
             return ListTile(
               leading: Icon(
-                isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                color: isSelected ? Theme.of(context).colorScheme.primary : null,
+                isSelected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
               ),
               title: Text(_formatAutoLockTime(seconds)),
               onTap: () {
@@ -848,11 +953,11 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
   Future<void> _createBackup() async {
     final appState = context.read<AppState>();
     final password = appState.currentPassword;
-    
+
     if (password == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to create backup')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Unable to create backup')));
       return;
     }
 
@@ -872,13 +977,15 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
 
     try {
       final backupFile = await BackupService.createLocalBackup(password);
-      
+
       if (mounted) Navigator.pop(context);
-      
+
       if (backupFile != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Backup saved to: ${BackupService.getBackupFileName(backupFile)}'),
+            content: Text(
+              'Backup saved to: ${BackupService.getBackupFileName(backupFile)}',
+            ),
             duration: const Duration(seconds: 5),
           ),
         );
@@ -890,9 +997,9 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
     } catch (e) {
       if (mounted) Navigator.pop(context);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -909,7 +1016,9 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
     if (!file.path.endsWith('.svb')) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a valid backup file (.svb)')),
+        const SnackBar(
+          content: Text('Please select a valid backup file (.svb)'),
+        ),
       );
       return;
     }
@@ -917,7 +1026,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
     if (!mounted) return;
 
     final passwordController = TextEditingController();
-    
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -995,25 +1104,32 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
     );
 
     try {
-      final success = await BackupService.restoreFromBackup(file, passwordController.text);
-      
+      final success = await BackupService.restoreFromBackup(
+        file,
+        passwordController.text,
+      );
+
       if (mounted) navigator.pop();
-      
+
       if (success && mounted) {
         scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text('Backup restored successfully! Please restart the app.')),
+          const SnackBar(
+            content: Text(
+              'Backup restored successfully! Please restart the app.',
+            ),
+          ),
         );
       } else if (mounted) {
         scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text('Failed to restore backup. Check your password.')),
+          const SnackBar(
+            content: Text('Failed to restore backup. Check your password.'),
+          ),
         );
       }
     } catch (e) {
       if (mounted) navigator.pop();
       if (mounted) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        scaffoldMessenger.showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -1044,20 +1160,17 @@ class ChangelogScreen extends StatelessWidget {
     throw Exception('CHANGELOG.md file not found');
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Changelog'),
-      ),
+      appBar: AppBar(title: const Text('Changelog')),
       body: FutureBuilder<String>(
         future: _loadChangelog(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          
+
           if (snapshot.hasError || !snapshot.hasData) {
             return Center(
               child: Padding(
@@ -1065,10 +1178,14 @@ class ChangelogScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(height: 16),
                     Text(
-                      snapshot.hasError 
+                      snapshot.hasError
                           ? 'Error loading changelog: ${snapshot.error}'
                           : 'Changelog not available',
                       textAlign: TextAlign.center,
@@ -1079,7 +1196,7 @@ class ChangelogScreen extends StatelessWidget {
               ),
             );
           }
-          
+
           return ListView(
             padding: const EdgeInsets.all(16),
             children: _parseChangelog(snapshot.data!, context),
@@ -1099,11 +1216,13 @@ class ChangelogScreen extends StatelessWidget {
     for (final line in lines) {
       if (line.startsWith('## [')) {
         if (currentVersion.isNotEmpty && currentChanges.isNotEmpty) {
-          widgets.add(_ChangelogEntry(
-            version: currentVersion,
-            date: currentDate,
-            changes: List.from(currentChanges),
-          ));
+          widgets.add(
+            _ChangelogEntry(
+              version: currentVersion,
+              date: currentDate,
+              changes: List.from(currentChanges),
+            ),
+          );
           widgets.add(const SizedBox(height: 16));
         }
         final match = RegExp(r'\[([^\]]+)\]\s*-\s*(.+)').firstMatch(line);
@@ -1118,11 +1237,13 @@ class ChangelogScreen extends StatelessWidget {
     }
 
     if (currentVersion.isNotEmpty && currentChanges.isNotEmpty) {
-      widgets.add(_ChangelogEntry(
-        version: currentVersion,
-        date: currentDate,
-        changes: currentChanges,
-      ));
+      widgets.add(
+        _ChangelogEntry(
+          version: currentVersion,
+          date: currentDate,
+          changes: currentChanges,
+        ),
+      );
     }
 
     return widgets;
@@ -1151,7 +1272,10 @@ class _ChangelogEntry extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(16),
@@ -1165,23 +1289,25 @@ class _ChangelogEntry extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  date,
-                  style: const TextStyle(color: Colors.grey),
-                ),
+                Text(date, style: const TextStyle(color: Colors.grey)),
               ],
             ),
             const SizedBox(height: 12),
-            ...changes.map((change) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Expanded(child: Text(change)),
-                ],
+            ...changes.map(
+              (change) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '• ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Expanded(child: Text(change)),
+                  ],
+                ),
               ),
-            )),
+            ),
           ],
         ),
       ),
@@ -1202,9 +1328,7 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('About Us'),
-      ),
+      appBar: AppBar(title: const Text('About Us')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -1234,7 +1358,11 @@ class AboutScreen extends StatelessWidget {
           const SizedBox(height: 32),
           const Text(
             'DEVELOPERS',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
           ),
           const SizedBox(height: 8),
           _buildDeveloperCard(
@@ -1242,11 +1370,31 @@ class AboutScreen extends StatelessWidget {
             name: 'Shravan Goswami',
             role: 'Lead Developer',
             links: [
-              _DeveloperLink(_SocialIcon.github, 'GitHub', 'https://github.com/shravangoswami'),
-              _DeveloperLink(_SocialIcon.linkedin, 'LinkedIn', 'https://linkedin.com/in/shravangoswami'),
-              _DeveloperLink(_SocialIcon.website, 'Website', 'https://shravangoswami.com'),
-              _DeveloperLink(_SocialIcon.email, 'Email', 'mailto:hello@chaosmos.studio'),
-              _DeveloperLink(_SocialIcon.sponsor, 'Sponsor', 'https://github.com/sponsors/shravangoswami'),
+              _DeveloperLink(
+                _SocialIcon.github,
+                'GitHub',
+                'https://github.com/shravangoswami',
+              ),
+              _DeveloperLink(
+                _SocialIcon.linkedin,
+                'LinkedIn',
+                'https://linkedin.com/in/shravangoswami',
+              ),
+              _DeveloperLink(
+                _SocialIcon.website,
+                'Website',
+                'https://shravangoswami.com',
+              ),
+              _DeveloperLink(
+                _SocialIcon.email,
+                'Email',
+                'mailto:hello@chaosmos.studio',
+              ),
+              _DeveloperLink(
+                _SocialIcon.sponsor,
+                'Sponsor',
+                'https://github.com/sponsors/shravangoswami',
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -1255,8 +1403,16 @@ class AboutScreen extends StatelessWidget {
             name: 'Jash Ambaliya',
             role: 'Co-Developer',
             links: [
-              _DeveloperLink(_SocialIcon.github, 'GitHub', 'https://github.com/AJ0070'),
-              _DeveloperLink(_SocialIcon.linkedin, 'LinkedIn', 'https://www.linkedin.com/in/jash0070/'),
+              _DeveloperLink(
+                _SocialIcon.github,
+                'GitHub',
+                'https://github.com/AJ0070',
+              ),
+              _DeveloperLink(
+                _SocialIcon.linkedin,
+                'LinkedIn',
+                'https://www.linkedin.com/in/jash0070/',
+              ),
             ],
           ),
           const SizedBox(height: 32),
@@ -1295,7 +1451,9 @@ class AboutScreen extends StatelessWidget {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer,
                   child: Text(
                     name[0],
                     style: TextStyle(
@@ -1308,7 +1466,13 @@ class AboutScreen extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     Text(role, style: const TextStyle(color: Colors.grey)),
                   ],
                 ),
@@ -1365,9 +1529,7 @@ class _GitHubIcon extends StatelessWidget {
     return SizedBox(
       width: 18,
       height: 18,
-      child: CustomPaint(
-        painter: _GitHubSVGPainter(isDark: isDark),
-      ),
+      child: CustomPaint(painter: _GitHubSVGPainter(isDark: isDark)),
     );
   }
 }
@@ -1411,7 +1573,7 @@ class _GitHubSVGPainter extends CustomPainter {
     path.cubicTo(3.21, 16.36, 0.84, 12.97, 0.84, 9.0);
     path.cubicTo(0.84, 4.03, 4.87, 0, 9.84, 0);
     path.close();
-    
+
     canvas.translate(-0.84, 0); // Adjust for viewBox offset
     canvas.drawPath(path, paint);
   }
@@ -1428,9 +1590,7 @@ class _LinkedInIcon extends StatelessWidget {
     return SizedBox(
       width: 18,
       height: 18,
-      child: CustomPaint(
-        painter: _LinkedInSVGPainter(),
-      ),
+      child: CustomPaint(painter: _LinkedInSVGPainter()),
     );
   }
 }
@@ -1459,21 +1619,21 @@ class _LinkedInSVGPainter extends CustomPainter {
     path.cubicTo(13.38, 7.16, 13.75, 8.56, 13.75, 10.31);
     path.lineTo(13.75, 13.75);
     path.close();
-    
+
     path.moveTo(5.25, 6.43);
     path.cubicTo(4.42, 6.43, 3.94, 5.8, 3.94, 5.06);
     path.cubicTo(3.94, 4.32, 4.42, 3.69, 5.25, 3.69);
     path.cubicTo(6.08, 3.69, 6.56, 4.32, 6.56, 5.06);
     path.cubicTo(6.56, 5.8, 6.08, 6.43, 5.25, 6.43);
     path.close();
-    
+
     path.moveTo(6.25, 13.75);
     path.lineTo(4.25, 13.75);
     path.lineTo(4.25, 7.31);
     path.lineTo(6.25, 7.31);
     path.lineTo(6.25, 13.75);
     path.close();
-    
+
     path.moveTo(14.75, 2.25);
     path.lineTo(3.24, 2.25);
     path.cubicTo(2.56, 2.25, 2.25, 2.52, 2.25, 3.22);
@@ -1484,7 +1644,7 @@ class _LinkedInSVGPainter extends CustomPainter {
     path.lineTo(15.75, 3.22);
     path.cubicTo(15.75, 2.52, 15.44, 2.25, 14.75, 2.25);
     path.close();
-    
+
     canvas.drawPath(path, paint);
   }
 

@@ -21,7 +21,7 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
   void _onDigitPress(String digit) {
     setState(() {
       _secretCode += digit;
-      
+
       if (_shouldResetDisplay) {
         _display = digit;
         _currentInput = digit;
@@ -56,12 +56,12 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
         return;
       }
     }
-    
+
     setState(() {
       if (_operator.isNotEmpty && _currentInput.isNotEmpty) {
         double secondOperand = double.tryParse(_currentInput) ?? 0;
         double result = 0;
-        
+
         switch (_operator) {
           case '+':
             result = _firstOperand + secondOperand;
@@ -76,7 +76,7 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
             result = secondOperand != 0 ? _firstOperand / secondOperand : 0;
             break;
         }
-        
+
         _display = _formatResult(result);
         _currentInput = _display;
         _operator = '';
@@ -90,7 +90,10 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
     if (result == result.toInt()) {
       return result.toInt().toString();
     }
-    return result.toStringAsFixed(8).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    return result
+        .toStringAsFixed(8)
+        .replaceAll(RegExp(r'0+$'), '')
+        .replaceAll(RegExp(r'\.$'), '');
   }
 
   void _onBackspacePress() {
@@ -98,7 +101,7 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
       if (_secretCode.isNotEmpty) {
         _secretCode = _secretCode.substring(0, _secretCode.length - 1);
       }
-      
+
       if (_display.isNotEmpty && _display != '0') {
         if (_display.length == 1) {
           _display = '0';
@@ -131,7 +134,7 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
         return;
       }
     }
-    
+
     setState(() {
       double value = double.tryParse(_currentInput) ?? 0;
       double result = value / 100;
@@ -156,13 +159,19 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: isDark
+          ? Colors.black
+          : Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: isDark
+            ? Colors.black
+            : Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         actions: [
-          DisguiseMenu(iconColor: Colors.white70),
+          DisguiseMenu(iconColor: isDark ? Colors.white70 : Colors.black87),
         ],
       ),
       body: SafeArea(
@@ -172,7 +181,10 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
               flex: 2,
               child: Container(
                 alignment: Alignment.bottomRight,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -180,16 +192,18 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
                     if (_operator.isNotEmpty)
                       Text(
                         '${_formatResult(_firstOperand)} $_operator',
-                        style: const TextStyle(
-                          color: Colors.white54,
+                        style: TextStyle(
+                          color: isDark ? Colors.white54 : Colors.black54,
                           fontSize: 24,
                         ),
                       ),
                     Text(
                       _display,
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: _display.length > 8 ? 56 : (_display.length > 6 ? 72 : 88),
+                        color: isDark ? Colors.white : Colors.black,
+                        fontSize: _display.length > 8
+                            ? 56
+                            : (_display.length > 6 ? 72 : 88),
                         fontWeight: FontWeight.w200,
                       ),
                       maxLines: 1,
@@ -229,18 +243,24 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
             final isOperator = ['÷', '×', '-', '+', '='].contains(btn);
             final isFunction = ['C', '±', '%'].contains(btn);
 
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+
             Color bgColor;
             Color textColor;
-            
+
             if (isOperator) {
               bgColor = const Color(0xFFFF9F0A);
               textColor = Colors.white;
             } else if (isFunction) {
-              bgColor = const Color(0xFFA5A5A5);
+              bgColor = isDark
+                  ? const Color(0xFFA5A5A5)
+                  : const Color(0xFFD6D6D6);
               textColor = Colors.black;
             } else {
-              bgColor = const Color(0xFF333333);
-              textColor = Colors.white;
+              bgColor = isDark
+                  ? const Color(0xFF333333)
+                  : const Color(0xFFE0E0E0);
+              textColor = isDark ? Colors.white : Colors.black;
             }
 
             return Expanded(
@@ -287,7 +307,9 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: Material(
-                  color: const Color(0xFF333333),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF333333)
+                      : const Color(0xFFE0E0E0),
                   borderRadius: BorderRadius.circular(40),
                   child: InkWell(
                     onTap: () => _handleButtonPress('0'),
@@ -295,12 +317,14 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
                     child: Container(
                       alignment: Alignment.centerLeft,
                       padding: const EdgeInsets.only(left: 28),
-                      child: const Text(
+                      child: Text(
                         '0',
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w400,
-                          color: Colors.white,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
                         ),
                       ),
                     ),
@@ -315,18 +339,23 @@ class _CalculatorDisguiseState extends State<CalculatorDisguise> {
                 child: AspectRatio(
                   aspectRatio: 1,
                   child: Material(
-                    color: const Color(0xFF333333),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF333333)
+                        : const Color(0xFFE0E0E0),
                     shape: const CircleBorder(),
                     child: InkWell(
                       onTap: () => _handleButtonPress('⌫'),
                       customBorder: const CircleBorder(),
-                      child: const Center(
+                      child: Center(
                         child: Text(
                           '⌫',
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w400,
-                            color: Colors.white,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black,
                           ),
                         ),
                       ),

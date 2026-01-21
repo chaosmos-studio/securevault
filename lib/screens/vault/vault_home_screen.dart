@@ -26,7 +26,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
   int _selectedIndex = 0;
   bool _isLoading = false;
   final ImagePicker _picker = ImagePicker();
-  
+
   bool _isSelectionMode = false;
   final Set<String> _selectedItems = {};
 
@@ -219,10 +219,10 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
       for (final filePath in filePaths) {
         final file = File(filePath);
         if (!await file.exists()) continue;
-        
+
         final fileStats = await file.stat();
         final fileSize = fileStats.size;
-        
+
         for (final album in albums) {
           final assets = await album.getAssetListRange(start: 0, end: 1000);
           for (final asset in assets) {
@@ -247,7 +247,11 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
         final result = await PhotoManager.editor.deleteWithIds(idsToDelete);
         if (result.isNotEmpty) {
           scaffoldMessenger.showSnackBar(
-            SnackBar(content: Text('${result.length} original $type${result.length > 1 ? 's' : ''} deleted from gallery')),
+            SnackBar(
+              content: Text(
+                '${result.length} original $type${result.length > 1 ? 's' : ''} deleted from gallery',
+              ),
+            ),
           );
         } else {
           scaffoldMessenger.showSnackBar(
@@ -256,7 +260,11 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
         }
       } else {
         scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('Original $type${filePaths.length > 1 ? 's' : ''} not found in gallery')),
+          SnackBar(
+            content: Text(
+              'Original $type${filePaths.length > 1 ? 's' : ''} not found in gallery',
+            ),
+          ),
         );
       }
     } catch (e) {
@@ -325,7 +333,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
     final appState = context.read<AppState>();
     final vault = appState.currentVault;
     final password = appState.currentPassword;
-    
+
     if (vault == null || password == null) return;
 
     final scaffoldMessenger = ScaffoldMessenger.of(context);
@@ -346,12 +354,12 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
     if (files.isNotEmpty) {
       await Share.shareXFiles(files, text: 'Shared from SecureVault');
     }
-    
+
     setState(() {
       _isSelectionMode = false;
       _selectedItems.clear();
     });
-    
+
     scaffoldMessenger.showSnackBar(
       SnackBar(content: Text('Shared ${files.length} items')),
     );
@@ -361,9 +369,9 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
     final appState = context.read<AppState>();
     final vault = appState.currentVault;
     final password = appState.currentPassword;
-    
+
     if (vault == null || password == null) return;
-    
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -388,9 +396,9 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
     for (final itemId in _selectedItems) {
       await VaultService.deleteItem(vault, password, itemId);
     }
-    
+
     await appState.refreshVault();
-    
+
     setState(() {
       _isSelectionMode = false;
       _selectedItems.clear();
@@ -419,12 +427,16 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
               actions: [
                 IconButton(
                   icon: const Icon(Icons.share),
-                  onPressed: _selectedItems.isNotEmpty ? _shareSelectedItems : null,
+                  onPressed: _selectedItems.isNotEmpty
+                      ? _shareSelectedItems
+                      : null,
                   tooltip: 'Share',
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
-                  onPressed: _selectedItems.isNotEmpty ? _deleteSelectedItems : null,
+                  onPressed: _selectedItems.isNotEmpty
+                      ? _deleteSelectedItems
+                      : null,
                   tooltip: 'Delete',
                 ),
               ],
@@ -437,7 +449,9 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const VaultSettingsScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const VaultSettingsScreen(),
+                      ),
                     );
                   },
                   tooltip: 'Settings',
@@ -484,7 +498,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
             ),
           ],
           border: Border.all(
-            color: isDark 
+            color: isDark
                 ? Colors.grey[700]!.withValues(alpha: 0.3)
                 : Colors.grey[200]!.withValues(alpha: 0.8),
             width: 1,
@@ -495,9 +509,27 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(0, Icons.photo_outlined, Icons.photo, 'Photos', colorScheme),
-              _buildNavItem(1, Icons.videocam_outlined, Icons.videocam, 'Videos', colorScheme),
-              _buildNavItem(2, Icons.note_outlined, Icons.note, 'Notes', colorScheme),
+              _buildNavItem(
+                0,
+                Icons.photo_outlined,
+                Icons.photo,
+                'Photos',
+                colorScheme,
+              ),
+              _buildNavItem(
+                1,
+                Icons.videocam_outlined,
+                Icons.videocam,
+                'Videos',
+                colorScheme,
+              ),
+              _buildNavItem(
+                2,
+                Icons.note_outlined,
+                Icons.note,
+                'Notes',
+                colorScheme,
+              ),
             ],
           ),
         ),
@@ -511,9 +543,15 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, IconData selectedIcon, String label, ColorScheme colorScheme) {
+  Widget _buildNavItem(
+    int index,
+    IconData icon,
+    IconData selectedIcon,
+    String label,
+    ColorScheme colorScheme,
+  ) {
     final isSelected = _selectedIndex == index;
-    
+
     return GestureDetector(
       onTap: () => setState(() => _selectedIndex = index),
       child: AnimatedContainer(
@@ -524,9 +562,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
           vertical: 10,
         ),
         decoration: BoxDecoration(
-          color: isSelected
-              ? colorScheme.primaryContainer
-              : Colors.transparent,
+          color: isSelected ? colorScheme.primaryContainer : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -534,8 +570,8 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
           children: [
             Icon(
               isSelected ? selectedIcon : icon,
-              color: isSelected 
-                  ? colorScheme.onPrimaryContainer 
+              color: isSelected
+                  ? colorScheme.onPrimaryContainer
                   : colorScheme.onSurface.withValues(alpha: 0.6),
               size: 24,
             ),
@@ -606,7 +642,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
 
   Widget _buildMediaTile(VaultItem item, VaultItemType type) {
     final isSelected = _selectedItems.contains(item.id);
-    
+
     return GestureDetector(
       onTap: () {
         if (_isSelectionMode) {
@@ -628,7 +664,9 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey[800]
+                  : Colors.grey[300],
               borderRadius: BorderRadius.circular(8),
             ),
             clipBehavior: Clip.antiAlias,
@@ -657,7 +695,11 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: const Icon(Icons.play_arrow, color: Colors.white, size: 16),
+                child: const Icon(
+                  Icons.play_arrow,
+                  color: Colors.white,
+                  size: 16,
+                ),
               ),
             ),
           if (_isSelectionMode)
@@ -669,12 +711,12 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
                 height: 24,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isSelected 
-                      ? Theme.of(context).colorScheme.primary 
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
                       : Colors.white.withValues(alpha: 0.8),
                   border: Border.all(
-                    color: isSelected 
-                        ? Theme.of(context).colorScheme.primary 
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primary
                         : Colors.grey,
                     width: 2,
                   ),
@@ -687,7 +729,9 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
           if (isSelected)
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: Theme.of(context).colorScheme.primary,

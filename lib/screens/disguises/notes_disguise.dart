@@ -89,15 +89,15 @@ class _NotesDisguiseState extends State<NotesDisguise> {
     var notes = _notes.where((note) {
       if (_searchQuery.isEmpty) return true;
       return note.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-             note.content.toLowerCase().contains(_searchQuery.toLowerCase());
+          note.content.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
-    
+
     notes.sort((a, b) {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
       return b.updatedAt.compareTo(a.updatedAt);
     });
-    
+
     return notes;
   }
 
@@ -218,7 +218,9 @@ class _NotesDisguiseState extends State<NotesDisguise> {
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
-    if (date.year == now.year && date.month == now.month && date.day == now.day) {
+    if (date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day) {
       return '${date.hour}:${date.minute.toString().padLeft(2, '0')}';
     }
     return '${date.month}/${date.day}';
@@ -232,9 +234,7 @@ class _NotesDisguiseState extends State<NotesDisguise> {
           onTap: _handleTitleTap,
           child: const Text('Notes'),
         ),
-        actions: const [
-          DisguiseMenu(),
-        ],
+        actions: const [DisguiseMenu()],
       ),
       body: Column(
         children: [
@@ -252,7 +252,8 @@ class _NotesDisguiseState extends State<NotesDisguise> {
                     ),
                     child: TextField(
                       controller: _searchController,
-                      onChanged: (value) => setState(() => _searchQuery = value),
+                      onChanged: (value) =>
+                          setState(() => _searchQuery = value),
                       decoration: InputDecoration(
                         hintText: 'Search notes...',
                         prefixIcon: const Icon(Icons.search),
@@ -266,7 +267,10 @@ class _NotesDisguiseState extends State<NotesDisguise> {
                               )
                             : null,
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ),
@@ -285,11 +289,18 @@ class _NotesDisguiseState extends State<NotesDisguise> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.note_alt_outlined, size: 64, color: Colors.grey[400]),
+                        Icon(
+                          Icons.note_alt_outlined,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'No notes yet',
-                          style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey[600],
+                          ),
                         ),
                         const SizedBox(height: 8),
                         ElevatedButton.icon(
@@ -301,15 +312,15 @@ class _NotesDisguiseState extends State<NotesDisguise> {
                     ),
                   )
                 : _filteredNotes.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No notes found',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      )
-                    : _isGridView
-                        ? _buildGridView()
-                        : _buildListView(),
+                ? Center(
+                    child: Text(
+                      'No notes found',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  )
+                : _isGridView
+                ? _buildGridView()
+                : _buildListView(),
           ),
         ],
       ),
@@ -330,7 +341,14 @@ class _NotesDisguiseState extends State<NotesDisguise> {
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text('PINNED', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+              child: Text(
+                'PINNED',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
             ),
           ),
           SliverPadding(
@@ -353,7 +371,14 @@ class _NotesDisguiseState extends State<NotesDisguise> {
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text('OTHERS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+              child: Text(
+                'OTHERS',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
             ),
           ),
         SliverPadding(
@@ -395,8 +420,8 @@ class _NotesDisguiseState extends State<NotesDisguise> {
         decoration: BoxDecoration(
           color: note.colorIndex == 0
               ? Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey[800]
-                  : Colors.white
+                    ? Colors.grey[800]
+                    : Colors.white
               : note.color,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
@@ -420,7 +445,11 @@ class _NotesDisguiseState extends State<NotesDisguise> {
                   ),
                 ),
                 if (note.isPinned)
-                  Icon(Icons.push_pin, size: 16, color: note.colorIndex == 0 ? Colors.grey : Colors.black54),
+                  Icon(
+                    Icons.push_pin,
+                    size: 16,
+                    color: note.colorIndex == 0 ? Colors.grey : Colors.black54,
+                  ),
               ],
             ),
             const SizedBox(height: 8),
@@ -429,13 +458,21 @@ class _NotesDisguiseState extends State<NotesDisguise> {
                 note.content.isEmpty ? 'No content' : note.content,
                 maxLines: 6,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 14, color: note.colorIndex == 0 ? Colors.grey[600] : Colors.black54),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: note.colorIndex == 0
+                      ? Colors.grey[600]
+                      : Colors.black54,
+                ),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               _formatDate(note.updatedAt),
-              style: TextStyle(fontSize: 12, color: note.colorIndex == 0 ? Colors.grey[500] : Colors.black45),
+              style: TextStyle(
+                fontSize: 12,
+                color: note.colorIndex == 0 ? Colors.grey[500] : Colors.black45,
+              ),
             ),
           ],
         ),
@@ -465,11 +502,16 @@ class _NotesDisguiseState extends State<NotesDisguise> {
           note.content.isEmpty ? 'No content' : note.content,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: note.colorIndex == 0 ? Colors.grey[600] : Colors.black54),
+          style: TextStyle(
+            color: note.colorIndex == 0 ? Colors.grey[600] : Colors.black54,
+          ),
         ),
         trailing: Text(
           _formatDate(note.updatedAt),
-          style: TextStyle(color: note.colorIndex == 0 ? Colors.grey[500] : Colors.black45, fontSize: 12),
+          style: TextStyle(
+            color: note.colorIndex == 0 ? Colors.grey[500] : Colors.black45,
+            fontSize: 12,
+          ),
         ),
       ),
     );
@@ -483,7 +525,9 @@ class _NotesDisguiseState extends State<NotesDisguise> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(note.isPinned ? Icons.push_pin_outlined : Icons.push_pin),
+              leading: Icon(
+                note.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
+              ),
               title: Text(note.isPinned ? 'Unpin' : 'Pin'),
               onTap: () {
                 Navigator.pop(context);
@@ -525,12 +569,17 @@ class _NotesDisguiseState extends State<NotesDisguise> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Choose color', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const Text(
+                'Choose color',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 16),
               Wrap(
                 spacing: 12,
                 runSpacing: 12,
-                children: List.generate(DisguiseNote.noteColors.length, (index) {
+                children: List.generate(DisguiseNote.noteColors.length, (
+                  index,
+                ) {
                   return GestureDetector(
                     onTap: () {
                       Navigator.pop(context);
@@ -546,15 +595,20 @@ class _NotesDisguiseState extends State<NotesDisguise> {
                         color: DisguiseNote.noteColors[index],
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: note.colorIndex == index ? Colors.blue : Colors.grey.withValues(alpha: 0.3),
+                          color: note.colorIndex == index
+                              ? Colors.blue
+                              : Colors.grey.withValues(alpha: 0.3),
                           width: note.colorIndex == index ? 3 : 1,
                         ),
                       ),
                       child: index == 0
-                          ? const Icon(Icons.format_color_reset, color: Colors.grey)
+                          ? const Icon(
+                              Icons.format_color_reset,
+                              color: Colors.grey,
+                            )
                           : note.colorIndex == index
-                              ? const Icon(Icons.check, color: Colors.black54)
-                              : null,
+                          ? const Icon(Icons.check, color: Colors.black54)
+                          : null,
                     ),
                   );
                 }),
@@ -688,12 +742,17 @@ class _DisguiseNoteEditorState extends State<DisguiseNoteEditor> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Choose color', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const Text(
+                'Choose color',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 16),
               Wrap(
                 spacing: 12,
                 runSpacing: 12,
-                children: List.generate(DisguiseNote.noteColors.length, (index) {
+                children: List.generate(DisguiseNote.noteColors.length, (
+                  index,
+                ) {
                   return GestureDetector(
                     onTap: () {
                       Navigator.pop(context);
@@ -706,15 +765,20 @@ class _DisguiseNoteEditorState extends State<DisguiseNoteEditor> {
                         color: DisguiseNote.noteColors[index],
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: _colorIndex == index ? Colors.blue : Colors.grey.withValues(alpha: 0.3),
+                          color: _colorIndex == index
+                              ? Colors.blue
+                              : Colors.grey.withValues(alpha: 0.3),
                           width: _colorIndex == index ? 3 : 1,
                         ),
                       ),
                       child: index == 0
-                          ? const Icon(Icons.format_color_reset, color: Colors.grey)
+                          ? const Icon(
+                              Icons.format_color_reset,
+                              color: Colors.grey,
+                            )
                           : _colorIndex == index
-                              ? const Icon(Icons.check, color: Colors.black54)
-                              : null,
+                          ? const Icon(Icons.check, color: Colors.black54)
+                          : null,
                     ),
                   );
                 }),
@@ -754,24 +818,36 @@ class _DisguiseNoteEditorState extends State<DisguiseNoteEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = _colorIndex == 0 ? null : DisguiseNote.noteColors[_colorIndex];
+    final bgColor = _colorIndex == 0
+        ? null
+        : DisguiseNote.noteColors[_colorIndex];
 
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: bgColor ?? Theme.of(context).appBarTheme.backgroundColor,
+        backgroundColor:
+            bgColor ?? Theme.of(context).appBarTheme.backgroundColor,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: _colorIndex == 0 ? null : Colors.black87),
+          icon: Icon(
+            Icons.arrow_back,
+            color: _colorIndex == 0 ? null : Colors.black87,
+          ),
           onPressed: _save,
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.palette_outlined, color: _colorIndex == 0 ? null : Colors.black87),
+            icon: Icon(
+              Icons.palette_outlined,
+              color: _colorIndex == 0 ? null : Colors.black87,
+            ),
             onPressed: _showColorPicker,
           ),
           if (!widget.isNew)
             IconButton(
-              icon: Icon(Icons.delete_outline, color: _colorIndex == 0 ? null : Colors.black87),
+              icon: Icon(
+                Icons.delete_outline,
+                color: _colorIndex == 0 ? null : Colors.black87,
+              ),
               onPressed: _confirmDelete,
             ),
         ],
@@ -789,7 +865,9 @@ class _DisguiseNoteEditorState extends State<DisguiseNoteEditor> {
               ),
               decoration: InputDecoration(
                 hintText: widget.isNew ? 'Enter title...' : 'Title',
-                hintStyle: TextStyle(color: _colorIndex == 0 ? null : Colors.black45),
+                hintStyle: TextStyle(
+                  color: _colorIndex == 0 ? null : Colors.black45,
+                ),
                 border: InputBorder.none,
               ),
             ),
@@ -800,10 +878,14 @@ class _DisguiseNoteEditorState extends State<DisguiseNoteEditor> {
                 maxLines: null,
                 expands: true,
                 textAlignVertical: TextAlignVertical.top,
-                style: TextStyle(color: _colorIndex == 0 ? null : Colors.black87),
+                style: TextStyle(
+                  color: _colorIndex == 0 ? null : Colors.black87,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Start typing...',
-                  hintStyle: TextStyle(color: _colorIndex == 0 ? null : Colors.black45),
+                  hintStyle: TextStyle(
+                    color: _colorIndex == 0 ? null : Colors.black45,
+                  ),
                   border: InputBorder.none,
                 ),
               ),
