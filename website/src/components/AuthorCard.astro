@@ -126,6 +126,19 @@ const authorImage = imageMap[authorId];
 
       const openCard = () => {
         clearTimeout(hoverTimeout);
+        
+        // Smart Positioning Logic
+        const triggerRect = trigger.getBoundingClientRect();
+        const cardHeight = (card as HTMLElement).offsetHeight;
+        const spaceAbove = triggerRect.top;
+        
+        // If not enough space above (plus some buffer), show below
+        if (spaceAbove < cardHeight + 20) {
+            card.classList.add('position-bottom');
+        } else {
+            card.classList.remove('position-bottom');
+        }
+
         card.classList.add('visible');
         trigger.setAttribute('aria-expanded', 'true');
         isOpen = true;
@@ -134,6 +147,7 @@ const authorImage = imageMap[authorId];
       const closeCard = () => {
         hoverTimeout = setTimeout(() => {
           card.classList.remove('visible');
+          // We don't remove position-bottom immediately to prevent jumping during fade out
           trigger.setAttribute('aria-expanded', 'false');
           isOpen = false;
         }, 150);
@@ -223,10 +237,21 @@ const authorImage = imageMap[authorId];
     transition: all 0.25s ease;
   }
 
+  /* Bottom Position Variant */
+  .author-card.position-bottom {
+    bottom: auto;
+    top: calc(100% + 10px);
+    transform: translateX(-50%) translateY(-10px);
+  }
+
   .author-card.visible {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+  
+  .author-card.position-bottom.visible {
     transform: translateX(-50%) translateY(0);
   }
 
@@ -240,6 +265,30 @@ const authorImage = imageMap[authorId];
     background: var(--bg-surface-2);
     border-right: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
+  }
+
+  /* Arrow adjustment for bottom position */
+  .author-card.position-bottom .card-arrow {
+    bottom: auto;
+    top: -6px;
+    border-bottom: none;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+    background: var(--bg-main); /* Match card background at top */
+  }
+  /* Fix arrow bg for light/dark modes */
+  .card-content {
+      background: var(--bg-main);
+      /* ... existing styles ... */
+  }
+  
+  /* Make sure arrow matches content bg */
+  .author-card.position-bottom .card-arrow {
+      background: var(--bg-main);
+  }
+  [data-theme='light'] .author-card.position-bottom .card-arrow {
+      background: #ffffff;
   }
 
   .card-content {
@@ -346,8 +395,17 @@ const authorImage = imageMap[authorId];
       left: 0;
       transform: translateX(0) translateY(10px);
     }
+    
+    .author-card.position-bottom {
+      left: 0;
+      transform: translateX(0) translateY(-10px);
+    }
 
     .author-card.visible {
+      transform: translateX(0) translateY(0);
+    }
+    
+    .author-card.position-bottom.visible {
       transform: translateX(0) translateY(0);
     }
 
