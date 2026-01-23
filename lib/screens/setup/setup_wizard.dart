@@ -180,38 +180,55 @@ class _SetupWizardState extends State<SetupWizard> {
   }
 
   Widget _buildWelcomePage() {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.security, size: 80, color: Colors.blue),
-          const SizedBox(height: 24),
-          const Text(
-            'Welcome to SecureVault',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Your private vault disguised as everyday apps. '
-            'Keep your photos, videos, and notes completely private.',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-          const Spacer(),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _nextPage,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight:
+                  constraints.maxHeight - 48, // Subtract vertical padding
+            ),
+            child: IntrinsicHeight(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 24),
+                  const Icon(Icons.security, size: 80, color: Colors.blue),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Welcome to SecureVault',
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Your private vault disguised as everyday apps. '
+                    'Keep your photos, videos, and notes completely private.',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  const Spacer(),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _nextPage,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: const Text(
+                        'Get Started',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              child: const Text('Get Started', style: TextStyle(fontSize: 18)),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -293,95 +310,104 @@ class _SetupWizardState extends State<SetupWizard> {
   }
 
   Widget _buildPasswordPage() {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: SingleChildScrollView(
-        child: SizedBox(
-          height:
-              MediaQuery.of(context).size.height -
-              100, // Account for safe area and header
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Create Your Vault',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Give your vault a name and set a password. '
-                'You can create more vaults later with different passwords.',
-                style: TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: _vaultNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Vault Name',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.folder),
-                  hintText: 'e.g., Personal, Work, Private',
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Confirm Password',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock_outline),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Admin Vault'),
-                subtitle: const Text(
-                  'Can see and manage all other vaults',
-                  style: TextStyle(fontSize: 12),
-                ),
-                value: _isMasterVault,
-                onChanged: (value) => setState(() => _isMasterVault = value),
-              ),
-              if (_error != null) ...[
-                const SizedBox(height: 8),
-                Text(_error!, style: const TextStyle(color: Colors.red)),
-              ],
-              const Spacer(),
-              Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight:
+                  constraints.maxHeight - 48, // Subtract vertical padding
+            ),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextButton(
-                    onPressed: _isLoading ? null : _previousPage,
-                    child: const Text('Back'),
+                  const Text(
+                    'Create Your Vault',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Give your vault a name and set a password. '
+                    'You can create more vaults later with different passwords.',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 24),
+                  TextField(
+                    controller: _vaultNameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Vault Name',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.folder),
+                      hintText: 'e.g., Personal, Work, Private',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Password',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.lock),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _confirmPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirm Password',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.lock_outline),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Admin Vault'),
+                    subtitle: const Text(
+                      'Can see and manage all other vaults',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    value: _isMasterVault,
+                    onChanged: (value) =>
+                        setState(() => _isMasterVault = value),
+                  ),
+                  if (_error != null) ...[
+                    const SizedBox(height: 8),
+                    Text(_error!, style: const TextStyle(color: Colors.red)),
+                  ],
                   const Spacer(),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _completeSetup,
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Complete Setup'),
+                  const SizedBox(height: 24), // Bottom spacing
+                  Row(
+                    children: [
+                      TextButton(
+                        onPressed: _isLoading ? null : _previousPage,
+                        child: const Text('Back'),
+                      ),
+                      const Spacer(),
+                      ElevatedButton(
+                        onPressed: _isLoading ? null : _completeSetup,
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text('Complete Setup'),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
