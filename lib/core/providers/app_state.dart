@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
 import '../services/vault_service.dart';
+import '../services/security_service.dart';
 
 class AppState extends ChangeNotifier {
   DisguiseType _currentDisguise = DisguiseType.calculator;
@@ -34,6 +35,8 @@ class AppState extends ChangeNotifier {
     _themeMode = ThemeMode.values[themeModeIndex];
 
     notifyListeners();
+    // Ensure screenshots are allowed in disguise mode
+    await SecurityService.allowScreenshots();
   }
 
   Future<void> setDisguise(DisguiseType disguise) async {
@@ -58,6 +61,11 @@ class AppState extends ChangeNotifier {
       _currentPassword = password;
       _lastActivityTime = DateTime.now();
       _currentVaultInfo = await VaultService.getVaultInfo(vault.id);
+      _currentVaultInfo = await VaultService.getVaultInfo(vault.id);
+
+      // Prevent screenshots when vault is unlocked
+      await SecurityService.preventScreenshots();
+
       notifyListeners();
       return true;
     }
@@ -71,6 +79,9 @@ class AppState extends ChangeNotifier {
     _lastActivityTime = null;
     _currentVaultInfo = null;
     notifyListeners();
+
+    // Allow screenshots again when locked (disguise mode)
+    SecurityService.allowScreenshots();
   }
 
   void updateActivity() {
