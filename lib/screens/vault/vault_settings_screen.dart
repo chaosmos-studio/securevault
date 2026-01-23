@@ -1410,6 +1410,11 @@ class AboutScreen extends StatelessWidget {
                 'LinkedIn',
                 'https://www.linkedin.com/in/jash0070/',
               ),
+              _DeveloperLink(
+                _SocialIcon.sponsor,
+                'Sponsor',
+                'https://github.com/sponsors/AJ0070',
+              ),
             ],
           ),
           const SizedBox(height: 32),

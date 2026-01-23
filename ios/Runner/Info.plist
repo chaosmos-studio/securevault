@@ -43,6 +43,12 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>http</string>
+		<string>mailto</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to take photos for your vault.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

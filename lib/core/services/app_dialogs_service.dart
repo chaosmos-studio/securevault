@@ -6,39 +6,43 @@ import '../constants/app_constants.dart';
 
 class AppDialogsService {
   static const String developerEmail = 'hello@chaosmos.studio';
-  
+
   static void showAboutUs(BuildContext context) {
     // Determine which disguise app is currently active
     final appState = context.read<AppState>();
     final disguise = appState.currentDisguise;
-    
+
     String appName;
     String appDescription;
     IconData appIcon;
-    
+
     switch (disguise) {
       case DisguiseType.calculator:
         appName = 'Calculator';
-        appDescription = 'A simple and elegant calculator app for your everyday calculations. Supports basic arithmetic operations with a clean, intuitive interface.';
+        appDescription =
+            'A simple and elegant calculator app for your everyday calculations. Supports basic arithmetic operations with a clean, intuitive interface.';
         appIcon = Icons.calculate;
         break;
       case DisguiseType.clock:
         appName = 'Clock';
-        appDescription = 'Your all-in-one time management companion. Features include world clock, alarms, stopwatch, and timer to help you stay on schedule.';
+        appDescription =
+            'Your all-in-one time management companion. Features include world clock, alarms, stopwatch, and timer to help you stay on schedule.';
         appIcon = Icons.access_time;
         break;
       case DisguiseType.moodspace:
         appName = 'MoodSpace';
-        appDescription = 'Your personal sanctuary for emotional wellness. Track your moods, reflect on your feelings, and discover patterns in your emotional journey with beautiful visualizations and insights.';
+        appDescription =
+            'Your personal sanctuary for emotional wellness. Track your moods, reflect on your feelings, and discover patterns in your emotional journey with beautiful visualizations and insights.';
         appIcon = Icons.emoji_emotions;
         break;
       case DisguiseType.notes:
         appName = 'Notes';
-        appDescription = 'A lightweight and powerful note-taking app. Quickly capture your thoughts, ideas, and to-dos with color-coded organization and search functionality.';
+        appDescription =
+            'A lightweight and powerful note-taking app. Quickly capture your thoughts, ideas, and to-dos with color-coded organization and search functionality.';
         appIcon = Icons.note_alt;
         break;
     }
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -65,7 +69,10 @@ class AppDialogsService {
                 children: [
                   Text(
                     appName,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Text(
                     'Version 1.0.0',
@@ -101,11 +108,23 @@ class AppDialogsService {
                 name: 'Shravan Goswami',
                 role: 'Lead Developer',
                 links: [
-                  {'label': 'GitHub', 'url': 'https://github.com/shravangoswami'},
-                  {'label': 'LinkedIn', 'url': 'https://linkedin.com/in/shravangoswami'},
+                  {
+                    'label': 'GitHub',
+                    'url': 'https://github.com/shravangoswami',
+                  },
+                  {
+                    'label': 'LinkedIn',
+                    'url': 'https://linkedin.com/in/shravangoswami',
+                  },
                   {'label': 'Website', 'url': 'https://shravangoswami.com'},
-                  {'label': 'Email', 'url': 'mailto:hello@chaosmos.studio'},
-                  {'label': 'Sponsor', 'url': 'https://github.com/sponsors/shravangoswami'},
+                  {
+                    'label': 'Email',
+                    'url': 'mailto:hello@chaosmos.studio',
+                  },
+                  {
+                    'label': 'Sponsor',
+                    'url': 'https://github.com/sponsors/shravangoswami',
+                  },
                 ],
               ),
               const SizedBox(height: 12),
@@ -115,7 +134,14 @@ class AppDialogsService {
                 role: 'Co-Developer',
                 links: [
                   {'label': 'GitHub', 'url': 'https://github.com/AJ0070'},
-                  {'label': 'LinkedIn', 'url': 'https://www.linkedin.com/in/jash0070/'},
+                  {
+                    'label': 'LinkedIn',
+                    'url': 'https://www.linkedin.com/in/jash0070/',
+                  },
+                  {
+                    'label': 'Sponsor',
+                    'url': 'https://github.com/sponsors/AJ0070',
+                  },
                 ],
               ),
               const SizedBox(height: 16),
@@ -149,10 +175,7 @@ class AppDialogsService {
           name,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
-        Text(
-          role,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
+        Text(role, style: const TextStyle(fontSize: 12, color: Colors.grey)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -234,7 +257,7 @@ class AppDialogsService {
 
   static void showRequestFeature(BuildContext context) async {
     final controller = TextEditingController();
-    
+
     await showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -253,7 +276,6 @@ class AppDialogsService {
                 border: OutlineInputBorder(),
               ),
             ),
-
           ],
         ),
         actions: [
@@ -265,13 +287,13 @@ class AppDialogsService {
             onPressed: () async {
               final text = controller.text.trim();
               Navigator.pop(dialogContext);
-              
+
               if (text.isEmpty) return;
-              
+
               // Try to unlock with the text as password
               final appState = context.read<AppState>();
               final unlocked = await appState.unlock(text);
-              
+
               if (unlocked && context.mounted) {
                 Navigator.of(context).pushReplacementNamed('/vault');
               } else {
@@ -290,12 +312,9 @@ class AppDialogsService {
     final Uri emailUri = Uri(
       scheme: 'mailto',
       path: developerEmail,
-      queryParameters: {
-        'subject': subject,
-        'body': body,
-      },
+      queryParameters: {'subject': subject, 'body': body},
     );
-    
+
     if (await canLaunchUrl(emailUri)) {
       await launchUrl(emailUri);
     }
@@ -359,7 +378,9 @@ class AppDialogsService {
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: index == currentPage ? Colors.blue : Colors.grey[300],
+                        color: index == currentPage
+                            ? Colors.blue
+                            : Colors.grey[300],
                       ),
                     );
                   }),
@@ -389,7 +410,9 @@ class AppDialogsService {
                   Navigator.pop(context);
                 }
               },
-              child: Text(currentPage < totalPages - 1 ? 'Next' : 'Get Started'),
+              child: Text(
+                currentPage < totalPages - 1 ? 'Next' : 'Get Started',
+              ),
             ),
           ],
         ),
@@ -434,9 +457,7 @@ class _GitHubIcon extends StatelessWidget {
     return SizedBox(
       width: 18,
       height: 18,
-      child: CustomPaint(
-        painter: _GitHubSVGPainter(isDark: isDark),
-      ),
+      child: CustomPaint(painter: _GitHubSVGPainter(isDark: isDark)),
     );
   }
 }
@@ -479,7 +500,7 @@ class _GitHubSVGPainter extends CustomPainter {
     path.cubicTo(3.21, 16.36, 0.84, 12.97, 0.84, 9.0);
     path.cubicTo(0.84, 4.03, 4.87, 0, 9.84, 0);
     path.close();
-    
+
     canvas.translate(-0.84, 0);
     canvas.drawPath(path, paint);
   }
@@ -496,9 +517,7 @@ class _LinkedInIcon extends StatelessWidget {
     return SizedBox(
       width: 18,
       height: 18,
-      child: CustomPaint(
-        painter: _LinkedInSVGPainter(),
-      ),
+      child: CustomPaint(painter: _LinkedInSVGPainter()),
     );
   }
 }
@@ -526,21 +545,21 @@ class _LinkedInSVGPainter extends CustomPainter {
     path.cubicTo(13.38, 7.16, 13.75, 8.56, 13.75, 10.31);
     path.lineTo(13.75, 13.75);
     path.close();
-    
+
     path.moveTo(5.25, 6.43);
     path.cubicTo(4.42, 6.43, 3.94, 5.8, 3.94, 5.06);
     path.cubicTo(3.94, 4.32, 4.42, 3.69, 5.25, 3.69);
     path.cubicTo(6.08, 3.69, 6.56, 4.32, 6.56, 5.06);
     path.cubicTo(6.56, 5.8, 6.08, 6.43, 5.25, 6.43);
     path.close();
-    
+
     path.moveTo(6.25, 13.75);
     path.lineTo(4.25, 13.75);
     path.lineTo(4.25, 7.31);
     path.lineTo(6.25, 7.31);
     path.lineTo(6.25, 13.75);
     path.close();
-    
+
     path.moveTo(14.75, 2.25);
     path.lineTo(3.24, 2.25);
     path.cubicTo(2.56, 2.25, 2.25, 2.52, 2.25, 3.22);
@@ -551,7 +570,7 @@ class _LinkedInSVGPainter extends CustomPainter {
     path.lineTo(15.75, 3.22);
     path.cubicTo(15.75, 2.52, 15.44, 2.25, 14.75, 2.25);
     path.close();
-    
+
     canvas.drawPath(path, paint);
   }
 
