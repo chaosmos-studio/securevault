@@ -62,7 +62,7 @@ import {
               <div class="phone-notch"></div>
               <div class="phone-screen">
                 <img
-                  src={`${import.meta.env.BASE_URL}/screenshots/calculator-disguise.png`.replace(
+                  src={`${import.meta.env.BASE_URL}/screenshots/calculator_dark.jpeg`.replace(
                     /\/\//g,
                     '/'
                   )}
@@ -124,7 +124,7 @@ import {
               <div class="phone-frame glow-card small">
                 <div class="phone-screen bg-black">
                   <img
-                    src={`${import.meta.env.BASE_URL}/screenshots/calculator-disguise.png`.replace(
+                    src={`${import.meta.env.BASE_URL}/screenshots/calculator_dark.jpeg`.replace(
                       /\/\//g,
                       '/'
                     )}
@@ -222,33 +222,56 @@ import {
 <script>
   const buttons = document.querySelectorAll('.disguise-btn');
   const previewImg = document.getElementById('preview-img') as HTMLImageElement;
+  const heroImg = document.querySelector('.hero-visual .screen-img') as HTMLImageElement;
 
-  const images: Record<string, string> = {
-    calc: `${import.meta.env.BASE_URL}/screenshots/calculator-disguise.png`.replace(
-      /\/\//g,
-      '/'
-    ),
-    clock: `${import.meta.env.BASE_URL}/screenshots/clock.png`.replace(
-      /\/\//g,
-      '/'
-    ),
-    mood: `${import.meta.env.BASE_URL}/screenshots/moodspace.png`.replace(
-      /\/\//g,
-      '/'
-    ),
-    notes: `${import.meta.env.BASE_URL}/screenshots/notes.png`.replace(
-      /\/\//g,
-      '/'
-    ),
+  const images: Record<string, { light: string; dark: string }> = {
+    calc: {
+      light: `${import.meta.env.BASE_URL}/screenshots/calculator_light.jpeg`.replace(/\/\//g, '/'),
+      dark: `${import.meta.env.BASE_URL}/screenshots/calculator_dark.jpeg`.replace(/\/\//g, '/'),
+    },
+    clock: {
+      light: `${import.meta.env.BASE_URL}/screenshots/clock_light.jpeg`.replace(/\/\//g, '/'),
+      dark: `${import.meta.env.BASE_URL}/screenshots/clock_dark.jpeg`.replace(/\/\//g, '/'),
+    },
+    mood: {
+      light: `${import.meta.env.BASE_URL}/screenshots/moodspace_light.jpeg`.replace(/\/\//g, '/'),
+      dark: `${import.meta.env.BASE_URL}/screenshots/moodspace_dark.jpeg`.replace(/\/\//g, '/'),
+    },
+    notes: {
+      light: `${import.meta.env.BASE_URL}/screenshots/notes_light.jpeg`.replace(/\/\//g, '/'),
+      dark: `${import.meta.env.BASE_URL}/screenshots/notes_dark.jpeg`.replace(/\/\//g, '/'),
+    },
   };
 
-  function updateImage(target: string) {
-    if (target && images[target] && previewImg.src !== images[target]) {
+  let currentTarget = 'calc';
+
+  function getTheme(): 'light' | 'dark' {
+    return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  }
+
+  function updateImages() {
+    const theme = getTheme();
+    const targetImages = images[currentTarget];
+    
+    if (!targetImages) return;
+
+    const newSrc = targetImages[theme];
+
+    // Update preview section image
+    if (previewImg && previewImg.src !== newSrc && !previewImg.src.endsWith(newSrc)) {
       previewImg.style.opacity = '0.5';
       setTimeout(() => {
-        previewImg.src = images[target];
+        previewImg.src = newSrc;
         previewImg.style.opacity = '1';
       }, 100);
+    }
+
+    // Update hero image (always calculator)
+    if (heroImg) {
+      const heroSrc = images['calc'][theme];
+      if (heroImg.src !== heroSrc && !heroImg.src.endsWith(heroSrc)) {
+        heroImg.src = heroSrc;
+      }
     }
   }
 
@@ -257,14 +280,37 @@ import {
       buttons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const target = btn.getAttribute('data-target');
-      if (target) updateImage(target);
+      if (target) {
+        currentTarget = target;
+        updateImages();
+      }
     });
 
     btn.addEventListener('mouseenter', () => {
       const target = btn.getAttribute('data-target');
-      if (target) updateImage(target);
+      if (target) {
+        currentTarget = target;
+        updateImages();
+      }
     });
   });
+
+  // Observe theme changes
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        updateImages();
+      }
+    });
+  });
+
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme'],
+  });
+
+  // Initial update
+  updateImages();
 
   const vaultStack = document.querySelector('.vault-stack');
   vaultStack?.addEventListener('click', () => {
