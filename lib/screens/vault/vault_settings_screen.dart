@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1153,11 +1154,7 @@ class ChangelogScreen extends StatelessWidget {
   const ChangelogScreen({super.key});
 
   Future<String> _loadChangelog() async {
-    final file = File('CHANGELOG.md');
-    if (await file.exists()) {
-      return await file.readAsString();
-    }
-    throw Exception('CHANGELOG.md file not found');
+    return await rootBundle.loadString('Changelog.md');
   }
 
   @override
