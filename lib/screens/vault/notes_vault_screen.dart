@@ -88,15 +88,15 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
     var notes = _notes.where((note) {
       if (_searchQuery.isEmpty) return true;
       return note.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-             note.content.toLowerCase().contains(_searchQuery.toLowerCase());
+          note.content.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
-    
+
     notes.sort((a, b) {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
       return b.updatedAt.compareTo(a.updatedAt);
     });
-    
+
     return notes;
   }
 
@@ -107,7 +107,9 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
 
     if (vault == null || password == null) return;
 
-    final noteItems = vault.items.where((item) => item.type == VaultItemType.note).toList();
+    final noteItems = vault.items
+        .where((item) => item.type == VaultItemType.note)
+        .toList();
     final notes = <VaultNote>[];
 
     for (final item in noteItems) {
@@ -168,10 +170,10 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
         (i) => i.type == VaultItemType.note && i.name == note.id,
         orElse: () => throw Exception('Note not found'),
       );
-      
+
       await VaultService.deleteItem(vault, password, item.id);
       await appState.refreshVault();
-      
+
       await VaultService.addItem(
         vault: appState.currentVault!,
         password: password,
@@ -180,7 +182,7 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
         data: noteData,
       );
       await appState.refreshVault();
-      
+
       setState(() {
         final index = _notes.indexWhere((n) => n.id == note.id);
         if (index != -1) {
@@ -204,7 +206,7 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
 
     await VaultService.deleteItem(vault, password, item.id);
     await appState.refreshVault();
-    
+
     setState(() {
       _notes.removeWhere((n) => n.id == note.id);
     });
@@ -261,14 +263,15 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.grey[800]
-                          : Colors.grey[200],
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(24),
                     ),
                     child: TextField(
                       controller: _searchController,
-                      onChanged: (value) => setState(() => _searchQuery = value),
+                      onChanged: (value) =>
+                          setState(() => _searchQuery = value),
                       decoration: InputDecoration(
                         hintText: 'Search notes...',
                         prefixIcon: const Icon(Icons.search),
@@ -282,7 +285,10 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
                               )
                             : null,
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ),
@@ -304,8 +310,8 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
                     ),
                   )
                 : _isGridView
-                    ? _buildGridView()
-                    : _buildListView(),
+                ? _buildGridView()
+                : _buildListView(),
           ),
         ],
       ),
@@ -326,7 +332,14 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text('PINNED', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+              child: Text(
+                'PINNED',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
             ),
           ),
           SliverPadding(
@@ -349,7 +362,14 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text('OTHERS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+              child: Text(
+                'OTHERS',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
             ),
           ),
         SliverPadding(
@@ -390,9 +410,7 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: note.colorIndex == 0
-              ? Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey[800]
-                  : Colors.white
+              ? Theme.of(context).colorScheme.surfaceContainer
               : note.color,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
@@ -416,7 +434,11 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
                   ),
                 ),
                 if (note.isPinned)
-                  Icon(Icons.push_pin, size: 16, color: note.colorIndex == 0 ? Colors.grey : Colors.black54),
+                  Icon(
+                    Icons.push_pin,
+                    size: 16,
+                    color: note.colorIndex == 0 ? Colors.grey : Colors.black54,
+                  ),
               ],
             ),
             const SizedBox(height: 8),
@@ -425,13 +447,21 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
                 note.content.isEmpty ? 'No content' : note.content,
                 maxLines: 6,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 14, color: note.colorIndex == 0 ? Colors.grey[600] : Colors.black54),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: note.colorIndex == 0
+                      ? Colors.grey[600]
+                      : Colors.black54,
+                ),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               _formatDate(note.updatedAt),
-              style: TextStyle(fontSize: 12, color: note.colorIndex == 0 ? Colors.grey[500] : Colors.black45),
+              style: TextStyle(
+                fontSize: 12,
+                color: note.colorIndex == 0 ? Colors.grey[500] : Colors.black45,
+              ),
             ),
           ],
         ),
@@ -461,11 +491,16 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
           note.content.isEmpty ? 'No content' : note.content,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: note.colorIndex == 0 ? Colors.grey[600] : Colors.black54),
+          style: TextStyle(
+            color: note.colorIndex == 0 ? Colors.grey[600] : Colors.black54,
+          ),
         ),
         trailing: Text(
           _formatDate(note.updatedAt),
-          style: TextStyle(color: note.colorIndex == 0 ? Colors.grey[500] : Colors.black45, fontSize: 12),
+          style: TextStyle(
+            color: note.colorIndex == 0 ? Colors.grey[500] : Colors.black45,
+            fontSize: 12,
+          ),
         ),
       ),
     );
@@ -479,7 +514,9 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(note.isPinned ? Icons.push_pin_outlined : Icons.push_pin),
+              leading: Icon(
+                note.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
+              ),
               title: Text(note.isPinned ? 'Unpin' : 'Pin'),
               onTap: () {
                 Navigator.pop(context);
@@ -519,7 +556,10 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Choose color', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const Text(
+                'Choose color',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 16),
               Wrap(
                 spacing: 12,
@@ -538,15 +578,20 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
                         color: VaultNote.noteColors[index],
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: note.colorIndex == index ? Colors.blue : Colors.grey.withValues(alpha: 0.3),
+                          color: note.colorIndex == index
+                              ? Colors.blue
+                              : Colors.grey.withValues(alpha: 0.3),
                           width: note.colorIndex == index ? 3 : 1,
                         ),
                       ),
                       child: index == 0
-                          ? const Icon(Icons.format_color_reset, color: Colors.grey)
+                          ? const Icon(
+                              Icons.format_color_reset,
+                              color: Colors.grey,
+                            )
                           : note.colorIndex == index
-                              ? const Icon(Icons.check, color: Colors.black54)
-                              : null,
+                          ? const Icon(Icons.check, color: Colors.black54)
+                          : null,
                     ),
                   );
                 }),
@@ -584,7 +629,9 @@ class _NotesVaultScreenState extends State<NotesVaultScreen> {
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
-    if (date.year == now.year && date.month == now.month && date.day == now.day) {
+    if (date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day) {
       return '${date.hour}:${date.minute.toString().padLeft(2, '0')}';
     }
     return '${date.month}/${date.day}';
@@ -649,7 +696,10 @@ class _VaultNoteEditorState extends State<VaultNoteEditor> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Choose color', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const Text(
+                'Choose color',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 16),
               Wrap(
                 spacing: 12,
@@ -669,15 +719,20 @@ class _VaultNoteEditorState extends State<VaultNoteEditor> {
                         color: VaultNote.noteColors[index],
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: widget.note.colorIndex == index ? Colors.blue : Colors.grey.withValues(alpha: 0.3),
+                          color: widget.note.colorIndex == index
+                              ? Colors.blue
+                              : Colors.grey.withValues(alpha: 0.3),
                           width: widget.note.colorIndex == index ? 3 : 1,
                         ),
                       ),
                       child: index == 0
-                          ? const Icon(Icons.format_color_reset, color: Colors.grey)
+                          ? const Icon(
+                              Icons.format_color_reset,
+                              color: Colors.grey,
+                            )
                           : widget.note.colorIndex == index
-                              ? const Icon(Icons.check, color: Colors.black54)
-                              : null,
+                          ? const Icon(Icons.check, color: Colors.black54)
+                          : null,
                     ),
                   );
                 }),
@@ -718,7 +773,7 @@ class _VaultNoteEditorState extends State<VaultNoteEditor> {
   Widget build(BuildContext context) {
     final bgColor = widget.note.colorIndex == 0 ? null : widget.note.color;
     final textColor = widget.note.colorIndex == 0 ? null : Colors.black87;
-    
+
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
@@ -730,7 +785,9 @@ class _VaultNoteEditorState extends State<VaultNoteEditor> {
         title: const Text('Secure Note'),
         actions: [
           IconButton(
-            icon: Icon(widget.note.isPinned ? Icons.push_pin : Icons.push_pin_outlined),
+            icon: Icon(
+              widget.note.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+            ),
             onPressed: _togglePin,
             tooltip: widget.note.isPinned ? 'Unpin' : 'Pin',
           ),
@@ -751,10 +808,16 @@ class _VaultNoteEditorState extends State<VaultNoteEditor> {
           children: [
             TextField(
               controller: _titleController,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
               decoration: InputDecoration(
                 hintText: 'Title',
-                hintStyle: TextStyle(color: widget.note.colorIndex == 0 ? null : Colors.black45),
+                hintStyle: TextStyle(
+                  color: widget.note.colorIndex == 0 ? null : Colors.black45,
+                ),
                 border: InputBorder.none,
               ),
             ),
@@ -768,7 +831,9 @@ class _VaultNoteEditorState extends State<VaultNoteEditor> {
                 style: TextStyle(color: textColor),
                 decoration: InputDecoration(
                   hintText: 'Start typing...',
-                  hintStyle: TextStyle(color: widget.note.colorIndex == 0 ? null : Colors.black45),
+                  hintStyle: TextStyle(
+                    color: widget.note.colorIndex == 0 ? null : Colors.black45,
+                  ),
                   border: InputBorder.none,
                 ),
               ),

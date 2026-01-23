@@ -34,26 +34,30 @@ class SecureVaultApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Utility',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      themeMode: ThemeMode.system,
-      home: const AppRouter(),
-      routes: {
-        '/setup': (context) => const SetupWizard(),
-        '/home': (context) => const DisguiseRouter(),
-        '/vault': (context) => const VaultHomeScreen(),
+    return Consumer<AppState>(
+      builder: (context, appState, _) {
+        return MaterialApp(
+          title: 'Utility',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.blue,
+              brightness: Brightness.dark,
+            ),
+            useMaterial3: true,
+          ),
+          themeMode: appState.themeMode,
+          home: const AppRouter(),
+          routes: {
+            '/setup': (context) => const SetupWizard(),
+            '/home': (context) => const DisguiseRouter(),
+            '/vault': (context) => const VaultHomeScreen(),
+          },
+        );
       },
     );
   }

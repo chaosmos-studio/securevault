@@ -23,11 +23,16 @@ class AppState extends ChangeNotifier {
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     _isSetupComplete = prefs.getBool('is_setup_complete') ?? false;
-    final disguiseId = prefs.getString('current_disguise') ?? DisguiseType.calculator.id;
+    final disguiseId =
+        prefs.getString('current_disguise') ?? DisguiseType.calculator.id;
     _currentDisguise = DisguiseType.values.firstWhere(
       (d) => d.id == disguiseId,
       orElse: () => DisguiseType.calculator,
     );
+
+    final themeModeIndex = prefs.getInt('theme_mode') ?? ThemeMode.system.index;
+    _themeMode = ThemeMode.values[themeModeIndex];
+
     notifyListeners();
   }
 
@@ -83,5 +88,15 @@ class AppState extends ChangeNotifier {
       _currentVault = await VaultService.unlockVault(_currentPassword!);
       notifyListeners();
     }
+  }
+
+  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode get themeMode => _themeMode;
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    _themeMode = mode;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('theme_mode', mode.index);
+    notifyListeners();
   }
 }

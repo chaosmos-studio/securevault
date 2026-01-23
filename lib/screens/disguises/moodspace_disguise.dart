@@ -16,7 +16,7 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
   final _moodController = TextEditingController();
   Map<String, List<MoodEntry>> _moodLogByDate = {};
   int _selectedTabIndex = 0;
-  
+
   final List<MoodOption> _moodOptions = [
     MoodOption('😊', 'Happy', const Color(0xFFFFC107)),
     MoodOption('😢', 'Sad', const Color(0xFF2196F3)),
@@ -50,20 +50,23 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
     if (moodJson != null) {
       final Map<String, dynamic> decoded = json.decode(moodJson);
       setState(() {
-        _moodLogByDate = decoded.map((key, value) => MapEntry(
-          key,
-          (value as List).map((e) => MoodEntry.fromJson(e)).toList(),
-        ));
+        _moodLogByDate = decoded.map(
+          (key, value) => MapEntry(
+            key,
+            (value as List).map((e) => MoodEntry.fromJson(e)).toList(),
+          ),
+        );
       });
     }
   }
 
   Future<void> _saveMoodLog() async {
     final prefs = await SharedPreferences.getInstance();
-    final encoded = json.encode(_moodLogByDate.map((key, value) => MapEntry(
-      key,
-      value.map((e) => e.toJson()).toList(),
-    )));
+    final encoded = json.encode(
+      _moodLogByDate.map(
+        (key, value) => MapEntry(key, value.map((e) => e.toJson()).toList()),
+      ),
+    );
     await prefs.setString('mood_log_data', encoded);
   }
 
@@ -83,7 +86,7 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
     final now = DateTime.now();
     final dateKey = _getDateKey(now);
     final entry = MoodEntry(mood: mood, emoji: emoji ?? '📝', timestamp: now);
-    
+
     setState(() {
       if (_moodLogByDate[dateKey] == null) {
         _moodLogByDate[dateKey] = [];
@@ -92,7 +95,7 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
     });
     await _saveMoodLog();
     _moodController.clear();
-    
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -106,42 +109,54 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF667eea),
-              Color(0xFF764ba2),
-            ],
+            colors: isDark
+                ? [const Color(0xFF667eea), const Color(0xFF764ba2)]
+                : [const Color(0xFFE0C3FC), const Color(0xFF8EC5FC)],
           ),
         ),
         child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              _buildDateHeader(),
-              Expanded(
-                child: IndexedStack(
-                  index: _selectedTabIndex,
-                  children: [
-                    _buildLogMoodTab(),
-                    _buildHistoryTab(),
-                    _buildCalendarTab(),
-                  ],
-                ),
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              textTheme: Theme.of(context).textTheme.apply(
+                bodyColor: isDark ? Colors.white : Colors.black87,
+                displayColor: isDark ? Colors.white : Colors.black87,
               ),
-              _buildBottomNav(),
-            ],
+              iconTheme: IconThemeData(
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            child: Column(
+              children: [
+                _buildHeader(isDark),
+                _buildDateHeader(isDark),
+                Expanded(
+                  child: IndexedStack(
+                    index: _selectedTabIndex,
+                    children: [
+                      _buildLogMoodTab(isDark),
+                      _buildHistoryTab(isDark),
+                      _buildCalendarTab(isDark),
+                    ],
+                  ),
+                ),
+                _buildBottomNav(isDark),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isDark) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Row(
@@ -150,41 +165,57 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
             'assets/icons/mood_icon.png',
             width: 32,
             height: 32,
-            color: Colors.white,
+            color: isDark ? Colors.white : Colors.black87,
           ),
           const SizedBox(width: 12),
-          const Text(
+          Text(
             'MoodSpace',
             style: TextStyle(
-              color: Colors.white,
+              color: isDark ? Colors.white : Colors.black87,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
           const Spacer(),
-          const DisguiseMenu(iconColor: Colors.white),
+          DisguiseMenu(iconColor: isDark ? Colors.white : Colors.black87),
         ],
       ),
     );
   }
 
-  Widget _buildDateHeader() {
+  Widget _buildDateHeader(bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Text(
         _getFormattedDate(),
-        style: const TextStyle(color: Colors.white70, fontSize: 14),
+        style: TextStyle(
+          color: isDark ? Colors.white70 : Colors.black54,
+          fontSize: 14,
+        ),
       ),
     );
   }
 
   String _getFormattedDate() {
     final now = DateTime.now();
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return '${months[now.month - 1]} ${now.day}';
   }
 
-  Widget _buildLogMoodTab() {
+  Widget _buildLogMoodTab(bool isDark) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -193,16 +224,18 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.15)
+                  : Colors.white.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'How are you feeling?',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: isDark ? Colors.white : Colors.black87,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -230,24 +263,33 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
                             width: 2,
                           ),
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              mood.emoji,
-                              style: const TextStyle(fontSize: 28),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  mood.emoji,
+                                  style: const TextStyle(fontSize: 28),
+                                ),
+                                const SizedBox(height: 4),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    mood.label,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              mood.label,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     );
@@ -260,16 +302,18 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.15)
+                  : Colors.white.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Or write your own:',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: isDark ? Colors.white : Colors.black87,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -277,13 +321,21 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _moodController,
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
                   maxLines: 3,
                   decoration: InputDecoration(
                     hintText: 'Type how you\'re feeling...',
-                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                    hintStyle: TextStyle(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.5)
+                          : Colors.black54,
+                    ),
                     filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.1),
+                    fillColor: isDark
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.white.withValues(alpha: 0.4),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -314,7 +366,10 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
                     ),
                     child: const Text(
                       'Save Mood',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -322,75 +377,88 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
             ),
           ),
           const SizedBox(height: 20),
-          _buildTodayMoods(),
+          _buildTodayMoods(isDark),
         ],
       ),
     );
   }
 
-  Widget _buildTodayMoods() {
+  Widget _buildTodayMoods(bool isDark) {
     final todayKey = _getDateKey(DateTime.now());
     final todayMoods = _moodLogByDate[todayKey] ?? [];
-    
+
     if (todayMoods.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.white.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
             'No moods logged today yet',
-            style: TextStyle(color: Colors.white54),
+            style: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
           ),
         ),
       );
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.1)
+            : Colors.white.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Today\'s Moods',
             style: TextStyle(
-              color: Colors.white,
+              color: isDark ? Colors.white : Colors.black87,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
-          ...todayMoods.reversed.take(5).map((entry) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              children: [
-                Text(entry.emoji, style: const TextStyle(fontSize: 20)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    entry.mood,
-                    style: const TextStyle(color: Colors.white),
+          ...todayMoods.reversed
+              .take(5)
+              .map(
+                (entry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Text(entry.emoji, style: const TextStyle(fontSize: 20)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          entry.mood,
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '${entry.timestamp.hour}:${entry.timestamp.minute.toString().padLeft(2, '0')}',
+                        style: TextStyle(
+                          color: isDark ? Colors.white54 : Colors.black54,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  '${entry.timestamp.hour}:${entry.timestamp.minute.toString().padLeft(2, '0')}',
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
-                ),
-              ],
-            ),
-          )),
+              ),
         ],
       ),
     );
   }
 
-  Widget _buildHistoryTab() {
+  Widget _buildHistoryTab(bool isDark) {
     final allEntries = <MoodEntry>[];
     _moodLogByDate.forEach((date, entries) {
       allEntries.addAll(entries);
@@ -398,10 +466,13 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
     allEntries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
     if (allEntries.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No mood history yet',
-          style: TextStyle(color: Colors.white54, fontSize: 16),
+          style: TextStyle(
+            color: isDark ? Colors.white54 : Colors.black54,
+            fontSize: 16,
+          ),
         ),
       );
     }
@@ -415,7 +486,9 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.white.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -428,11 +501,17 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
                   children: [
                     Text(
                       entry.mood,
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 16,
+                      ),
                     ),
                     Text(
                       _formatDateTime(entry.timestamp),
-                      style: const TextStyle(color: Colors.white54, fontSize: 12),
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : Colors.black54,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -445,47 +524,69 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
   }
 
   String _formatDateTime(DateTime dt) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return '${months[dt.month - 1]} ${dt.day}, ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
   }
 
-  Widget _buildCalendarTab() {
-    return MoodCalendarView(moodLogByDate: _moodLogByDate);
+  Widget _buildCalendarTab(bool isDark) {
+    return MoodCalendarView(moodLogByDate: _moodLogByDate, isDark: isDark);
   }
 
-  Widget _buildBottomNav() {
+  Widget _buildBottomNav(bool isDark) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildNavItem(0, Icons.add_reaction, 'Log'),
-          _buildNavItem(1, Icons.history, 'History'),
-          _buildNavItem(2, Icons.calendar_month, 'Calendar'),
+          _buildNavItem(0, Icons.add_reaction, 'Log', isDark),
+          _buildNavItem(1, Icons.history, 'History', isDark),
+          _buildNavItem(2, Icons.calendar_month, 'Calendar', isDark),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, String label) {
+  Widget _buildNavItem(int index, IconData icon, String label, bool isDark) {
     final isSelected = _selectedTabIndex == index;
     return GestureDetector(
       onTap: () => setState(() => _selectedTabIndex = index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
+          color: isSelected
+              ? (isDark
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : Colors.white.withValues(alpha: 0.5))
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           children: [
-            Icon(icon, color: isSelected ? Colors.white : Colors.white54),
+            Icon(
+              icon,
+              color: isSelected
+                  ? (isDark ? Colors.white : Colors.black)
+                  : (isDark ? Colors.white54 : Colors.black38),
+            ),
             if (isSelected) ...[
               const SizedBox(width: 8),
               Text(
                 label,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -511,13 +612,13 @@ class MoodEntry {
   final DateTime timestamp;
 
   MoodEntry({required this.mood, this.emoji = '📝', required this.timestamp});
-  
+
   Map<String, dynamic> toJson() => {
     'mood': mood,
     'emoji': emoji,
     'timestamp': timestamp.toIso8601String(),
   };
-  
+
   factory MoodEntry.fromJson(Map<String, dynamic> json) => MoodEntry(
     mood: json['mood'],
     emoji: json['emoji'] ?? '📝',
@@ -527,9 +628,14 @@ class MoodEntry {
 
 class MoodCalendarView extends StatefulWidget {
   final Map<String, List<MoodEntry>> moodLogByDate;
-  
-  const MoodCalendarView({super.key, required this.moodLogByDate});
-  
+  final bool isDark;
+
+  const MoodCalendarView({
+    super.key,
+    required this.moodLogByDate,
+    required this.isDark,
+  });
+
   @override
   State<MoodCalendarView> createState() => _MoodCalendarViewState();
 }
@@ -537,13 +643,13 @@ class MoodCalendarView extends StatefulWidget {
 class _MoodCalendarViewState extends State<MoodCalendarView> {
   late DateTime _currentMonth;
   String? _selectedDate;
-  
+
   @override
   void initState() {
     super.initState();
     _currentMonth = DateTime.now();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -554,19 +660,35 @@ class _MoodCalendarViewState extends State<MoodCalendarView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(Icons.chevron_left, color: Colors.white),
+                icon: Icon(
+                  Icons.chevron_left,
+                  color: widget.isDark ? Colors.white : Colors.black87,
+                ),
                 onPressed: () => setState(() {
-                  _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
+                  _currentMonth = DateTime(
+                    _currentMonth.year,
+                    _currentMonth.month - 1,
+                  );
                 }),
               ),
               Text(
                 '${_getMonthName(_currentMonth.month)} ${_currentMonth.year}',
-                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: widget.isDark ? Colors.white : Colors.black87,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               IconButton(
-                icon: const Icon(Icons.chevron_right, color: Colors.white),
+                icon: Icon(
+                  Icons.chevron_right,
+                  color: widget.isDark ? Colors.white : Colors.black87,
+                ),
                 onPressed: () => setState(() {
-                  _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
+                  _currentMonth = DateTime(
+                    _currentMonth.year,
+                    _currentMonth.month + 1,
+                  );
                 }),
               ),
             ],
@@ -577,21 +699,30 @@ class _MoodCalendarViewState extends State<MoodCalendarView> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-                .map((d) => Text(d, style: const TextStyle(color: Colors.white54, fontWeight: FontWeight.bold)))
+                .map(
+                  (d) => Text(
+                    d,
+                    style: TextStyle(
+                      color: widget.isDark ? Colors.white54 : Colors.black54,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ),
         const SizedBox(height: 8),
-        Expanded(
-          child: _buildCalendarGrid(),
-        ),
-        if (_selectedDate != null && widget.moodLogByDate[_selectedDate] != null)
+        Expanded(child: _buildCalendarGrid()),
+        if (_selectedDate != null &&
+            widget.moodLogByDate[_selectedDate] != null)
           Container(
             height: 150,
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: widget.isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.white.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -599,7 +730,11 @@ class _MoodCalendarViewState extends State<MoodCalendarView> {
               children: [
                 Text(
                   'Moods on $_selectedDate',
-                  style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: widget.isDark ? Colors.white70 : Colors.black54,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Expanded(
@@ -611,14 +746,29 @@ class _MoodCalendarViewState extends State<MoodCalendarView> {
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Row(
                           children: [
-                            Text(entry.emoji, style: const TextStyle(fontSize: 16)),
+                            Text(
+                              entry.emoji,
+                              style: const TextStyle(fontSize: 16),
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
-                              child: Text(entry.mood, style: const TextStyle(color: Colors.white)),
+                              child: Text(
+                                entry.mood,
+                                style: TextStyle(
+                                  color: widget.isDark
+                                      ? Colors.white
+                                      : Colors.black87,
+                                ),
+                              ),
                             ),
                             Text(
                               '${entry.timestamp.hour}:${entry.timestamp.minute.toString().padLeft(2, '0')}',
-                              style: const TextStyle(color: Colors.white54, fontSize: 12),
+                              style: TextStyle(
+                                color: widget.isDark
+                                    ? Colors.white54
+                                    : Colors.black54,
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ),
@@ -632,40 +782,63 @@ class _MoodCalendarViewState extends State<MoodCalendarView> {
       ],
     );
   }
-  
+
   Widget _buildCalendarGrid() {
-    final firstDayOfMonth = DateTime(_currentMonth.year, _currentMonth.month, 1);
-    final lastDayOfMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
+    final firstDayOfMonth = DateTime(
+      _currentMonth.year,
+      _currentMonth.month,
+      1,
+    );
+    final lastDayOfMonth = DateTime(
+      _currentMonth.year,
+      _currentMonth.month + 1,
+      0,
+    );
     final startingWeekday = firstDayOfMonth.weekday % 7;
-    
+
     return GridView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 7,
+      ),
       itemCount: 42,
       itemBuilder: (context, index) {
         final dayNumber = index - startingWeekday + 1;
         if (dayNumber < 1 || dayNumber > lastDayOfMonth.day) {
           return const SizedBox();
         }
-        
-        final dateKey = '${_currentMonth.year}-${_currentMonth.month.toString().padLeft(2, '0')}-${dayNumber.toString().padLeft(2, '0')}';
+
+        final dateKey =
+            '${_currentMonth.year}-${_currentMonth.month.toString().padLeft(2, '0')}-${dayNumber.toString().padLeft(2, '0')}';
         final moods = widget.moodLogByDate[dateKey];
         final hasMoods = moods?.isNotEmpty ?? false;
         final isSelected = _selectedDate == dateKey;
-        final isToday = DateTime.now().year == _currentMonth.year && 
-                        DateTime.now().month == _currentMonth.month && 
-                        DateTime.now().day == dayNumber;
-        
+        final isToday =
+            DateTime.now().year == _currentMonth.year &&
+            DateTime.now().month == _currentMonth.month &&
+            DateTime.now().day == dayNumber;
+
         return GestureDetector(
           onTap: () => setState(() => _selectedDate = dateKey),
           child: Container(
             margin: const EdgeInsets.all(2),
             decoration: BoxDecoration(
-              color: isSelected 
-                  ? Colors.white.withValues(alpha: 0.3) 
-                  : (hasMoods ? Colors.white.withValues(alpha: 0.15) : null),
+              color: isSelected
+                  ? (widget.isDark
+                        ? Colors.white.withValues(alpha: 0.3)
+                        : Colors.white.withValues(alpha: 0.6))
+                  : (hasMoods
+                        ? (widget.isDark
+                              ? Colors.white.withValues(alpha: 0.15)
+                              : Colors.white.withValues(alpha: 0.4))
+                        : null),
               borderRadius: BorderRadius.circular(8),
-              border: isToday ? Border.all(color: Colors.white, width: 2) : null,
+              border: isToday
+                  ? Border.all(
+                      color: widget.isDark ? Colors.white : Colors.black87,
+                      width: 2,
+                    )
+                  : null,
             ),
             child: Stack(
               alignment: Alignment.center,
@@ -673,7 +846,7 @@ class _MoodCalendarViewState extends State<MoodCalendarView> {
                 Text(
                   '$dayNumber',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: widget.isDark ? Colors.white : Colors.black87,
                     fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
@@ -692,9 +865,22 @@ class _MoodCalendarViewState extends State<MoodCalendarView> {
       },
     );
   }
-  
+
   String _getMonthName(int month) {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
     return months[month - 1];
   }
 }
