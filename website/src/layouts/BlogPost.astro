@@ -9,9 +9,14 @@ import FormattedDate from '../components/FormattedDate.astro';
 import AuthorCard from '../components/AuthorCard.astro';
 import Giscus from '../components/Giscus.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+import type { MarkdownHeading } from 'astro';
+import TableOfContents from '../components/TableOfContents.astro';
 
-const { title, description, pubDate, updatedDate, heroImage, authors } =
+type Props = CollectionEntry<'blog'>['data'] & {
+  headings?: MarkdownHeading[];
+};
+
+const { title, description, pubDate, updatedDate, heroImage, authors, headings } =
   Astro.props;
 ---
 
@@ -63,8 +68,16 @@ const { title, description, pubDate, updatedDate, heroImage, authors } =
           </div>
         </div>
 
-        <div class="prose">
-          <slot />
+        <div class="content-container">
+          <div class="prose">
+            <slot />
+          </div>
+          
+          {headings && headings.length > 0 && (
+            <aside class="sidebar">
+              <TableOfContents headings={headings} />
+            </aside>
+          )}
         </div>
 
         <Giscus />
@@ -88,22 +101,50 @@ const { title, description, pubDate, updatedDate, heroImage, authors } =
 
   .blog-article {
     width: 100%;
-    max-width: 800px;
+    max-width: 1200px; /* Increased from 800px */
     background: transparent;
     position: relative;
     padding-bottom: 3rem;
   }
 
+  /* ... existing styles ... */
   [data-theme='light'] .blog-article {
   }
 
   .hero-section {
     position: relative;
     width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
     border-radius: 20px;
     overflow: hidden;
     background: var(--bg-main);
   }
+
+  /* Content Grid Layout */
+  .content-container {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 3rem;
+    margin-top: 2rem;
+    align-items: start;
+    max-width: 1100px;
+    margin: 2rem auto 0;
+  }
+
+  .prose {
+    padding: 0; /* Remove internal padding as grid handles spacing */
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text-muted);
+    min-width: 0; /* Prevent grid overflow */
+  }
+  
+  .sidebar {
+    position: sticky;
+    top: 8rem;
+  }
+
   [data-theme='light'] .hero-section {
     box-shadow: none;
     background: transparent;
@@ -188,13 +229,7 @@ const { title, description, pubDate, updatedDate, heroImage, authors } =
     font-weight: 400;
   }
 
-  .prose {
-    padding: 2.5rem;
-    padding-top: 0;
-    font-size: 1.05rem;
-    line-height: 1.8;
-    color: var(--text-muted);
-  }
+  /* Prose Styles */
   .prose :global(h2) {
     font-size: 1.5rem;
     margin-top: 2rem;
@@ -238,14 +273,28 @@ const { title, description, pubDate, updatedDate, heroImage, authors } =
     width: 100%;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
+    .content-container {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    
+    .sidebar {
+      grid-row: 1; /* Move TOC above content on mobile */
+      position: static;
+      margin-bottom: 1rem;
+    }
+
     .blog-article {
       border-radius: 0;
     }
     main {
       padding: 6rem 0 2rem;
     }
-    .prose,
+    /* Prose padding moved from .prose to main container in grid layout or global padding */
+    .content-container {
+      padding: 0 1.5rem;
+    }
     .hero-content {
       padding: 1.5rem;
     }
