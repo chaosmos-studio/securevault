@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
 import '../services/vault_service.dart';
+import '../services/encryption_service.dart';
 import '../services/security_service.dart';
 
 class AppState extends ChangeNotifier {
@@ -10,6 +11,7 @@ class AppState extends ChangeNotifier {
   bool _isUnlocked = false;
   Vault? _currentVault;
   String? _currentPassword;
+  String? _currentKey; // Cache the derived key for performance
   DateTime? _lastActivityTime;
   VaultInfo? _currentVaultInfo;
 
@@ -18,6 +20,7 @@ class AppState extends ChangeNotifier {
   bool get isUnlocked => _isUnlocked;
   Vault? get currentVault => _currentVault;
   String? get currentPassword => _currentPassword;
+  String? get currentKey => _currentKey;
   VaultInfo? get currentVaultInfo => _currentVaultInfo;
   bool get isMasterVault => _currentVaultInfo?.isMaster ?? false;
 
@@ -59,8 +62,9 @@ class AppState extends ChangeNotifier {
       _isUnlocked = true;
       _currentVault = vault;
       _currentPassword = password;
+      // Derive and cache key once
+      _currentKey = await EncryptionService.deriveKeyFromPassword(password);
       _lastActivityTime = DateTime.now();
-      _currentVaultInfo = await VaultService.getVaultInfo(vault.id);
       _currentVaultInfo = await VaultService.getVaultInfo(vault.id);
 
       // Prevent screenshots when vault is unlocked
@@ -76,6 +80,7 @@ class AppState extends ChangeNotifier {
     _isUnlocked = false;
     _currentVault = null;
     _currentPassword = null;
+    _currentKey = null;
     _lastActivityTime = null;
     _currentVaultInfo = null;
     notifyListeners();

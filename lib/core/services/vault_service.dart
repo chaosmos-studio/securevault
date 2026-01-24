@@ -236,19 +236,20 @@ class VaultService {
     required String name,
     required Uint8List data,
     Uint8List? thumbnail,
+    String? key,
   }) async {
     final itemId = _uuid.v4();
     final vaultsDir = await _getVaultsDirectory();
-    final key = await EncryptionService.deriveKeyFromPassword(password);
+    final encryptionKey = key ?? await EncryptionService.deriveKeyFromPassword(password);
     
     final assetPath = '${vaultsDir.path}/${vault.id}/assets/$itemId.enc';
-    final encryptedData = await EncryptionService.encryptBytes(data, key);
+    final encryptedData = await EncryptionService.encryptBytes(data, encryptionKey);
     await File(assetPath).writeAsBytes(encryptedData);
     
     String? thumbnailPath;
     if (thumbnail != null) {
       thumbnailPath = '${vaultsDir.path}/${vault.id}/assets/${itemId}_thumb.enc';
-      final encryptedThumb = await EncryptionService.encryptBytes(thumbnail, key);
+      final encryptedThumb = await EncryptionService.encryptBytes(thumbnail, encryptionKey);
       await File(thumbnailPath).writeAsBytes(encryptedThumb);
     }
     
@@ -266,7 +267,7 @@ class VaultService {
     return itemId;
   }
 
-  static Future<Uint8List?> getItemData(Vault vault, String password, String itemId) async {
+  static Future<Uint8List?> getItemData(Vault vault, String password, String itemId, {String? key}) async {
     final vaultsDir = await _getVaultsDirectory();
     final assetPath = '${vaultsDir.path}/${vault.id}/assets/$itemId.enc';
     final file = File(assetPath);
@@ -274,24 +275,24 @@ class VaultService {
     if (!await file.exists()) return null;
     
     try {
-      final key = await EncryptionService.deriveKeyFromPassword(password);
+      final encryptionKey = key ?? await EncryptionService.deriveKeyFromPassword(password);
       final encryptedData = await file.readAsBytes();
-      return await EncryptionService.decryptBytes(encryptedData, key);
+      return await EncryptionService.decryptBytes(encryptedData, encryptionKey);
     } catch (e) {
       return null;
     }
   }
 
-  static Future<Uint8List?> getThumbnail(Vault vault, String password, VaultItem item) async {
+  static Future<Uint8List?> getThumbnail(Vault vault, String password, VaultItem item, {String? key}) async {
     if (item.thumbnailPath == null) return null;
     
     final file = File(item.thumbnailPath!);
     if (!await file.exists()) return null;
     
     try {
-      final key = await EncryptionService.deriveKeyFromPassword(password);
+      final encryptionKey = key ?? await EncryptionService.deriveKeyFromPassword(password);
       final encryptedData = await file.readAsBytes();
-      return await EncryptionService.decryptBytes(encryptedData, key);
+      return await EncryptionService.decryptBytes(encryptedData, encryptionKey);
     } catch (e) {
       return null;
     }

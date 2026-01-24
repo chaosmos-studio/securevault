@@ -13,6 +13,7 @@ import 'vault_settings_screen.dart';
 import 'photo_viewer_screen.dart';
 import 'video_player_screen.dart';
 import 'notes_vault_screen.dart';
+import 'cached_media_tile.dart';
 
 class VaultHomeScreen extends StatefulWidget {
   const VaultHomeScreen({super.key});
@@ -67,6 +68,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
         setState(() => _isLoading = true);
         final vault = appState.currentVault;
         final password = appState.currentPassword;
+        final key = appState.currentKey;
 
         if (vault == null || password == null) return;
 
@@ -82,6 +84,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
             name: image.name,
             data: bytes,
             thumbnail: thumbnail,
+            key: key,
           );
           addedFiles.add(image.path);
         }
@@ -98,6 +101,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
         setState(() => _isLoading = true);
         final vault = appState.currentVault;
         final password = appState.currentPassword;
+        final key = appState.currentKey;
 
         if (vault == null || password == null) return;
 
@@ -111,6 +115,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
           name: image.name,
           data: bytes,
           thumbnail: thumbnail,
+          key: key,
         );
 
         await appState.refreshVault();
@@ -138,6 +143,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
       setState(() => _isLoading = true);
       final vault = appState.currentVault;
       final password = appState.currentPassword;
+      final key = appState.currentKey;
 
       if (vault == null || password == null) return;
 
@@ -149,6 +155,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
         type: VaultItemType.video,
         name: video.name,
         data: bytes,
+        key: key,
       );
 
       await appState.refreshVault();
@@ -333,6 +340,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
     final appState = context.read<AppState>();
     final vault = appState.currentVault;
     final password = appState.currentPassword;
+    final key = appState.currentKey;
 
     if (vault == null || password == null) return;
 
@@ -342,7 +350,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
 
     for (final itemId in _selectedItems) {
       final item = vault.items.firstWhere((i) => i.id == itemId);
-      final data = await VaultService.getItemData(vault, password, itemId);
+      final data = await VaultService.getItemData(vault, password, itemId, key: key);
       if (data != null) {
         final ext = item.type == VaultItemType.photo ? 'jpg' : 'mp4';
         final file = File('${tempDir.path}/${item.name}.$ext');
@@ -641,127 +649,39 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
   }
 
   Widget _buildMediaTile(VaultItem item, VaultItemType type) {
+    final appState = context.read<AppState>();
     final isSelected = _selectedItems.contains(item.id);
 
-    return GestureDetector(
-      onTap: () {
-        if (_isSelectionMode) {
-          _toggleItemSelection(item.id);
-        } else {
-          _openMedia(item);
-        }
-      },
-      onLongPress: () {
+    return CachedMediaTile(
+      item: item,
+      vault: appState.currentVault!,
+      password: appState.currentPassword!,
+      encryptionKey: appState.currentKey,
+      isSelected: isSelected,
+      isSelectionMode: _isSelectionMode,
+      onToggleSelection: _toggleItemSelection,
+      onOpen: _openMedia,
+      onLongPress: (id) {
         if (!_isSelectionMode) {
           setState(() {
             _isSelectionMode = true;
-            _selectedItems.add(item.id);
+            _selectedItems.add(id);
           });
         }
       },
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey[800]
-                  : Colors.grey[300],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: FutureBuilder<Uint8List?>(
-              future: _loadThumbnail(item),
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data != null) {
-                  return Image.memory(snapshot.data!, fit: BoxFit.cover);
-                }
-                return Center(
-                  child: Icon(
-                    type == VaultItemType.photo ? Icons.photo : Icons.videocam,
-                    color: Colors.grey[500],
-                  ),
-                );
-              },
-            ),
-          ),
-          if (type == VaultItemType.video)
-            Positioned(
-              right: 4,
-              bottom: 4,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(
-                  Icons.play_arrow,
-                  color: Colors.white,
-                  size: 16,
-                ),
-              ),
-            ),
-          if (_isSelectionMode)
-            Positioned(
-              top: 4,
-              right: 4,
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.white.withValues(alpha: 0.8),
-                  border: Border.all(
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : Colors.grey,
-                    width: 2,
-                  ),
-                ),
-                child: isSelected
-                    ? const Icon(Icons.check, color: Colors.white, size: 16)
-                    : null,
-              ),
-            ),
-          if (isSelected)
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.primary,
-                  width: 2,
-                ),
-              ),
-            ),
-        ],
-      ),
     );
   }
 
-  Future<Uint8List?> _loadThumbnail(VaultItem item) async {
-    final appState = context.read<AppState>();
-    final vault = appState.currentVault;
-    final password = appState.currentPassword;
-
-    if (vault == null || password == null) return null;
-
-    return await VaultService.getThumbnail(vault, password, item);
-  }
 
   void _openMedia(VaultItem item) async {
     final appState = context.read<AppState>();
     final vault = appState.currentVault;
     final password = appState.currentPassword;
+    final key = appState.currentKey;
 
     if (vault == null || password == null) return;
 
-    final data = await VaultService.getItemData(vault, password, item.id);
+    final data = await VaultService.getItemData(vault, password, item.id, key: key);
     if (data == null || !mounted) return;
 
     if (item.type == VaultItemType.photo) {

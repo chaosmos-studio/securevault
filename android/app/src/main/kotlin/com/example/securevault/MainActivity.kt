@@ -50,24 +50,33 @@ class MainActivity : FlutterActivity() {
         val packageManager = packageManager
         val packageName = packageName
 
+        // Enable the new alias FIRST to prevent app kill issues
+        for ((id, alias) in aliases) {
+            if (id == disguiseId) {
+                packageManager.setComponentEnabledSetting(
+                    ComponentName(packageName, "$packageName$alias"),
+                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                    PackageManager.DONT_KILL_APP
+                )
+            }
+        }
+
+        // Disable MainActivity (default entry point)
         packageManager.setComponentEnabledSetting(
             ComponentName(packageName, "$packageName.MainActivity"),
             PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
             PackageManager.DONT_KILL_APP
         )
 
+        // Disable other aliases
         for ((id, alias) in aliases) {
-            val state = if (id == disguiseId) {
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-            } else {
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+            if (id != disguiseId) {
+                packageManager.setComponentEnabledSetting(
+                    ComponentName(packageName, "$packageName$alias"),
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP
+                )
             }
-            
-            packageManager.setComponentEnabledSetting(
-                ComponentName(packageName, "$packageName$alias"),
-                state,
-                PackageManager.DONT_KILL_APP
-            )
         }
     }
 
