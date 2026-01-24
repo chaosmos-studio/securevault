@@ -1370,7 +1370,7 @@ class AboutScreen extends StatelessWidget {
               _DeveloperLink(
                 _SocialIcon.github,
                 'GitHub',
-                'https://github.com/shravangoswami',
+                'https://github.com/shravanngoswamii',
               ),
               _DeveloperLink(
                 _SocialIcon.linkedin,
@@ -1390,7 +1390,7 @@ class AboutScreen extends StatelessWidget {
               _DeveloperLink(
                 _SocialIcon.sponsor,
                 'Sponsor',
-                'https://github.com/sponsors/shravangoswami',
+                'https://github.com/sponsors/shravanngoswamii',
               ),
             ],
           ),

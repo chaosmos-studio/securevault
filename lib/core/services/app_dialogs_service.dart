@@ -110,7 +110,7 @@ class AppDialogsService {
                 links: [
                   {
                     'label': 'GitHub',
-                    'url': 'https://github.com/shravangoswami',
+                    'url': 'https://github.com/shravanngoswamii',
                   },
                   {
                     'label': 'LinkedIn',
@@ -123,7 +123,7 @@ class AppDialogsService {
                   },
                   {
                     'label': 'Sponsor',
-                    'url': 'https://github.com/sponsors/shravangoswami',
+                    'url': 'https://github.com/sponsors/shravanngoswamii',
                   },
                 ],
               ),
