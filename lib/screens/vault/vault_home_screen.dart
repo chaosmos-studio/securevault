@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -92,7 +91,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
         await appState.refreshVault();
 
         if (mounted && addedFiles.isNotEmpty) {
-          _showDeleteOriginalDialog(addedFiles, 'photo');
+          _showManualDeleteReminderDialog(context, 'photo');
         }
       } else {
         final XFile? image = await _picker.pickImage(source: source);
@@ -161,7 +160,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
       await appState.refreshVault();
 
       if (mounted && source == ImageSource.gallery) {
-        _showDeleteOriginalDialog([video.path], 'video');
+        _showManualDeleteReminderDialog(context, 'video');
       }
     } catch (e) {
       if (mounted) {
@@ -174,111 +173,29 @@ class _VaultHomeScreenState extends State<VaultHomeScreen>
     }
   }
 
-  void _showDeleteOriginalDialog(List<String> filePaths, String type) {
-    final count = filePaths.length;
+  void _showManualDeleteReminderDialog(BuildContext context, String type) {
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text('Delete Original $type${count > 1 ? 's' : ''}?'),
-        content: Text(
-          count > 1
-              ? '$count ${type}s have been securely stored in your vault. Would you like to delete the originals from your device gallery?'
-              : 'The $type has been securely stored in your vault. Would you like to delete the original from your device gallery?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(count > 1 ? 'Keep Originals' : 'Keep Original'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              await _deleteFromGallery(filePaths, type);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(
-              count > 1 ? 'Delete Originals' : 'Delete Original',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _deleteFromGallery(List<String> filePaths, String type) async {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-    try {
-      final permission = await PhotoManager.requestPermissionExtend();
-      if (!permission.isAuth) {
-        scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text('Permission denied to access gallery')),
-        );
-        return;
-      }
-
-      final assetType = type == 'photo' ? RequestType.image : RequestType.video;
-      final albums = await PhotoManager.getAssetPathList(type: assetType);
-
-      final idsToDelete = <String>[];
-
-      for (final filePath in filePaths) {
-        final file = File(filePath);
-        if (!await file.exists()) continue;
-
-        final fileStats = await file.stat();
-        final fileSize = fileStats.size;
-
-        for (final album in albums) {
-          final assets = await album.getAssetListRange(start: 0, end: 1000);
-          for (final asset in assets) {
-            final assetFile = await asset.file;
-            if (assetFile != null) {
-              if (assetFile.path == filePath) {
-                idsToDelete.add(asset.id);
-                break;
-              }
-              final assetSize = await assetFile.length();
-              if (assetSize == fileSize) {
-                idsToDelete.add(asset.id);
-                break;
-              }
-            }
-          }
-          if (idsToDelete.length == filePaths.length) break;
-        }
-      }
-
-      if (idsToDelete.isNotEmpty) {
-        final result = await PhotoManager.editor.deleteWithIds(idsToDelete);
-        if (result.isNotEmpty) {
-          scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text(
-                '${result.length} original $type${result.length > 1 ? 's' : ''} deleted from gallery',
-              ),
-            ),
-          );
-        } else {
-          scaffoldMessenger.showSnackBar(
-            SnackBar(content: Text('Could not delete original ${type}s')),
-          );
-        }
-      } else {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Privacy Reminder'),
             content: Text(
-              'Original $type${filePaths.length > 1 ? 's' : ''} not found in gallery',
+              'Your $type has been securely encrypted and stored in the vault.\n\n'
+              'To ensure complete privacy, please manually delete the original $type from your device gallery.\n\n'
+              'We do not automatically delete files or access your gallery to guarantee that even we cannot see your personal media.',
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('I Understand'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        );
-      }
-    } catch (e) {
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('Error deleting original: $e')),
-      );
-    }
+    );
   }
 
   Future<ImageSource?> _showSourceDialog() async {
