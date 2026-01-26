@@ -13,6 +13,19 @@ import {
   DoorOpen,
   MoreVertical,
 } from '@lucide/astro';
+
+import { Image } from 'astro:assets';
+import heroDark from '../assets/screenshots/hero_section_dark.png';
+import heroLight from '../assets/screenshots/hero_section_light.png';
+import calculatorDark from '../assets/screenshots/calculator_dark.jpeg';
+import calculatorLight from '../assets/screenshots/calculator_light.jpeg';
+import clockDark from '../assets/screenshots/clock_dark.jpeg';
+import clockLight from '../assets/screenshots/clock_light.jpeg';
+import moodspaceDark from '../assets/screenshots/moodspace_dark.jpeg';
+import moodspaceLight from '../assets/screenshots/moodspace_light.jpeg';
+import notesDark from '../assets/screenshots/notes_dark.jpeg';
+import notesLight from '../assets/screenshots/notes_light.jpeg';
+
 ---
 
 <Layout title="SecureVault - Invisible Privacy">
@@ -61,13 +74,12 @@ import {
             <div class="phone-frame">
               <div class="phone-notch"></div>
               <div class="phone-screen">
-                <img
-                  src={`${import.meta.env.BASE_URL}/screenshots/hero_section_dark.png`.replace(
-                    /\/\//g,
-                    '/'
-                  )}
+                <Image
+                  src={heroDark}
                   alt="SecureVault Calculator"
                   class="screen-img main-shot"
+                  id="hero-img"
+                  loading="eager"
                 />
               </div>
             </div>
@@ -123,11 +135,8 @@ import {
             <div class="disguise-visual">
               <div class="phone-frame small">
                 <div class="phone-screen bg-black">
-                  <img
-                    src={`${import.meta.env.BASE_URL}/screenshots/calculator_dark.jpeg`.replace(
-                      /\/\//g,
-                      '/'
-                    )}
+                  <Image
+                    src={calculatorDark}
                     id="preview-img"
                     class="screen-img fade-in"
                     alt="Disguise Preview"
@@ -219,60 +228,75 @@ import {
   </div>
 </Layout>
 
-<script>
+<script
+  define:vars={{
+    heroDarkSrc: heroDark.src,
+    heroLightSrc: heroLight.src,
+    calcDarkSrc: calculatorDark.src,
+    calcLightSrc: calculatorLight.src,
+    clockDarkSrc: clockDark.src,
+    clockLightSrc: clockLight.src,
+    moodDarkSrc: moodspaceDark.src,
+    moodLightSrc: moodspaceLight.src,
+    notesDarkSrc: notesDark.src,
+    notesLightSrc: notesLight.src,
+  }}
+>
   const buttons = document.querySelectorAll('.disguise-btn');
-  const previewImg = document.getElementById('preview-img') as HTMLImageElement;
-  const heroImg = document.querySelector('.hero-visual .screen-img') as HTMLImageElement;
+  const previewImg = document.getElementById('preview-img');
+  const heroImg = document.getElementById('hero-img');
 
   const heroImages = {
-    light: `${import.meta.env.BASE_URL}/screenshots/hero_section_light.png`.replace(/\/\//g, '/'),
-    dark: `${import.meta.env.BASE_URL}/screenshots/hero_section_dark.png`.replace(/\/\//g, '/'),
+    light: heroLightSrc,
+    dark: heroDarkSrc,
   };
 
-  const images: Record<string, { light: string; dark: string }> = {
+  const images = {
     calc: {
-      light: `${import.meta.env.BASE_URL}/screenshots/calculator_light.jpeg`.replace(/\/\//g, '/'),
-      dark: `${import.meta.env.BASE_URL}/screenshots/calculator_dark.jpeg`.replace(/\/\//g, '/'),
+      light: calcLightSrc,
+      dark: calcDarkSrc,
     },
     clock: {
-      light: `${import.meta.env.BASE_URL}/screenshots/clock_light.jpeg`.replace(/\/\//g, '/'),
-      dark: `${import.meta.env.BASE_URL}/screenshots/clock_dark.jpeg`.replace(/\/\//g, '/'),
+      light: clockLightSrc,
+      dark: clockDarkSrc,
     },
     mood: {
-      light: `${import.meta.env.BASE_URL}/screenshots/moodspace_light.jpeg`.replace(/\/\//g, '/'),
-      dark: `${import.meta.env.BASE_URL}/screenshots/moodspace_dark.jpeg`.replace(/\/\//g, '/'),
+      light: moodLightSrc,
+      dark: moodDarkSrc,
     },
     notes: {
-      light: `${import.meta.env.BASE_URL}/screenshots/notes_light.jpeg`.replace(/\/\//g, '/'),
-      dark: `${import.meta.env.BASE_URL}/screenshots/notes_dark.jpeg`.replace(/\/\//g, '/'),
+      light: notesLightSrc,
+      dark: notesDarkSrc,
     },
   };
 
   let currentTarget = 'calc';
 
-  function getTheme(): 'light' | 'dark' {
-    return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  function getTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'light'
+      ? 'light'
+      : 'dark';
   }
 
   function updateImages() {
     const theme = getTheme();
-    
+
     // Update hero image
     if (heroImg) {
       const heroSrc = heroImages[theme];
-      if (heroImg.src !== heroSrc && !heroImg.src.endsWith(heroSrc)) {
+      if (heroImg.src !== heroSrc) {
         heroImg.src = heroSrc;
       }
     }
 
     const targetImages = images[currentTarget];
-    
+
     if (!targetImages) return;
 
     const newSrc = targetImages[theme];
 
     // Update preview section image
-    if (previewImg && previewImg.src !== newSrc && !previewImg.src.endsWith(newSrc)) {
+    if (previewImg && previewImg.src !== newSrc) {
       previewImg.style.opacity = '0.5';
       setTimeout(() => {
         previewImg.src = newSrc;
@@ -302,9 +326,12 @@ import {
   });
 
   // Observe theme changes
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      if (
+        mutation.type === 'attributes' &&
+        mutation.attributeName === 'data-theme'
+      ) {
         updateImages();
       }
     });
