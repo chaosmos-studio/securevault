@@ -1,4 +1,4 @@
-package com.example.securevault
+package com.shravangoswami.securevault
 
 import android.content.ComponentName
 import android.content.pm.PackageManager

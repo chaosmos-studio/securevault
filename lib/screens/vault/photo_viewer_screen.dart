@@ -140,12 +140,14 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
         onTap: () => setState(() => _showControls = !_showControls),
         child: Stack(
           children: [
-            Center(
+            SizedBox.expand(
               child: InteractiveViewer(
                 panEnabled: true,
                 minScale: 0.5,
                 maxScale: 4.0,
-                child: Image.memory(widget.imageData, fit: BoxFit.contain),
+                child: Center(
+                  child: Image.memory(widget.imageData, fit: BoxFit.contain),
+                ),
               ),
             ),
             if (_showControls) ...[

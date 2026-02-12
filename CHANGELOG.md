@@ -2,6 +2,12 @@
 
 All notable changes to SecureVault will be documented in this file.
 
+## [1.0.1] - February 2026
+
+### Fixed
+- Image zoom now works across the full screen area instead of a compact region
+- Improved pan and zoom experience in photo viewer
+
 ## [1.0.0] - January 2026
 
 ### Added

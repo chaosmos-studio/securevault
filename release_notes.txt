@@ -1,0 +1,16 @@
+Release Name: 1.0.1 (Internal Beta 2)
+
+Release Notes:
+Bug fix release.
+- Fixed image zoom not working across full screen area.
+- Images now zoom and pan smoothly across the entire display.
+
+---
+
+Release Name: 1.0.0 (Internal Beta 1)
+
+Release Notes:
+Initial internal testing release.
+- Secure Vault feature basic implementation.
+- Biometric authentication.
+- File encryption and hiding.
