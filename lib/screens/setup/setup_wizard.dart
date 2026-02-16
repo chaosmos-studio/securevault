@@ -81,25 +81,37 @@ class _SetupWizardState extends State<SetupWizard> {
         isMaster: _isMasterVault,
       );
 
-      // Save disguise preference first (doesn't restart app)
+      // Save disguise preference (safe — isSetupComplete is still false,
+      // so AppRouter still shows SetupWizard even after notifyListeners)
       await appState.setDisguise(_selectedDisguise);
-      await appState.completeSetup();
 
       if (mounted) {
-        // Show first-time instructions BEFORE applying disguise (which restarts app)
+        // Show first-time instructions while SetupWizard is still active
         await AppDialogsService.showFirstTimeInstructions(context);
 
-        // Mark instructions as shown
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('first_time_instructions', false);
 
-        // Now apply disguise (this will restart app on Android)
+        // Apply native icon change while SetupWizard is still active
         await DisguiseService.setDisguise(_selectedDisguise);
 
         if (Platform.isAndroid) {
+          // Persist setup complete directly to SharedPreferences WITHOUT
+          // calling appState.completeSetup() which triggers notifyListeners()
+          // and causes AppRouter to replace SetupWizard before we can
+          // show the restart dialog and force-stop the app.
+          await prefs.setBool('is_setup_complete', true);
+
+          // Show dialog, then kill the app so launcher picks up the new icon.
+          // When the app restarts, AppState.initialize() reads is_setup_complete
+          // from SharedPreferences and routes to the disguise screen.
           _showRestartDialog();
-        } else if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/home');
+        } else {
+          // On non-Android platforms, complete setup normally
+          await appState.completeSetup();
+          if (mounted) {
+            Navigator.of(context).pushReplacementNamed('/home');
+          }
         }
       }
     } catch (e) {
@@ -120,14 +132,14 @@ class _SetupWizardState extends State<SetupWizard> {
       builder: (context) => AlertDialog(
         title: const Text('Apply Disguise'),
         content: const Text(
-          'The app will briefly close to apply the new icon and name. '
-          'This is normal and only happens when changing the disguise.',
+          'The app will now close to apply the new icon and name. '
+          'Please reopen the app from your home screen.',
         ),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              Navigator.of(context).pushReplacementNamed('/home');
+              await DisguiseService.forceStopApp();
             },
             child: const Text('OK'),
           ),

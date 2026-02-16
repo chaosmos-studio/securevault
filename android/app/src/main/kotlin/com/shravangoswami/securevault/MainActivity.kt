@@ -3,6 +3,8 @@ package com.shravangoswami.securevault
 import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -38,6 +40,13 @@ class MainActivity : FlutterActivity() {
                 }
                 "getCurrentDisguise" -> {
                     result.success(getCurrentDisguise())
+                }
+                "forceStopApp" -> {
+                    result.success(true)
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        finishAffinity()
+                        android.os.Process.killProcess(android.os.Process.myPid())
+                    }, 500)
                 }
                 else -> {
                     result.notImplemented()

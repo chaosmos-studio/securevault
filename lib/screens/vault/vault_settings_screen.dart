@@ -293,12 +293,15 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Apply Changes'),
         content: const Text(
-          'The app will briefly close to apply the new icon and name. '
-          'This is normal and only happens when changing the disguise.',
+          'The app will now close to apply the new icon and name. '
+          'Please reopen the app from your home screen.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () async {
+              Navigator.pop(context);
+              await DisguiseService.forceStopApp();
+            },
             child: const Text('OK'),
           ),
         ],

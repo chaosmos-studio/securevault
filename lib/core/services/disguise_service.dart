@@ -44,6 +44,18 @@ class DisguiseService {
 
   // Deprecated methods removed as we use IconService now
 
+  /// Kills the app process so the Android launcher picks up the new icon.
+  /// Call this AFTER all data has been persisted.
+  static Future<void> forceStopApp() async {
+    if (Platform.isAndroid) {
+      try {
+        await _methodChannel.invokeMethod('forceStopApp');
+      } catch (e) {
+        // Process may already be dead
+      }
+    }
+  }
+
   static Future<bool> supportsIconChange() async {
     if (Platform.isAndroid) {
       return true;
