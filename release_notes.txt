@@ -1,3 +1,14 @@
+Release Name: 1.0.2 (Internal Beta 3)
+
+Release Notes:
+Bug fix release — disguise mode reliability improvements.
+- Fixed app icon not changing on first install. The disguise icon now applies correctly during initial setup on all Android devices.
+- App now properly closes after disguise selection so the Android launcher picks up the new icon.
+- Disguise changes from vault settings also force-close the app for reliable icon refresh.
+- Updated contact email to hello@chaosmos.studio.
+
+---
+
 Release Name: 1.0.1 (Internal Beta 2)
 
 Release Notes:

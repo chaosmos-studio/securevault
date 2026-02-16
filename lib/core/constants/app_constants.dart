@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppConstants {
   static const String appName = 'SecureVault';
-  static const String version = '1.0.0';
+  static const String version = '1.0.2';
 
   static const int maxFailedAttempts = 5;
   static const int lockoutDurationMinutes = 5;

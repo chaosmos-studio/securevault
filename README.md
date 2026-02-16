@@ -61,6 +61,14 @@ flutter build apk --release
 
 APK output: `build/app/outputs/flutter-apk/app-release.apk`
 
+## Play Store Publish Build
+
+```bash
+flutter build appbundle --release
+```
+
+AAB output: `build\app\outputs\bundle\release\app-release.aab`
+
 ## License
 
 Proprietary. See LICENSE file.

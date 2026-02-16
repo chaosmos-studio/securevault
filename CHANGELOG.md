@@ -2,6 +2,16 @@
 
 All notable changes to SecureVault will be documented in this file.
 
+## [1.0.2] - February 2026
+
+### Fixed
+- App icon not changing on first install — disguise mode now applies correctly during initial setup
+- App no longer stays open after setup; it force-closes so the launcher picks up the new icon
+- Disguise icon change in vault settings now force-closes the app for reliable launcher refresh
+
+### Changed
+- Updated contact email to hello@chaosmos.studio
+
 ## [1.0.1] - February 2026
 
 ### Fixed
