@@ -58,8 +58,8 @@ class _SetupWizardState extends State<SetupWizard> {
       setState(() => _error = 'Please enter a vault name');
       return;
     }
-    if (_passwordController.text.length < 4) {
-      setState(() => _error = 'Password must be at least 4 characters');
+    if (_passwordController.text.length < 6) {
+      setState(() => _error = 'Password must be at least 6 characters');
       return;
     }
     if (_passwordController.text != _confirmPasswordController.text) {

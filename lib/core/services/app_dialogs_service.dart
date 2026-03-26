@@ -74,9 +74,9 @@ class AppDialogsService {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const Text(
-                    'Version 1.0.0',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  Text(
+                    'Version ${AppConstants.version}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),

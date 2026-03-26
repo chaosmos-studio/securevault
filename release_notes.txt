@@ -1,3 +1,12 @@
+Release Name: 1.0.3 (Production Release)
+
+Release Notes:
+First public production release.
+- Minimum vault password length increased to 6 characters for stronger security.
+- Fixed About screen always showing version 1.0.0 instead of the correct version.
+
+---
+
 Release Name: 1.0.2 (Internal Beta 3)
 
 Release Notes:

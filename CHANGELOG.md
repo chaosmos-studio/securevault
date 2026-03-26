@@ -2,6 +2,15 @@
 
 All notable changes to SecureVault will be documented in this file.
 
+## [1.0.3] - March 2026
+
+### Changed
+- Increased minimum vault password length from 4 to 6 characters for stronger protection
+- About screen now always shows the correct app version
+
+### Fixed
+- About dialog was displaying version 1.0.0 regardless of the installed version
+
 ## [1.0.2] - February 2026
 
 ### Fixed
