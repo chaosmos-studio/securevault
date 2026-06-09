@@ -6,10 +6,12 @@ import BackToTop from '../components/BackToTop.astro';
 import { Image } from 'astro:assets';
 import luffyImg from '../assets/luffy.png';
 import zoroImg from '../assets/zoro.png';
+import jitendraImg from '../assets/jitendra.webp';
 import { Github, Linkedin, Globe, Mail, Heart } from '@lucide/astro';
 import authors from '../data/authors.json';
 
 const imageMap: Record<string, ImageMetadata> = {
+  jitendra: jitendraImg,
   shravan: luffyImg,
   jash: zoroImg,
 };

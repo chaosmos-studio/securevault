@@ -1,4 +1,17 @@
 {
+  "jitendra": {
+    "id": "jitendra",
+    "name": "Jitendra Verma",
+    "role": "Lead Developer",
+    "image": "/src/assets/jitendra.webp",
+    "social": {
+      "github": "https://github.com/jitendravjh",
+      "linkedin": null,
+      "website": "https://jitendravjh.github.io",
+      "email": null
+    },
+    "sponsor": null
+  },
   "shravan": {
     "id": "shravan",
     "name": "Shravan Goswami",
