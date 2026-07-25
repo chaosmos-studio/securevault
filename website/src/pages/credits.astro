@@ -1,183 +1,190 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import SiteHeader from "../components/SiteHeader.astro";
-import SiteFooter from "../components/SiteFooter.astro";
-import { Heart } from "@lucide/astro";
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { Heart } from '@lucide/astro';
 ---
 
 <Layout title="Credits - SecureVault">
-    <div class="premium-container" id="main-container">
+  <div class="premium-container" id="main-container">
+    <SiteHeader />
 
-        <SiteHeader />
+    <main>
+      <section class="page-header">
+        <h1 class="headline">
+          Credits & <span class="text-gradient">Acknowledgments</span>
+        </h1>
+        <p class="subheadline">
+          The tools and resources that made this possible.
+        </p>
+      </section>
 
-        <main>
-            <section class="page-header">
-                <h1 class="headline">
-                    Credits & <span class="text-gradient">Acknowledgments</span>
-                </h1>
-                <p class="subheadline">The tools and resources that made this possible.</p>
-            </section>
+      <section class="credits-section glow-card">
+        <div class="credit-category">
+          <h3><Heart size={20} class="icon" /> Assets & Resources</h3>
+          <ul>
+            <li>
+              <strong>Icons:</strong>
+              <a
+                href="https://www.flaticon.com/"
+                target="_blank"
+                rel="noopener noreferrer">Flaticon</a
+              >
+            </li>
+            <li>
+              <strong>Developer Photos:</strong> Generated with <strong
+                >Gemini Nano Banana</strong
+              >
+            </li>
+          </ul>
+        </div>
 
-            <section class="credits-section glow-card">
-                <div class="credit-category">
-                    <h3><Heart size={20} class="icon" /> Assets & Resources</h3>
-                    <ul>
-                        <li>
-                            <strong>Icons:</strong> <a href="https://www.flaticon.com/" target="_blank" rel="noopener noreferrer">Flaticon</a>
-                        </li>
-                        <li>
-                            <strong>Developer Photos:</strong> Generated with <strong>Gemini Nano Banana</strong>
-                        </li>
-                    </ul>
-                </div>
+        <div class="divider"></div>
 
-                <div class="divider"></div>
+        <div class="credit-category">
+          <h3><Heart size={20} class="icon" /> Development Tools</h3>
+          <ul>
+            <li>
+              <strong>IDE Assistant:</strong> Copilot in VS Code
+              <span class="sub-text"
+                >(Powered by Claude Sonnet 4.5, Claude Opus 4.5, Gemini 3 Pro &
+                Grok Code Fast 1)</span
+              >
+            </li>
+            <li>
+              <strong>Agentic Coding:</strong> Antigravity
+              <span class="sub-text"
+                >(Powered by Gemini 3 Pro High & Claude Opus 4.5)</span
+              >
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
 
-                <div class="credit-category">
-                    <h3><Heart size={20} class="icon" /> Development Tools</h3>
-                    <ul>
-                        <li>
-                            <strong>IDE Assistant:</strong> Copilot in VS Code
-                            <span class="sub-text">(Powered by Claude Sonnet 4.5, Claude Opus 4.5, Gemini 3 Pro & Grok Code Fast 1)</span>
-                        </li>
-                        <li>
-                            <strong>Agentic Coding:</strong> Antigravity
-                            <span class="sub-text">(Powered by Gemini 3 Pro High & Claude Opus 4.5)</span>
-                        </li>
-                    </ul>
-                </div>
-            </section>
-        </main>
-
-        <SiteFooter />
-    </div>
+    <SiteFooter />
+  </div>
 </Layout>
 
 <script>
-    const wrapper = document.getElementById("main-container");
-    if (wrapper) {
-        wrapper.addEventListener("mousemove", (e) => {
-            const rect = wrapper.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            wrapper.style.setProperty("--mouse-x", `${x}px`);
-            wrapper.style.setProperty("--mouse-y", `${y}px`);
+  const wrapper = document.getElementById('main-container');
+  if (wrapper) {
+    wrapper.addEventListener('mousemove', e => {
+      const rect = wrapper.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      wrapper.style.setProperty('--mouse-x', `${x}px`);
+      wrapper.style.setProperty('--mouse-y', `${y}px`);
 
-            document.querySelectorAll(".glow-card").forEach((card) => {
-                const cardRect = card.getBoundingClientRect();
-                const cardX = e.clientX - cardRect.left;
-                const cardY = e.clientY - cardRect.top;
-                (card as HTMLElement).style.setProperty(
-                    "--card-x",
-                    `${cardX}px`,
-                );
-                (card as HTMLElement).style.setProperty(
-                    "--card-y",
-                    `${cardY}px`,
-                );
-            });
-        });
-    }
+      document.querySelectorAll('.glow-card').forEach(card => {
+        const cardRect = card.getBoundingClientRect();
+        const cardX = e.clientX - cardRect.left;
+        const cardY = e.clientY - cardRect.top;
+        (card as HTMLElement).style.setProperty('--card-x', `${cardX}px`);
+        (card as HTMLElement).style.setProperty('--card-y', `${cardY}px`);
+      });
+    });
+  }
 </script>
 
 <style>
+  main {
+    padding: 6rem 5% 4rem;
+    max-width: 800px;
+    margin: 0 auto;
+    z-index: 2;
+    position: relative;
+    min-height: 80vh;
+  }
+  @media (min-width: 768px) {
     main {
-        padding: 6rem 5% 4rem;
-        max-width: 800px;
-        margin: 0 auto;
-        z-index: 2;
-        position: relative;
-        min-height: 80vh;
+      padding: 10rem 5% 4rem;
     }
-    @media (min-width: 768px) {
-        main {
-            padding: 10rem 5% 4rem;
-        }
-    }
+  }
 
-    .page-header {
-        text-align: center;
-        margin-bottom: 4rem;
-    }
-    .headline {
-        font-size: clamp(2.5rem, 5vw, 4rem);
-        margin-bottom: 0.5rem;
-    }
-    .subheadline {
-        color: var(--text-muted);
-        font-size: 1.2rem;
-    }
+  .page-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .headline {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    margin-bottom: 0.5rem;
+  }
+  .subheadline {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+  }
 
-    .text-gradient {
-        background: linear-gradient(90deg, var(--accent), #a855f7);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+  .text-gradient {
+    background: linear-gradient(90deg, var(--accent), #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 
+  .credits-section {
+    padding: 3rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+  }
+
+  .credit-category h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-main);
+  }
+  .icon {
+    color: var(--accent);
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    margin-bottom: 1rem;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+
+  li strong {
+    color: var(--text-main);
+  }
+
+  li a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: opacity 0.2s;
+  }
+  li a:hover {
+    opacity: 0.8;
+  }
+
+  .sub-text {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    opacity: 0.8;
+    margin-top: 0.2rem;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2rem 0;
+  }
+
+  @media (max-width: 768px) {
     .credits-section {
-        padding: 3rem;
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        backdrop-filter: blur(12px);
+      padding: 2rem;
     }
-
-    .credit-category h3 {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        font-size: 1.4rem;
-        margin-bottom: 1.5rem;
-        color: var(--text-main);
-    }
-    .icon {
-        color: var(--accent);
-    }
-
-    ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    li {
-        margin-bottom: 1rem;
-        color: var(--text-muted);
-        font-size: 1.1rem;
-        line-height: 1.6;
-    }
-
-    li strong {
-        color: var(--text-main);
-    }
-
-    li a {
-        color: var(--accent);
-        text-decoration: underline;
-        text-underline-offset: 4px;
-        transition: opacity 0.2s;
-    }
-    li a:hover {
-        opacity: 0.8;
-    }
-
-    .sub-text {
-        display: block;
-        font-size: 0.9rem;
-        color: var(--text-muted);
-        opacity: 0.8;
-        margin-top: 0.2rem;
-    }
-
-    .divider {
-        height: 1px;
-        background: var(--border);
-        margin: 2rem 0;
-    }
-
-    @media (max-width: 768px) {
-        .credits-section {
-            padding: 2rem;
-        }
-    }
+  }
 </style>

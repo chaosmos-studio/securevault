@@ -126,17 +126,17 @@ const authorImage = imageMap[authorId];
 
       const openCard = () => {
         clearTimeout(hoverTimeout);
-        
+
         // Smart Positioning Logic
         const triggerRect = trigger.getBoundingClientRect();
         const cardHeight = (card as HTMLElement).offsetHeight;
         const spaceAbove = triggerRect.top;
-        
+
         // If not enough space above (plus some buffer), show below
         if (spaceAbove < cardHeight + 20) {
-            card.classList.add('position-bottom');
+          card.classList.add('position-bottom');
         } else {
-            card.classList.remove('position-bottom');
+          card.classList.remove('position-bottom');
         }
 
         card.classList.add('visible');
@@ -250,7 +250,7 @@ const authorImage = imageMap[authorId];
     pointer-events: auto;
     transform: translateX(-50%) translateY(0);
   }
-  
+
   .author-card.position-bottom.visible {
     transform: translateX(-50%) translateY(0);
   }
@@ -279,16 +279,16 @@ const authorImage = imageMap[authorId];
   }
   /* Fix arrow bg for light/dark modes */
   .card-content {
-      background: var(--bg-main);
-      /* ... existing styles ... */
+    background: var(--bg-main);
+    /* ... existing styles ... */
   }
-  
+
   /* Make sure arrow matches content bg */
   .author-card.position-bottom .card-arrow {
-      background: var(--bg-main);
+    background: var(--bg-main);
   }
   [data-theme='light'] .author-card.position-bottom .card-arrow {
-      background: #ffffff;
+    background: #ffffff;
   }
 
   .card-content {
@@ -395,7 +395,7 @@ const authorImage = imageMap[authorId];
       left: 0;
       transform: translateX(0) translateY(10px);
     }
-    
+
     .author-card.position-bottom {
       left: 0;
       transform: translateX(0) translateY(-10px);
@@ -404,7 +404,7 @@ const authorImage = imageMap[authorId];
     .author-card.visible {
       transform: translateX(0) translateY(0);
     }
-    
+
     .author-card.position-bottom.visible {
       transform: translateX(0) translateY(0);
     }

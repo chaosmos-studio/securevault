@@ -16,8 +16,15 @@ type Props = CollectionEntry<'blog'>['data'] & {
   headings?: MarkdownHeading[];
 };
 
-const { title, description, pubDate, updatedDate, heroImage, authors, headings } =
-  Astro.props;
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  heroImage,
+  authors,
+  headings,
+} = Astro.props;
 ---
 
 <Layout title={`${title} - SecureVault Blog`}>
@@ -73,15 +80,15 @@ const { title, description, pubDate, updatedDate, heroImage, authors, headings }
             <slot />
             <Giscus />
           </div>
-          
-          {headings && headings.length > 0 && (
-            <aside class="sidebar">
-              <TableOfContents headings={headings} />
-            </aside>
-          )}
+
+          {
+            headings && headings.length > 0 && (
+              <aside class="sidebar">
+                <TableOfContents headings={headings} />
+              </aside>
+            )
+          }
         </div>
-
-
       </article>
     </main>
 
@@ -138,7 +145,7 @@ const { title, description, pubDate, updatedDate, heroImage, authors, headings }
     color: var(--text-muted);
     min-width: 0; /* Prevent grid overflow */
   }
-  
+
   .sidebar {
     height: 100%; /* Ensure it takes full height of grid track */
   }
@@ -277,7 +284,7 @@ const { title, description, pubDate, updatedDate, heroImage, authors, headings }
       grid-template-columns: 1fr;
       gap: 2rem;
     }
-    
+
     .sidebar {
       grid-row: 1; /* Move TOC above content on mobile */
       position: static;
