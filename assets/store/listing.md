@@ -2,15 +2,14 @@
 
 Drafts only. Nothing here has been sent to Play.
 Contact email on the listing: hello@chaosmos.studio
-Counts are checked by `store/tools/store_art.py`.
 
-## App name (24 of 30)
+## App name (29 of 30)
 
-SecureVault: Hide Photos
+SecureVault: Calculator Vault
 
-## Short description (78 of 80)
+## Short description (68 of 80)
 
-Hide photos, videos and notes behind a working calculator, notes or clock app.
+Hide photos, videos and notes behind a calculator that really works.
 
 ## Full description
 
@@ -61,7 +60,9 @@ SecureVault hides what you put inside it. It cannot hide other apps. Nobody can 
 
 ## Other titles considered
 
+- SecureVault: Hide Photos (24)
 - SecureVault: Photo Vault (24)
 - SecureVault: Private Vault (26)
 
+"Calculator vault" is the main search term for apps like this one, and the calculator is the default disguise.
 The live title, "SecureVault - Hide Anything", promises more than the app does, and one user has emailed asking it to hide other apps.
