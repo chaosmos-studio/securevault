@@ -287,7 +287,8 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> {
                     ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-                child: Row(
+                child: Wrap(
+                  runSpacing: 8,
                   children: [
                     _TabPill(label: 'Photos', count: photos.length, selected: _tab == 0, onTap: () => _switch(0)),
                     _TabPill(label: 'Videos', count: videos.length, selected: _tab == 1, onTap: () => _switch(1)),
