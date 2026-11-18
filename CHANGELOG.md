@@ -19,6 +19,8 @@ Build 5 (Play version code 5).
 ### Fixed
 - Backups now hold your photos, videos and notes, and restore on a new phone
 - Saving and backups now work on older phones
+- Photos and videos you add leave no copy behind outside the vault
+- The vault's tabs fit on screen at large text sizes
 - Notes in any language read back exactly as written
 - Changing a PIN can no longer leave a vault half changed if the phone switches off
 - The Clock no longer shows a minute digit twice, and its text shows in the light theme
