@@ -1157,7 +1157,7 @@ class ChangelogScreen extends StatelessWidget {
   const ChangelogScreen({super.key});
 
   Future<String> _loadChangelog() async {
-    return await rootBundle.loadString('Changelog.md');
+    return await rootBundle.loadString('CHANGELOG.md');
   }
 
   @override
