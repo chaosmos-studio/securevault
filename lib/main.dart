@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'core/constants/app_constants.dart';
 import 'core/providers/app_state.dart';
 import 'core/services/migration_service.dart';
-import 'screens/setup/setup_wizard.dart';
-import 'screens/disguises/calculator_disguise.dart';
-import 'screens/disguises/notes_disguise.dart';
-import 'screens/disguises/clock_disguise.dart';
-import 'screens/disguises/moodspace_disguise.dart';
+import 'screens/disguises/disguise_screen.dart';
+import 'screens/setup/setup_flow.dart';
 import 'screens/vault/vault_home_screen.dart';
+import 'ui/vault_theme.dart';
+
+final GlobalKey<NavigatorState> appNavigator = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,121 +33,83 @@ class SecureVaultApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppState>(
-      builder: (context, appState, _) {
-        return MaterialApp(
-          title: 'Utility',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF1E88E5), // Premium Blue
-              brightness: Brightness.light,
-              surface: const Color(0xFFF5F7FA),
-            ),
-            useMaterial3: true,
-            appBarTheme: const AppBarTheme(
-              centerTitle: true,
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              titleTextStyle: TextStyle(
-                color: Color(0xFF1A1A1A),
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-              ),
-              iconTheme: IconThemeData(color: Color(0xFF1A1A1A)),
-            ),
-            // cardTheme: CardTheme(
-            //   elevation: 2,
-            //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            //   surfaceTintColor: Colors.white,
-            // ),
-          ),
-          darkTheme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF1E88E5),
-              brightness: Brightness.dark,
-              surface: const Color(0xFF121212),
-              onSurface: const Color(0xFFE0E0E0),
-            ),
-            useMaterial3: true,
-            appBarTheme: const AppBarTheme(
-              centerTitle: true,
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              titleTextStyle: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-              ),
-              iconTheme: IconThemeData(color: Colors.white),
-            ),
-            // cardTheme: CardTheme(
-            //   elevation: 4,
-            //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            //   surfaceTintColor: const Color(0xFF1E1E1E),
-            // ),
-          ),
-          themeMode: appState.themeMode,
-          home: const AppRouter(),
-          routes: {
-            '/setup': (context) => const SetupWizard(),
-            '/home': (context) => const DisguiseRouter(),
-            '/vault': (context) => const VaultHomeScreen(),
-          },
-        );
-      },
+    final themeMode = context.select<AppState, ThemeMode>((s) => s.themeMode);
+    return MaterialApp(
+      title: 'Utility',
+      navigatorKey: appNavigator,
+      debugShowCheckedModeBanner: false,
+      theme: buildVaultTheme(Brightness.light),
+      darkTheme: buildVaultTheme(Brightness.dark),
+      themeMode: themeMode,
+      home: const AppRouter(),
     );
   }
 }
 
-class AppRouter extends StatelessWidget {
+/// Shows setup, the disguise or the vault, and locks the vault when the app
+/// is left.
+class AppRouter extends StatefulWidget {
   const AppRouter({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<AppState>(
-      builder: (context, appState, _) {
-        if (!appState.isSetupComplete) {
-          return const SetupWizard();
-        }
+  State<AppRouter> createState() => _AppRouterState();
+}
 
-        if (appState.isUnlocked) {
-          return const VaultHomeScreen();
-        }
+class _AppRouterState extends State<AppRouter> {
+  late final AppLifecycleListener _lifecycle;
+  bool _wasUnlocked = false;
 
-        return const DisguiseRouter();
-      },
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle = AppLifecycleListener(
+      onHide: () => context.read<AppState>().onLeft(),
+      onShow: () => context.read<AppState>().onReturned(),
     );
   }
-}
-
-class DisguiseRouter extends StatefulWidget {
-  const DisguiseRouter({super.key});
 
   @override
-  State<DisguiseRouter> createState() => _DisguiseRouterState();
-}
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
 
-class _DisguiseRouterState extends State<DisguiseRouter> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppState>(
-      builder: (context, appState, _) {
-        switch (appState.currentDisguise) {
-          case DisguiseType.calculator:
-            return const CalculatorDisguise();
-          case DisguiseType.notes:
-            return const NotesDisguise();
-          case DisguiseType.clock:
-            return const ClockDisguise();
-          case DisguiseType.moodspace:
-            return const MoodSpaceDisguise();
-        }
-      },
+    final state = context.watch<AppState>();
+
+    // Opening or locking the vault closes every screen opened before it.
+    if (_wasUnlocked != state.isUnlocked) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        appNavigator.currentState?.popUntil((route) => route.isFirst);
+      });
+    }
+    _wasUnlocked = state.isUnlocked;
+
+    final Widget screen;
+    if (!state.isSetupComplete) {
+      screen = const SetupFlow(key: ValueKey('setup'));
+    } else if (state.isUnlocked) {
+      screen = VaultHomeScreen(key: ValueKey('vault-${state.currentVault?.id}'));
+    } else {
+      screen = DisguiseScreen(
+        key: ValueKey('disguise-${state.currentDisguise.id}'),
+        disguise: state.currentDisguise,
+      );
+    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 260),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.985, end: 1).animate(animation),
+          child: child,
+        ),
+      ),
+      child: screen,
     );
   }
 }
