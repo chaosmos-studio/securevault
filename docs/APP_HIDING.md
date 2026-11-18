@@ -82,7 +82,8 @@ It only puts a PIN in front of an app that is still on the home screen.
 - Research has found most of these frameworks open to attack, and banking malware has used them to get around Android's sandbox [43][44][45].
 - Play allows container apps only if they refuse to load any app that declares `REQUIRE_SECURE_ENV`, never proxy other apps, and check every manifest [39][40].
   Google says no technical feature enforces this, so it rests on policy alone [40].
-- SecureVault 1.1 now declares `REQUIRE_SECURE_ENV`, so these containers must not load the vault [41].
+- Declaring `REQUIRE_SECURE_ENV` would forbid these containers from loading SecureVault [41].
+  We tried it in 1.1, but the build tools rewrote the name to `com.shravangoswami.securevault.REQUIRE_SECURE_ENV` in the merged manifest, which containers would not recognise, so it is left out until that is solved.
 
 ## What Google Play's policies say
 
