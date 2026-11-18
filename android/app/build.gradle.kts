@@ -49,6 +49,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Installs beside the Play build, so testing never touches real vaults.
+            applicationIdSuffix = ".dev"
+        }
         release {
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
