@@ -1,427 +1,236 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../core/providers/app_state.dart';
+import '../../core/logic/calculator_engine.dart';
 import '../../core/widgets/disguise_menu.dart';
+import 'disguise_screen.dart';
+import 'pulse.dart';
 
+class _CalcColors {
+  const _CalcColors({
+    required this.ground,
+    required this.ink,
+    required this.muted,
+    required this.digit,
+    required this.function,
+    required this.operator,
+    required this.onOperator,
+    required this.equals,
+    required this.onEquals,
+  });
+
+  final Color ground, ink, muted, digit, function, operator, onOperator, equals, onEquals;
+
+  static const light = _CalcColors(
+    ground: Color(0xFFF9FAFC),
+    ink: Color(0xFF1A1C20),
+    muted: Color(0xFF6B7079),
+    digit: Color(0xFFECEFF4),
+    function: Color(0xFFDDE2EA),
+    operator: Color(0xFFD7E3FA),
+    onOperator: Color(0xFF16345F),
+    equals: Color(0xFF2F5BB0),
+    onEquals: Color(0xFFFFFFFF),
+  );
+
+  static const dark = _CalcColors(
+    ground: Color(0xFF111215),
+    ink: Color(0xFFE7E8EC),
+    muted: Color(0xFF969AA3),
+    digit: Color(0xFF25272C),
+    function: Color(0xFF353941),
+    operator: Color(0xFF29395A),
+    onOperator: Color(0xFFD7E3FA),
+    equals: Color(0xFFA8C4FA),
+    onEquals: Color(0xFF0E2A57),
+  );
+}
+
+enum _Kind { digit, function, operator, equals }
+
+/// A working calculator. Digits typed and then "=" open the vault when they
+/// are a vault PIN.
 class CalculatorDisguise extends StatefulWidget {
-  const CalculatorDisguise({super.key});
+  const CalculatorDisguise({super.key, this.coach = false});
+
+  final bool coach;
 
   @override
   State<CalculatorDisguise> createState() => _CalculatorDisguiseState();
 }
 
 class _CalculatorDisguiseState extends State<CalculatorDisguise> {
-  String _display = '0';
-  String _currentInput = '';
-  String _operator = '';
-  double _firstOperand = 0;
-  bool _shouldResetDisplay = false;
-  String _secretCode = '';
+  final _engine = CalculatorEngine();
 
-  void _onDigitPress(String digit) {
-    setState(() {
-      _secretCode += digit;
+  /// Every digit typed since the last clear or "=", operators skipped.
+  String _secret = '';
 
-      if (_shouldResetDisplay) {
-        _display = digit;
-        _currentInput = digit;
-        _shouldResetDisplay = false;
-      } else if (_display == '0' && digit != '.') {
-        _display = digit;
-        _currentInput = digit;
-      } else {
-        _display += digit;
-        _currentInput += digit;
-      }
-    });
-  }
-
-  void _onOperatorPress(String op) {
-    setState(() {
-      if (_currentInput.isNotEmpty) {
-        _firstOperand = double.tryParse(_currentInput) ?? 0;
-      }
-      _operator = op;
-      _shouldResetDisplay = true;
-      _currentInput = '';
-    });
-  }
-
-  void _onEqualsPress() async {
-    if (_secretCode.isNotEmpty) {
-      final appState = context.read<AppState>();
-      final unlocked = await appState.unlock(_secretCode);
-      if (unlocked && mounted) {
-        Navigator.of(context).pushReplacementNamed('/vault');
-        return;
-      }
+  Future<void> _press(String key) async {
+    switch (key) {
+      case 'AC':
+        _secret = '';
+        setState(_engine.clear);
+      case '±':
+        setState(_engine.toggleSign);
+      case '%':
+        if (await _tryOpen()) return;
+        setState(_engine.percent);
+      case '⌫':
+        if (_secret.isNotEmpty) _secret = _secret.substring(0, _secret.length - 1);
+        setState(_engine.backspace);
+      case '=':
+        if (await _tryOpen()) return;
+        _secret = '';
+        setState(_engine.equals);
+      case CalculatorEngine.plus ||
+            CalculatorEngine.minus ||
+            CalculatorEngine.times ||
+            CalculatorEngine.divide:
+        setState(() => _engine.operator(key));
+      default:
+        if (key != '.') _secret += key;
+        setState(() => _engine.digit(key));
     }
-
-    setState(() {
-      if (_operator.isNotEmpty && _currentInput.isNotEmpty) {
-        double secondOperand = double.tryParse(_currentInput) ?? 0;
-        double result = 0;
-
-        switch (_operator) {
-          case '+':
-            result = _firstOperand + secondOperand;
-            break;
-          case '-':
-            result = _firstOperand - secondOperand;
-            break;
-          case '×':
-            result = _firstOperand * secondOperand;
-            break;
-          case '÷':
-            result = secondOperand != 0 ? _firstOperand / secondOperand : 0;
-            break;
-        }
-
-        _display = _formatResult(result);
-        _currentInput = _display;
-        _operator = '';
-        _shouldResetDisplay = true;
-      }
-      _secretCode = '';
-    });
   }
 
-  String _formatResult(double result) {
-    if (result == result.toInt()) {
-      return result.toInt().toString();
-    }
-    return result
-        .toStringAsFixed(8)
-        .replaceAll(RegExp(r'0+$'), '')
-        .replaceAll(RegExp(r'\.$'), '');
-  }
-
-  void _onBackspacePress() {
-    setState(() {
-      if (_secretCode.isNotEmpty) {
-        _secretCode = _secretCode.substring(0, _secretCode.length - 1);
-      }
-
-      if (_display.isNotEmpty && _display != '0') {
-        if (_display.length == 1) {
-          _display = '0';
-          _currentInput = '';
-        } else {
-          _display = _display.substring(0, _display.length - 1);
-          _currentInput = _display;
-        }
-      }
-    });
-  }
-
-  void _onClearPress() {
-    setState(() {
-      _display = '0';
-      _currentInput = '';
-      _operator = '';
-      _firstOperand = 0;
-      _shouldResetDisplay = false;
-      _secretCode = '';
-    });
-  }
-
-  void _onPercentPress() async {
-    if (_secretCode.isNotEmpty) {
-      final appState = context.read<AppState>();
-      final unlocked = await appState.unlock(_secretCode);
-      if (unlocked && mounted) {
-        Navigator.of(context).pushReplacementNamed('/vault');
-        return;
-      }
-    }
-
-    setState(() {
-      double value = double.tryParse(_currentInput) ?? 0;
-      double result = value / 100;
-      _display = _formatResult(result);
-      _currentInput = _display;
-      _secretCode = '';
-    });
-  }
-
-  void _onSignChangePress() {
-    setState(() {
-      if (_currentInput.isNotEmpty && _currentInput != '0') {
-        if (_currentInput.startsWith('-')) {
-          _currentInput = _currentInput.substring(1);
-        } else {
-          _currentInput = '-$_currentInput';
-        }
-        _display = _currentInput;
-      }
-    });
+  Future<bool> _tryOpen() async {
+    final code = _secret;
+    if (code.isEmpty) return false;
+    final opened = await tryVaultCode(context, code);
+    if (opened) _secret = '';
+    return opened;
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final c = dark ? _CalcColors.dark : _CalcColors.light;
+    final display = _engine.display;
+    final preview = _engine.preview;
 
-    return Scaffold(
-      backgroundColor: isDark
-          ? Colors.black
-          : Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: isDark
-            ? Colors.black
-            : Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        actions: [
-          DisguiseMenu(iconColor: isDark ? Colors.white70 : Colors.black87),
+    return Theme(
+      data: ThemeData(
+        useMaterial3: true,
+        brightness: dark ? Brightness.dark : Brightness.light,
+        colorSchemeSeed: c.equals,
+        fontFamily: 'Roboto',
+      ),
+      child: Scaffold(
+        backgroundColor: c.ground,
+        body: SafeArea(
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 4, top: 4),
+                  child: DisguiseMenu(iconColor: c.muted),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          display,
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: display == CalculatorEngine.divideByZero ? 40 : 72,
+                            fontWeight: FontWeight.w300,
+                            color: c.ink,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      SizedBox(
+                        height: 40,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            preview,
+                            style: TextStyle(fontSize: 32, color: c.muted),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+                child: AspectRatio(
+                  aspectRatio: 4 / 5,
+                  child: Column(
+                    children: [
+                      _row(c, const [('AC', _Kind.function), ('±', _Kind.function), ('%', _Kind.function), (CalculatorEngine.divide, _Kind.operator)]),
+                      _row(c, const [('7', _Kind.digit), ('8', _Kind.digit), ('9', _Kind.digit), (CalculatorEngine.times, _Kind.operator)]),
+                      _row(c, const [('4', _Kind.digit), ('5', _Kind.digit), ('6', _Kind.digit), (CalculatorEngine.minus, _Kind.operator)]),
+                      _row(c, const [('1', _Kind.digit), ('2', _Kind.digit), ('3', _Kind.digit), (CalculatorEngine.plus, _Kind.operator)]),
+                      _row(c, const [('0', _Kind.digit), ('.', _Kind.digit), ('⌫', _Kind.digit), ('=', _Kind.equals)]),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _row(_CalcColors c, List<(String, _Kind)> keys) {
+    return Expanded(
+      child: Row(
+        children: [
+          for (final (label, kind) in keys)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(5),
+                child: _key(c, label, kind),
+              ),
+            ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Container(
-                alignment: Alignment.bottomRight,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    if (_operator.isNotEmpty)
-                      Text(
-                        '${_formatResult(_firstOperand)} $_operator',
-                        style: TextStyle(
-                          color: isDark ? Colors.white54 : Colors.black54,
-                          fontSize: 24,
-                        ),
-                      ),
-                    Text(
-                      _display,
-                      style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black,
-                        fontSize: _display.length > 8
-                            ? 56
-                            : (_display.length > 6 ? 72 : 88),
-                        fontWeight: FontWeight.w200,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 4,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Column(
-                  children: [
-                    _buildIOSRow(['C', '±', '%', '÷']),
-                    _buildIOSRow(['7', '8', '9', '×']),
-                    _buildIOSRow(['4', '5', '6', '-']),
-                    _buildIOSRow(['1', '2', '3', '+']),
-                    _buildIOSBottomRow(),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
-  Widget _buildIOSRow(List<String> buttons) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          children: buttons.map((btn) {
-            final isOperator = ['÷', '×', '-', '+', '='].contains(btn);
-            final isFunction = ['C', '±', '%'].contains(btn);
-
-            final isDark = Theme.of(context).brightness == Brightness.dark;
-
-            Color bgColor;
-            Color textColor;
-
-            if (isOperator) {
-              bgColor = const Color(0xFFFF9F0A);
-              textColor = Colors.white;
-            } else if (isFunction) {
-              bgColor = isDark
-                  ? const Color(0xFFA5A5A5)
-                  : const Color(0xFFD6D6D6);
-              textColor = Colors.black;
-            } else {
-              bgColor = isDark
-                  ? const Color(0xFF333333)
-                  : const Color(0xFFE0E0E0);
-              textColor = isDark ? Colors.white : Colors.black;
-            }
-
-            return Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Material(
-                    color: bgColor,
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      onTap: () => _handleButtonPress(btn),
-                      customBorder: const CircleBorder(),
-                      child: Center(
-                        child: Text(
-                          btn,
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w400,
-                            color: textColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
+  Widget _key(_CalcColors c, String label, _Kind kind) {
+    final (bg, fg) = switch (kind) {
+      _Kind.digit => (c.digit, c.ink),
+      _Kind.function => (c.function, c.ink),
+      _Kind.operator => (c.operator, c.onOperator),
+      _Kind.equals => (c.equals, c.onEquals),
+    };
+    final Widget face = label == '⌫'
+        ? Icon(Icons.backspace_outlined, color: fg, size: 26)
+        : Text(
+            label,
+            style: TextStyle(
+              fontSize: label == 'AC' ? 26 : 32,
+              fontWeight: FontWeight.w400,
+              color: fg,
+            ),
+          );
+    final key = Material(
+      color: bg,
+      shape: const StadiumBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _press(label),
+        child: Center(child: face),
       ),
     );
-  }
-
-  Widget _buildIOSBottomRow() {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          children: [
-            // 0 button - wider
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Material(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? const Color(0xFF333333)
-                      : const Color(0xFFE0E0E0),
-                  borderRadius: BorderRadius.circular(40),
-                  child: InkWell(
-                    onTap: () => _handleButtonPress('0'),
-                    borderRadius: BorderRadius.circular(40),
-                    child: Container(
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.only(left: 28),
-                      child: Text(
-                        '0',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w400,
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white
-                              : Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // Backspace button
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Material(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFF333333)
-                        : const Color(0xFFE0E0E0),
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      onTap: () => _handleButtonPress('⌫'),
-                      customBorder: const CircleBorder(),
-                      child: Center(
-                        child: Text(
-                          '⌫',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w400,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white
-                                : Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // = button
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Material(
-                    color: const Color(0xFFFF9F0A),
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      onTap: () => _handleButtonPress('='),
-                      customBorder: const CircleBorder(),
-                      child: const Center(
-                        child: Text(
-                          '=',
-                          style: TextStyle(
-                            fontSize: 40,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    final semantic = Semantics(
+      button: true,
+      label: switch (label) { '⌫' => 'Backspace', '±' => 'Plus or minus', _ => label },
+      child: key,
     );
-  }
-
-  void _handleButtonPress(String btn) {
-    switch (btn) {
-      case 'C':
-        _onClearPress();
-        break;
-      case '±':
-        _onSignChangePress();
-        break;
-      case '%':
-        _onPercentPress();
-        break;
-      case '⌫':
-        _onBackspacePress();
-        break;
-      case '=':
-        _onEqualsPress();
-        break;
-      case '+':
-      case '-':
-      case '×':
-      case '÷':
-        _onOperatorPress(btn);
-        break;
-      default:
-        _onDigitPress(btn);
-    }
+    return label == '=' && widget.coach ? Pulse(child: semantic) : semantic;
   }
 }
