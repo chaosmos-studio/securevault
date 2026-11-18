@@ -2,7 +2,7 @@
     <application
         android:label="SecureVault"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_shield">
+        android:icon="@mipmap/ic_vault">
 
         <activity
             android:name=".MainActivity"

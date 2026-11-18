@@ -9,7 +9,7 @@ class DisguiseIcon extends StatelessWidget {
   final double size;
 
   static String assetFor(DisguiseType? d) => switch (d) {
-        null => 'assets/icons/shield_icon.png',
+        null => 'assets/icons/vault_icon.png',
         DisguiseType.calculator => 'assets/icons/calculator_icon.png',
         DisguiseType.notes => 'assets/icons/notes_icon.png',
         DisguiseType.clock => 'assets/icons/clock_icon.png',
