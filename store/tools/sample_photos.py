@@ -148,7 +148,7 @@ def aurora(size, rng):
         phase = rng.uniform(0, 6)
         for x in range(0, size, 3):
             y = size * (0.3 + k * 0.08) + size * 0.08 * math.sin(x / size * 3 + phase)
-            d.line([x, y, x, y + size * 0.25], fill=(80, 255, 170, 26))
+            d.line([x, y, x, y + size * (0.12 + 0.06 * k)], fill=(80, 255, 170, 34), width=3)
     band = band.filter(ImageFilter.GaussianBlur(size / 60))
     img.paste(band, (0, 0), band)
     d = ImageDraw.Draw(img)

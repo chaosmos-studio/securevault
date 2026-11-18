@@ -231,6 +231,7 @@ void main() {
       } else {
         final id = await makeVault(photos: _photoFiles(), videos: 2);
         await VaultService.createVault('135790', name: 'Work', createdByVaultId: id);
+        await VaultService.createVault('246802', name: 'Travel', createdByVaultId: id);
       }
       await state.initialize();
       await state.unlock('482915');
