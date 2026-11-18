@@ -176,6 +176,9 @@ ICONS = {
 }
 PREVIEWS = {"ic_vault": "vault_icon", "ic_calculator": "calculator_icon", "ic_notes": "notes_icon",
             "ic_clock": "clock_icon", "ic_mood": "mood_icon"}
+# The alternate icons ios/Runner/Info.plist names, at 60 pt and 2x and 3x. iOS rounds the corners itself.
+IOS = {"ic_calculator": "CalculatorIcon", "ic_notes": "NotesIcon", "ic_clock": "ClockIcon",
+       "ic_mood": "MoodSpaceIcon"}
 
 
 def rounded(img):
@@ -217,6 +220,9 @@ def write_app():
             "</adaptive-icon>\n")
         colors.append(f'    <color name="{name}_background">#{"%02X%02X%02X" % bg_color}</color>')
         rounded(full_icon(bg, fg, 256)).save(ROOT / "assets/icons" / f"{PREVIEWS[name]}.png")
+        if name in IOS:
+            for suffix, side in (("", 60), ("@2x", 120), ("@3x", 180)):
+                full_icon(bg, fg, side).convert("RGB").save(ROOT / "ios/Runner" / f"{IOS[name]}{suffix}.png")
         if name == "ic_vault":
             full_icon(bg, fg, 512).convert("RGB").save(ROOT / "store/icon-512.png")
         print(f"wrote {name}")
