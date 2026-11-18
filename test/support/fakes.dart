@@ -32,6 +32,12 @@ Future<Directory> useFreshDevice() async {
   return root;
 }
 
+/// Makes [dir] read-only, as Downloads is on Android 7 to 10 without a storage
+/// permission, or writable again.
+void setWritable(Directory dir, bool writable) {
+  Process.runSync('chmod', [writable ? 'u+w' : 'a-w', dir.path]);
+}
+
 /// Restores a device snapshot written by [snapshotDevice].
 Future<Directory> useDeviceSnapshot(Directory snapshot) async {
   final root = await Directory.systemTemp.createTemp('securevault_test_');

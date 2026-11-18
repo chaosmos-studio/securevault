@@ -11,14 +11,17 @@ class TempFiles {
     return dir;
   }
 
-  static Future<File> write(String name, List<int> bytes) async {
+  static Future<File> create(String name) async {
     final dir = await folder();
     final safe = name.replaceAll(RegExp(r'[\\/]'), '_');
     // A folder per copy keeps the original file name for the other app.
     final own = await Directory('${dir.path}/${DateTime.now().microsecondsSinceEpoch}')
         .create();
-    return File('${own.path}/$safe').writeAsBytes(bytes, flush: true);
+    return File('${own.path}/$safe').create();
   }
+
+  static Future<File> write(String name, List<int> bytes) async =>
+      (await create(name)).writeAsBytes(bytes, flush: true);
 
   static Future<void> clear() async {
     try {
