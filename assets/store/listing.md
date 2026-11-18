@@ -42,10 +42,11 @@ SecureVault hides what you put inside it. It cannot hide other apps. Nobody can 
 ## Release notes for 1.1.0
 
 - A calm new look for the vault and all four disguises
-- Setup now asks for a PIN and lets you open your vault once on the disguise, so you know how it works
+- Setup asks for a PIN and lets you open your vault once on the disguise, so you know how it works
 - The disguises work like real apps: sums in the right order, a timer keypad, saved alarms, a mood journal
-- The new icon appears when you leave the app, with no restart
+- The new icon shows when you leave the app, with no restart
 - Backups now hold your photos, videos and notes, and restore on a new phone
+- Saving and backups now work on older phones
 - Notes in any language read back exactly as written
 
 ## Screenshot captions
