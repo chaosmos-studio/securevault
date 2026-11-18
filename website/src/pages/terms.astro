@@ -1,0 +1,207 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import BackToTop from '../components/BackToTop.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Layout title="Terms of Service - SecureVault">
+  <div class="premium-container" id="main-container">
+    <SiteHeader />
+
+    <main>
+      <section class="page-header">
+        <h1 class="headline">Terms of service</h1>
+        <p class="subheadline">The deal, in plain words.</p>
+      </section>
+
+      <div class="legal-content">
+        <div class="text-block">
+          <p>
+            SecureVault is a free app for Android that keeps photos, videos and
+            notes in an encrypted vault behind an everyday app. It shows no ads
+            and sells nothing. These terms are the agreement between you and us
+            when you use it.
+          </p>
+          <p>
+            Last updated on 18 November 2026. How the app handles your data is
+            in its <a href={`${base}/privacy/`}>privacy policy</a>.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>Who we are</h2>
+          <p>
+            SecureVault is made by Shravan Goswami, who runs Chaosmos, with Jash
+            Ambaliya. "We" and "us" in these terms mean them. You can reach us at
+            <a href="mailto:hello@chaosmos.studio">hello@chaosmos.studio</a>.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>Agreeing to these terms</h2>
+          <p>
+            By installing or using SecureVault, you agree to these terms. If you
+            do not agree, please do not use it. If you are under the age at which
+            you can agree to terms like these where you live, a parent or
+            guardian needs to agree for you.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>Using the app</h2>
+          <p>
+            We give you a personal, non-exclusive, non-transferable right to
+            install SecureVault and use it on your own devices. The app, its
+            design and its code belong to us. Please do not copy, sell or
+            redistribute it, and do not reverse engineer it except as the law
+            allows.
+          </p>
+          <p>
+            Use SecureVault lawfully. Do not use it to keep anything that is
+            illegal to have, or to hide anything that harms other people.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>Your vault and your PIN</h2>
+          <ul>
+            <li>
+              Everything you put in a vault stays on your phone, encrypted with
+              your PIN. We never receive it and cannot see it.
+            </li>
+            <li>
+              We cannot recover a forgotten PIN or anything locked behind it.
+              Choose a PIN you will remember.
+            </li>
+            <li>
+              Uninstalling the app, resetting the phone or clearing the app's
+              storage deletes your vaults. Back up your vault from the app's
+              settings and keep the file somewhere safe.
+            </li>
+            <li>
+              The disguise changes how the app looks on your phone. It does not
+              stop someone who knows your PIN, or who has full control of your
+              phone, from reaching your vault.
+            </li>
+          </ul>
+        </div>
+
+        <div class="text-block">
+          <h2>Changes to the app</h2>
+          <p>
+            We keep improving SecureVault. Updates can add, change or remove
+            features, and we may one day stop offering the app.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>The app as it is</h2>
+          <p>
+            We make SecureVault with care, but we provide it as it is, without
+            promises that it will always be available or free of bugs, as far as
+            the law allows. As far as the law allows, we are not liable for lost
+            data, for indirect or unforeseeable losses, or for losses that come
+            from a forgotten PIN or a missing backup.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>Your rights under the law</h2>
+          <p>
+            Nothing in these terms takes away rights you have under the consumer
+            protection laws where you live, including in the European Economic
+            Area and the United Kingdom. Where these terms and those laws differ,
+            the laws win.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>The law that applies</h2>
+          <p>
+            These terms are governed by the laws of India. If you live
+            elsewhere, you keep the protection of the laws of your own country,
+            and you can bring a claim in your own courts where those laws allow.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>Changes to these terms</h2>
+          <p>
+            If these terms change, this page will be updated and the date at the
+            top will change.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>Contact</h2>
+          <p>
+            Email <a href="mailto:hello@chaosmos.studio">hello@chaosmos.studio</a>
+            with any question about these terms.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <BackToTop />
+    <SiteFooter />
+  </div>
+</Layout>
+
+<style>
+  main {
+    padding: 6rem 5% 4rem;
+    max-width: 800px;
+    margin: 0 auto;
+    z-index: 2;
+    position: relative;
+  }
+  .page-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .headline {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    margin-bottom: 0.5rem;
+  }
+  .subheadline {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+  }
+  .legal-content {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+  }
+  .text-block {
+    margin-bottom: 2rem;
+  }
+  h2 {
+    font-size: 1.3rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  p,
+  li {
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+  }
+  ul {
+    padding-left: 1.25rem;
+    margin: 0;
+  }
+  a {
+    color: var(--accent);
+  }
+  @media (max-width: 600px) {
+    .legal-content {
+      padding: 1.5rem;
+    }
+  }
+</style>
