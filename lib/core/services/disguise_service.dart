@@ -19,11 +19,6 @@ class DisguiseService {
     await prefs.setString(_pendingKey, disguise.id);
   }
 
-  static Future<String?> pendingIcon() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_pendingKey);
-  }
-
   static Future<void> applyPendingIcon() async {
     final prefs = await SharedPreferences.getInstance();
     final pending = prefs.getString(_pendingKey);

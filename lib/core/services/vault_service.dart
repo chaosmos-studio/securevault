@@ -93,20 +93,6 @@ class VaultInfo {
     createdByVaultId: json['createdByVaultId'],
     canSeeVaultIds: (json['canSeeVaultIds'] as List?)?.cast<String>() ?? [],
   );
-  
-  VaultInfo copyWith({
-    String? id,
-    String? name,
-    bool? isMaster,
-    String? createdByVaultId,
-    List<String>? canSeeVaultIds,
-  }) => VaultInfo(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    isMaster: isMaster ?? this.isMaster,
-    createdByVaultId: createdByVaultId ?? this.createdByVaultId,
-    canSeeVaultIds: canSeeVaultIds ?? this.canSeeVaultIds,
-  );
 }
 
 class VaultService {
@@ -143,11 +129,6 @@ class VaultService {
   static Future<void> _saveVaultIndex(Map<String, VaultInfo> index) async {
     final toSave = index.map((key, value) => MapEntry(key, value.toJson()));
     await _storage.write(key: _vaultIndexKey, value: json.encode(toSave));
-  }
-
-  static Future<bool> hasAnyVault() async {
-    final index = await _getVaultIndex();
-    return index.isNotEmpty;
   }
 
   static Future<bool> isPasswordTaken(String password) async {
@@ -417,16 +398,6 @@ class VaultService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> getAllVaults() async {
-    final index = await _getVaultIndex();
-    return index.entries.map((e) => {
-      'name': e.value.name,
-      'id': e.value.id,
-      'isMaster': e.value.isMaster,
-      'canSeeVaultIds': e.value.canSeeVaultIds,
-    }).toList();
-  }
-
   static Set<String> _getAncestorIds(String vaultId, Map<String, VaultInfo> index) {
     final ancestors = <String>{};
     String? currentId = vaultId;
@@ -539,26 +510,6 @@ class VaultService {
     return null;
   }
 
-  static Future<bool> updateVaultPermissions(
-    String vaultId, {
-    bool? isMaster,
-    List<String>? canSeeVaultIds,
-  }) async {
-    final index = await _getVaultIndex();
-    
-    for (final entry in index.entries) {
-      if (entry.value.id == vaultId) {
-        index[entry.key] = entry.value.copyWith(
-          isMaster: isMaster,
-          canSeeVaultIds: canSeeVaultIds,
-        );
-        await _saveVaultIndex(index);
-        return true;
-      }
-    }
-    return false;
-  }
-
   static Future<bool> renameVault(String vaultId, String name) async {
     final index = await _getVaultIndex();
     for (final entry in index.entries) {
@@ -575,15 +526,5 @@ class VaultService {
       }
     }
     return false;
-  }
-
-  static Future<String?> getVaultName(String vaultId) async {
-    final index = await _getVaultIndex();
-    for (final entry in index.entries) {
-      if (entry.value.id == vaultId) {
-        return entry.value.name;
-      }
-    }
-    return null;
   }
 }
