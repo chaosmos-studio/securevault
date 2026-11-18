@@ -8,11 +8,15 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// The upload key comes from the environment in CI and from android/key.properties on a local machine.
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
+fun signing(env: String, property: String): String? =
+    System.getenv(env)?.takeIf { it.isNotEmpty() } ?: keystoreProperties[property] as String?
+val hasUploadKey = signing("ANDROID_KEYSTORE_PATH", "storeFile") != null
 
 android {
     namespace = "com.shravangoswami.securevault"
@@ -30,10 +34,10 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String? ?: ""
-            keyPassword = keystoreProperties["keyPassword"] as String? ?: ""
-            storeFile = keystoreProperties["storeFile"]?.let { file(it) }
-            storePassword = keystoreProperties["storePassword"] as String? ?: ""
+            keyAlias = signing("ANDROID_KEYSTORE_ALIAS", "keyAlias") ?: ""
+            keyPassword = signing("ANDROID_KEY_PASSWORD", "keyPassword") ?: ""
+            storeFile = signing("ANDROID_KEYSTORE_PATH", "storeFile")?.let { file(it) }
+            storePassword = signing("ANDROID_KEYSTORE_PASSWORD", "storePassword") ?: ""
         }
     }
 
@@ -54,11 +58,7 @@ android {
             applicationIdSuffix = ".dev"
         }
         release {
-            if (keystorePropertiesFile.exists()) {
-                signingConfig = signingConfigs.getByName("release")
-            } else {
-                signingConfig = signingConfigs.getByName("debug")
-            }
+            signingConfig = signingConfigs.getByName(if (hasUploadKey) "release" else "debug")
         }
     }
 }
