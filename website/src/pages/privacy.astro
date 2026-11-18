@@ -3,6 +3,12 @@ import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import BackToTop from '../components/BackToTop.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const links = {
+  googlePrivacy: 'https://policies.google.com/privacy',
+  github: 'https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement',
+};
 ---
 
 <Layout title="Privacy Policy - SecureVault">
@@ -14,91 +20,164 @@ import BackToTop from '../components/BackToTop.astro';
         <h1 class="headline">
           Privacy <span class="text-gradient">Policy</span>
         </h1>
-        <p class="subheadline">We don't want your data. Period.</p>
+        <p class="subheadline">Your vault stays on your phone.</p>
       </section>
 
       <div class="legal-content hover-section">
         <div class="compliance-box glow-card">
           <div class="compliance-icon">✓</div>
           <div class="compliance-text">
-            <h3>Google Play Data Safety Declaration</h3>
+            <h3>Google Play Data safety</h3>
             <p>
-              SecureVault <strong>does not collect, share, or transmit</strong> any
-              user personal data to external servers. All encrypted files (photos,
-              videos, notes) are stored strictly locally on your device. We have no
-              access to your vault passwords or contents.
+              SecureVault <strong>collects no data and shares no data</strong>. It
+              has no accounts, no ads, no analytics and no internet access.
             </p>
           </div>
         </div>
 
         <div class="text-block">
-          <h2>1. Data Collection</h2>
           <p>
-            SecureVault has no accounts and no servers. This means:
+            Last updated on 18 November 2026. This policy covers the SecureVault
+            app for Android and these pages. The rules for using the app are in
+            its <a href={`${base}/terms/`}>terms of service</a>.
           </p>
           <ul>
-            <li>We do not collect personal usage data.</li>
-            <li>We do not collect your device information.</li>
-            <li>We do not collect your photos, videos, or notes.</li>
-            <li>We do not track your location.</li>
+            <li>No accounts and no servers</li>
+            <li>Your vaults stay on your phone, encrypted with your PIN</li>
+            <li>No ads, no analytics, no tracking</li>
+            <li>No permissions to grant</li>
+            <li>Works fully offline</li>
           </ul>
         </div>
 
         <div class="text-block">
-          <h2>2. Local Storage</h2>
+          <h2>Who we are</h2>
           <p>
-            All data you add to SecureVault is encrypted (AES-256) and stored in
-            your phone's internal storage. It is left out of Android's backups
-            and phone-to-phone transfers. It leaves your phone only when you
-            save or share a copy, or make a backup file yourself.
+            SecureVault is published by Chaosmos, the studio Shravan Goswami
+            runs. Questions about this policy go to
+            <a href="mailto:hello@chaosmos.studio">hello@chaosmos.studio</a>.
           </p>
         </div>
 
         <div class="text-block">
-          <h2>3. Permissions</h2>
+          <h2>What the app collects</h2>
           <p>
-            SecureVault asks for no permissions. Photos and videos come in
+            Nothing. SecureVault has no accounts, no ads, no analytics and no
+            crash reporting, and it never asks for your name or email. The app
+            has no internet access, so nothing you put in it, and nothing about
+            how you use it, can reach us or anyone else.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>What the app keeps on your phone</h2>
+          <p>Everything stays in the app's private storage on your phone:</p>
+          <ul>
+            <li>
+              Your vaults. Photos, videos, thumbnails, notes, and the names and
+              dates of what is in them are encrypted with AES-256 under a key made
+              from that vault's PIN.
+            </li>
+            <li>
+              The list of your vaults and their names, protected by your phone's
+              Android Keystore.
+            </li>
+            <li>
+              Your settings, and what you write in the disguise itself, such as
+              its notes, alarms or mood entries.
+            </li>
+          </ul>
+          <p>
+            None of this goes into Android's cloud backups or phone-to-phone
+            transfers. Uninstalling the app or clearing its storage deletes all
+            of it.
+          </p>
+          <p>
+            When you share, open or play a file, the app makes a decrypted copy
+            for the other app to use. When you add a photo or video, the photo
+            picker hands the app a copy. The app deletes the picker's copy as
+            soon as the file is in the vault, and deletes every copy of either
+            kind whenever the vault locks and whenever the app starts.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>What leaves your phone</h2>
+          <p>
+            Only what you choose to send: a copy you save to Downloads or share,
+            and a backup file you make. A backup file holds a vault's items still
+            encrypted, and it opens only with that vault's PIN, so keep it as
+            carefully as the vault itself.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>Permissions</h2>
+          <p>
+            SecureVault asks you for no permissions. Photos and videos come in
             through Android's own photo picker, the camera opens through your
-            phone's camera app, and copies and backups go to Downloads or
-            through the share sheet.
+            phone's camera app, and copies and backups go to Downloads or through
+            the share sheet. The video player adds the network state and wake lock
+            permissions, which Android grants without asking. The app has no
+            internet permission.
           </p>
         </div>
 
         <div class="text-block">
-          <h2>4. Third-Party Services</h2>
+          <h2>Google Play</h2>
           <p>
-            We do not use third-party analytics SDKs that track user behavior.
-            We prioritize privacy over metrics.
+            The app comes through Google Play. Google may collect data about
+            installs, devices and app crashes as part of running the store, under
+            <a href={links.googlePrivacy}>Google's privacy policy</a>. That
+            happens outside the app, and we see only totals, such as install
+            counts, in the Play Console.
           </p>
         </div>
 
         <div class="text-block">
-          <h2>Terms & Conditions</h2>
-          <p>By downloading or using SecureVault, you agree to these terms:</p>
-          <ul>
-            <li>
-              <strong>License:</strong> SecureVault is proprietary software. You are
-              granted a license for personal use only. Unauthorized redistribution,
-              modification, or reverse engineering is prohibited.
-            </li>
-            <li>
-              <strong>No Warranty:</strong> The software is provided "as is" without
-              warranties of any kind. We are not liable for any data loss or damages
-              arising from its use.
-            </li>
-            <li>
-              <strong>User Responsibility:</strong> You are responsible for managing
-              your passwords and data backups. Since we do not store your data, <strong
-                >we cannot recover lost passwords or deleted data.</strong
-              >
-            </li>
-            <li>
-              <strong>Copyright:</strong> All rights reserved. &copy; 2026.
-            </li>
-          </ul>
+          <h2>These pages</h2>
+          <p>
+            These pages are static pages hosted on GitHub Pages. GitHub may log
+            standard technical data, such as IP addresses, to keep the service
+            secure and working, as described in
+            <a href={links.github}>GitHub's privacy statement</a>. The pages use
+            no analytics and no cookies. Your theme choice is kept in your
+            browser's local storage.
+          </p>
+          <p>
+            The blog and the help center have an optional comment box powered by
+            Giscus, which stores comments as GitHub Discussions in a public
+            repository. Commenting needs you to sign in with GitHub, and anything
+            you post is public and covered by GitHub's terms and privacy
+            statement. If you email us, we use your message and address only to
+            reply.
+          </p>
         </div>
 
-        <div class="updated-date">Last Updated: January 20, 2026</div>
+        <div class="text-block">
+          <h2>Children</h2>
+          <p>
+            SecureVault is not directed at children under 13, and we do not
+            collect personal information from anyone, including children.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>Changes</h2>
+          <p>
+            If a future version changes what the app does with data, this page
+            will be updated before that version is released, and the date at the
+            top will change.
+          </p>
+        </div>
+
+        <div class="text-block">
+          <h2>Contact</h2>
+          <p>
+            Email <a href="mailto:hello@chaosmos.studio">hello@chaosmos.studio</a>
+            with any question about privacy.
+          </p>
+        </div>
       </div>
     </main>
 
@@ -211,7 +290,7 @@ import BackToTop from '../components/BackToTop.astro';
   }
   ul {
     padding-left: 1.25rem;
-    margin: 0;
+    margin: 0 0 0.75rem 0;
   }
   li {
     margin-bottom: 0.4rem;
@@ -219,12 +298,7 @@ import BackToTop from '../components/BackToTop.astro';
   strong {
     color: var(--text-main);
   }
-
-  .updated-date {
-    margin-top: 2.5rem;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    text-align: center;
-    opacity: 0.7;
+  a {
+    color: var(--accent);
   }
 </style>
