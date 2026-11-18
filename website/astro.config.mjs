@@ -6,8 +6,8 @@ import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://shravangoswami.com',
-  base: process.env.PR_PREVIEW_BASE_URL || '/SecureVault',
+  site: 'https://chaosmos.studio',
+  base: process.env.PR_PREVIEW_BASE_URL || '/securevault',
   integrations: [mdx(), sitemap()],
   image: {
     service: {

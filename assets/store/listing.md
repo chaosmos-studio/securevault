@@ -2,6 +2,8 @@
 
 Drafts only. Nothing here has been sent to Play.
 Contact email on the listing: hello@chaosmos.studio
+Website: https://chaosmos.studio/securevault/
+Privacy policy: https://chaosmos.studio/securevault/privacy/
 
 ## App name (29 of 30)
 

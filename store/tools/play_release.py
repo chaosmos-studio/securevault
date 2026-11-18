@@ -31,7 +31,7 @@ import jwt
 ROOT = Path(__file__).resolve().parents[2]
 STORE = ROOT / "assets/store"
 PACKAGE = "com.shravangoswami.securevault"
-CONTACT = {"contactEmail": "hello@chaosmos.studio", "contactWebsite": "https://shravangoswami.com/SecureVault/"}
+CONTACT = {"contactEmail": "hello@chaosmos.studio", "contactWebsite": "https://chaosmos.studio/securevault/"}
 API = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/"
 UPLOAD = "https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications/"
 LIMITS = {"title": 30, "shortDescription": 80, "fullDescription": 4000}
