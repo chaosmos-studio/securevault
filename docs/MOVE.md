@@ -21,10 +21,10 @@ Nothing here happens before Jash Ambaliya and Jitendra Verma agree to the licenc
 Three choices:
 
 1. **Full history.** It is honest and keeps everyone's commits, but it publishes things we have no right to publish:
-   - the One Piece and anime images (`website/src/assets/luffy.png`, `zoro.png`, `jitendra.webp`);
-   - the 1.0.x shield, weather and disguise icons, whose source is unknown;
-   - `node_modules` with a 19 MB Windows DLL, and Flutter's `linux/` and `windows/` ephemeral folders;
-   - old personal addresses in website pages and commit metadata.
+   - the One Piece and anime images (`website/src/assets/luffy.png`, `zoro.png`, `jitendra.webp`)
+   - the 1.0.x shield, weather and disguise icons, whose source is unknown
+   - `node_modules` with a 19 MB Windows DLL, and Flutter's `linux/` and `windows/` ephemeral folders
+   - old personal addresses in website pages and commit metadata
 2. **One fresh commit.** It is clean and small, but it drops the co-creators' commits, which are their credit.
 3. **Filtered history (recommended).** Keep every commit and its message, and remove only what must not be published. It keeps everyone's credit and leaves no image or file we lack the rights to.
 
