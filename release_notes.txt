@@ -1,3 +1,16 @@
+Release Name: 1.1.0 (Production Release)
+
+Release Notes:
+- A calm new look for the vault and all four disguises
+- Setup asks for a PIN and lets you open your vault once on the disguise, so you know how it works
+- The disguises work like real apps: sums in the right order, a timer keypad, saved alarms, a mood journal
+- The new icon shows when you leave the app, with no restart
+- Backups now hold your photos, videos and notes, and restore on a new phone
+- Saving and backups now work on older phones
+- Notes in any language read back exactly as written
+
+---
+
 Release Name: 1.0.3 (Production Release)
 
 Release Notes:
@@ -32,5 +45,4 @@ Release Name: 1.0.0 (Internal Beta 1)
 Release Notes:
 Initial internal testing release.
 - Secure Vault feature basic implementation.
-- Biometric authentication.
 - File encryption and hiding.

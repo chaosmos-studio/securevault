@@ -18,16 +18,24 @@ class EncryptionService {
     return salt;
   }
 
+  /// The salt every vault on this phone is keyed with, made on first use.
+  static Future<String> deviceSalt() => _getOrCreateSalt();
+
   static Future<String> deriveKeyFromPassword(String password) async {
-    final salt = await _getOrCreateSalt();
+    return deriveKeyWithSalt(password, await _getOrCreateSalt());
+  }
+
+  /// The vault key for [password] under [salt], as made on the phone that
+  /// owns that salt. Backups carry their phone's salt to open on another.
+  static String deriveKeyWithSalt(String password, String salt) {
     final saltBytes = base64.decode(salt);
     final passwordBytes = utf8.encode(password);
-    
+
     var key = Uint8List.fromList([...passwordBytes, ...saltBytes]);
     for (int i = 0; i < 10000; i++) {
       key = Uint8List.fromList(sha256.convert(key).bytes);
     }
-    
+
     return base64.encode(key.sublist(0, 32));
   }
 

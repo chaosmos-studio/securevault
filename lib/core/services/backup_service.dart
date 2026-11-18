@@ -2,206 +2,153 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../constants/app_constants.dart';
+import 'downloads.dart';
 import 'encryption_service.dart';
+import 'vault_service.dart';
 
+class BackupException implements Exception {
+  const BackupException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+/// One vault in one file, to keep somewhere else and bring back after a
+/// reinstall or on a new phone.
+///
+/// The file is "SVB2", the salt of the phone that made it, then the list of
+/// items encrypted with the vault's key, then each item's file exactly as it
+/// is stored in the vault, already encrypted. Opening it needs the vault's PIN.
 class BackupService {
-  static const _storage = FlutterSecureStorage();
-  static const int _currentBackupVersion = 1;
+  static const _magic = 'SVB2\n';
 
-  static Future<File?> createLocalBackup(String password) async {
-    try {
-      final backupData = await _gatherBackupData(password);
-      if (backupData == null) return null;
+  /// Writes a backup of [vault] into Downloads, or where Downloads can't be
+  /// written, into the app's own folder for the share sheet.
+  static Future<SavedCopy> backUp({
+    required Vault vault,
+    required String vaultName,
+    required String password,
+  }) async {
+    final salt = await EncryptionService.deviceSalt();
+    final key = EncryptionService.deriveKeyWithSalt(password, salt);
+    final vaultsDir = Directory('${(await getApplicationDocumentsDirectory()).path}/vaults/${vault.id}');
 
-      final downloadsDir = await _getBackupDirectory();
-      final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
-      final backupFile = File('${downloadsDir.path}/securevault_backup_$timestamp.svb');
-
-      final key = await EncryptionService.deriveKeyFromPassword(password);
-      final encryptedBackup = await EncryptionService.encryptBytes(
-        Uint8List.fromList(utf8.encode(jsonEncode(backupData))),
-        key,
-      );
-
-      await backupFile.writeAsBytes(encryptedBackup);
-      return backupFile;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  static Future<bool> restoreFromBackup(File backupFile, String password) async {
-    try {
-      final encryptedData = await backupFile.readAsBytes();
-      final key = await EncryptionService.deriveKeyFromPassword(password);
-      
-      final decryptedData = await EncryptionService.decryptBytes(encryptedData, key);
-      final backupJson = jsonDecode(utf8.decode(decryptedData)) as Map<String, dynamic>;
-      
-      return await _restoreBackupData(backupJson, password);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  static Future<Directory> _getBackupDirectory() async {
-    if (Platform.isAndroid) {
-      final dir = Directory('/storage/emulated/0/Download');
-      if (await dir.exists()) return dir;
-    }
-    return await getApplicationDocumentsDirectory();
-  }
-
-  static Future<Map<String, dynamic>?> _gatherBackupData(String password) async {
-    try {
-      final appDir = await getApplicationDocumentsDirectory();
-      final vaultsDir = Directory('${appDir.path}/vaults');
-      
-      if (!await vaultsDir.exists()) return null;
-
-      final backupData = <String, dynamic>{
-        'version': _currentBackupVersion,
-        'createdAt': DateTime.now().toIso8601String(),
-        'vaults': <Map<String, dynamic>>[],
-      };
-
-      final vaultIndex = await _storage.read(key: 'vault_index');
-      if (vaultIndex != null) {
-        backupData['vaultIndex'] = vaultIndex;
+    final files = <Map<String, Object>>[];
+    for (final item in vault.items) {
+      for (final name in ['${item.id}.enc', if (item.thumbnailPath != null) '${item.id}_thumb.enc']) {
+        final file = File('${vaultsDir.path}/assets/$name');
+        if (await file.exists()) files.add({'name': name, 'size': await file.length()});
       }
+    }
+    final manifest = utf8.encode(json.encode({
+      'version': 2,
+      'app': AppConstants.version,
+      'createdAt': DateTime.now().toIso8601String(),
+      'vaultName': vaultName,
+      'items': vault.items.map((i) => i.toJson()).toList(),
+      'files': files,
+    }));
+    final sealed = await EncryptionService.encryptBytes(Uint8List.fromList(manifest), key);
 
-      await for (final entity in vaultsDir.list()) {
-        if (entity is Directory) {
-          final vaultId = entity.path.split('/').last.split('\\').last;
-          final vaultData = await _backupVault(entity, vaultId);
-          if (vaultData != null) {
-            (backupData['vaults'] as List).add(vaultData);
-          }
+    final now = DateTime.now();
+    String two(int n) => n.toString().padLeft(2, '0');
+    final copy = await Downloads.create('backup-${now.year}-${two(now.month)}-${two(now.day)}-'
+        '${two(now.hour)}${two(now.minute)}.svb');
+    final sink = await copy.file.open(mode: FileMode.write);
+    try {
+      await sink.writeFrom(utf8.encode('$_magic$salt\n'));
+      await sink.writeFrom((ByteData(4)..setUint32(0, sealed.length)).buffer.asUint8List());
+      await sink.writeFrom(sealed);
+      for (final f in files) {
+        await sink.writeFrom(await File('${vaultsDir.path}/assets/${f['name']}').readAsBytes());
+      }
+    } finally {
+      await sink.close();
+    }
+    return copy;
+  }
+
+  /// Adds the items in [backup] that [vault] does not have yet, and returns
+  /// how many were added. [backupPassword] is the PIN the backed-up vault had.
+  static Future<int> restore({
+    required File backup,
+    required String backupPassword,
+    required Vault vault,
+    required String password,
+    String? key,
+  }) async {
+    final input = await backup.open();
+    try {
+      final head = await input.read(_magic.length);
+      if (utf8.decode(head, allowMalformed: true) != _magic) {
+        throw const BackupException('This file is not a SecureVault backup');
+      }
+      final saltBytes = <int>[];
+      for (var b = await input.readByte(); b != 0x0A; b = await input.readByte()) {
+        if (b < 0 || saltBytes.length > 64) {
+          throw const BackupException('This backup is damaged');
         }
+        saltBytes.add(b);
+      }
+      final salt = ascii.decode(saltBytes);
+      final backupKey = EncryptionService.deriveKeyWithSalt(backupPassword, salt);
+
+      final length = ByteData.sublistView(await input.read(4)).getUint32(0);
+      final Map<String, dynamic> manifest;
+      try {
+        final plain = await EncryptionService.decryptBytes(await input.read(length), backupKey);
+        manifest = json.decode(utf8.decode(plain)) as Map<String, dynamic>;
+      } catch (_) {
+        throw const BackupException('That PIN does not open this backup');
       }
 
-      final prefs = <String, String>{};
-      final allKeys = ['disguise_type', 'auto_lock_seconds', 'mood_log', 'data_version'];
-      for (final key in allKeys) {
-        final value = await _storage.read(key: key);
-        if (value != null) prefs[key] = value;
-      }
-      backupData['preferences'] = prefs;
-
-      return backupData;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  static Future<Map<String, dynamic>?> _backupVault(Directory vaultDir, String vaultId) async {
-    try {
-      final metaFile = File('${vaultDir.path}/meta.enc');
-      if (!await metaFile.exists()) return null;
-
-      final vaultData = <String, dynamic>{
-        'id': vaultId,
-        'meta': base64Encode(await metaFile.readAsBytes()),
-        'assets': <Map<String, String>>[],
-      };
-
-      final assetsDir = Directory('${vaultDir.path}/assets');
-      if (await assetsDir.exists()) {
-        await for (final asset in assetsDir.list()) {
-          if (asset is File) {
-            final assetName = asset.path.split('/').last.split('\\').last;
-            final assetData = base64Encode(await asset.readAsBytes());
-            (vaultData['assets'] as List).add({
-              'name': assetName,
-              'data': assetData,
-            });
-          }
-        }
+      final offsets = <String, (int, int)>{};
+      var position = await input.position();
+      for (final f in (manifest['files'] as List).cast<Map<String, dynamic>>()) {
+        final size = f['size'] as int;
+        offsets[f['name'] as String] = (position, size);
+        position += size;
       }
 
-      return vaultData;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  static Future<bool> _restoreBackupData(Map<String, dynamic> backupData, String password) async {
-    try {
-      final appDir = await getApplicationDocumentsDirectory();
-      final vaultsDir = Directory('${appDir.path}/vaults');
-      await vaultsDir.create(recursive: true);
-
-      if (backupData['vaultIndex'] != null) {
-        await _storage.write(key: 'vault_index', value: backupData['vaultIndex']);
+      Future<Uint8List?> read(String name) async {
+        final at = offsets[name];
+        if (at == null) return null;
+        await input.setPosition(at.$1);
+        return EncryptionService.decryptBytes(await input.read(at.$2), backupKey);
       }
 
-      final vaults = backupData['vaults'] as List;
-      for (final vault in vaults) {
-        await _restoreVault(vaultsDir, vault as Map<String, dynamic>);
+      final have = vault.items.map((i) => i.id).toSet();
+      // A note keeps its name when edited, while its item id changes.
+      final notes = vault.items
+          .where((i) => i.type == VaultItemType.note)
+          .map((i) => i.name)
+          .toSet();
+      var added = 0;
+      for (final json in (manifest['items'] as List).cast<Map<String, dynamic>>()) {
+        final item = VaultItem.fromJson(json);
+        if (have.contains(item.id)) continue;
+        if (item.type == VaultItemType.note && notes.contains(item.name)) continue;
+        final data = await read('${item.id}.enc');
+        if (data == null) continue;
+        await VaultService.addItem(
+          vault: vault,
+          password: password,
+          key: key,
+          type: item.type,
+          name: item.name,
+          data: data,
+          thumbnail: item.thumbnailPath == null ? null : await read('${item.id}_thumb.enc'),
+          itemId: item.id,
+          createdAt: item.createdAt,
+        );
+        added++;
       }
-
-      final prefs = backupData['preferences'] as Map<String, dynamic>?;
-      if (prefs != null) {
-        for (final entry in prefs.entries) {
-          await _storage.write(key: entry.key, value: entry.value);
-        }
-      }
-
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  static Future<void> _restoreVault(Directory vaultsDir, Map<String, dynamic> vaultData) async {
-    final vaultId = vaultData['id'] as String;
-    final vaultDir = Directory('${vaultsDir.path}/$vaultId');
-    await vaultDir.create(recursive: true);
-
-    final metaData = base64Decode(vaultData['meta'] as String);
-    await File('${vaultDir.path}/meta.enc').writeAsBytes(metaData);
-
-    final assetsDir = Directory('${vaultDir.path}/assets');
-    await assetsDir.create(recursive: true);
-
-    final assets = vaultData['assets'] as List;
-    for (final asset in assets) {
-      final assetMap = asset as Map<String, dynamic>;
-      final assetName = assetMap['name'] as String;
-      final assetData = base64Decode(assetMap['data'] as String);
-      await File('${assetsDir.path}/$assetName').writeAsBytes(assetData);
-    }
-  }
-
-  static Future<List<File>> listBackupFiles() async {
-    try {
-      final backupDir = await _getBackupDirectory();
-      final files = <File>[];
-      
-      await for (final entity in backupDir.list()) {
-        if (entity is File && entity.path.endsWith('.svb')) {
-          files.add(entity);
-        }
-      }
-      
-      files.sort((a, b) => b.path.compareTo(a.path));
-      return files;
-    } catch (e) {
-      return [];
-    }
-  }
-
-  static String getBackupFileName(File file) {
-    return file.path.split('/').last.split('\\').last;
-  }
-
-  static Future<DateTime?> getBackupDate(File file) async {
-    try {
-      final stat = await file.stat();
-      return stat.modified;
-    } catch (e) {
-      return null;
+      return added;
+    } finally {
+      await input.close();
     }
   }
 }

@@ -1,0 +1,10 @@
+{
+  "auto_lock_seconds": 60,
+  "current_disguise": "clock",
+  "data_version": 1,
+  "disguise_notes": "[{\"id\":\"1767398400000\",\"title\":\"Shopping\",\"content\":\"Bread, eggs\",\"updatedAt\":\"2026-01-03T08:00:00.000\",\"colorIndex\":2,\"isPinned\":false}]",
+  "first_time_instructions": false,
+  "is_setup_complete": true,
+  "mood_log_data": "{\"2026-01-03\":[{\"mood\":\"Calm\",\"emoji\":\"😌\",\"timestamp\":\"2026-01-03T21:15:00.000\"}]}",
+  "theme_mode": 2
+}

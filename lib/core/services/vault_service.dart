@@ -194,7 +194,8 @@ class VaultService {
     
     final vaultInfo = index[passwordHash];
     if (vaultInfo == null) return null;
-    
+
+    await _settleStaged(vaultInfo.id, password);
     return await _loadVault(vaultInfo.id, password);
   }
 
@@ -237,8 +238,10 @@ class VaultService {
     required Uint8List data,
     Uint8List? thumbnail,
     String? key,
+    String? itemId,
+    DateTime? createdAt,
   }) async {
-    final itemId = _uuid.v4();
+    itemId ??= _uuid.v4();
     final vaultsDir = await _getVaultsDirectory();
     final encryptionKey = key ?? await EncryptionService.deriveKeyFromPassword(password);
     
@@ -257,7 +260,7 @@ class VaultService {
       id: itemId,
       type: type,
       name: name,
-      createdAt: DateTime.now(),
+      createdAt: createdAt ?? DateTime.now(),
       thumbnailPath: thumbnailPath,
     );
     
@@ -311,41 +314,104 @@ class VaultService {
     await _saveVault(vault, password);
   }
 
+  static const _pendingSuffix = '.new';
+
+  /// Re-encrypts a vault under a new password, in a way a crash cannot break:
+  /// every file is first written beside the old one, then the password index
+  /// switches over, and only then do the new files replace the old ones.
+  /// A switch interrupted half way is finished on the next unlock.
   static Future<bool> changePassword(Vault vault, String oldPassword, String newPassword) async {
+    final vaultsDir = await _getVaultsDirectory();
+    final vaultDir = Directory('${vaultsDir.path}/${vault.id}');
+    final staged = <File>[];
     try {
       final oldHash = await EncryptionService.hashPassword(oldPassword);
       final newHash = await EncryptionService.hashPassword(newPassword);
-      
       final index = await _getVaultIndex();
       final vaultInfo = index[oldHash];
-      if (vaultInfo == null || vaultInfo.id != vault.id) return false;
-      
-      index.remove(oldHash);
-      index[newHash] = vaultInfo;
-      await _saveVaultIndex(index);
-      
-      final vaultsDir = await _getVaultsDirectory();
+      if (vaultInfo == null || vaultInfo.id != vault.id || index.containsKey(newHash)) {
+        return false;
+      }
+
       final oldKey = await EncryptionService.deriveKeyFromPassword(oldPassword);
       final newKey = await EncryptionService.deriveKeyFromPassword(newPassword);
-      
-      final assetsDir = Directory('${vaultsDir.path}/${vault.id}/assets');
+
+      final assetsDir = Directory('${vaultDir.path}/assets');
       if (await assetsDir.exists()) {
         await for (final file in assetsDir.list()) {
           if (file is File && file.path.endsWith('.enc')) {
-            final encryptedData = await file.readAsBytes();
-            final decryptedData = await EncryptionService.decryptBytes(encryptedData, oldKey);
-            final reEncrypted = await EncryptionService.encryptBytes(decryptedData, newKey);
-            await file.writeAsBytes(reEncrypted);
+            final plain = await EncryptionService.decryptBytes(await file.readAsBytes(), oldKey);
+            final next = File('${file.path}$_pendingSuffix');
+            await next.writeAsBytes(await EncryptionService.encryptBytes(plain, newKey), flush: true);
+            staged.add(next);
           }
         }
       }
-      
-      vault = Vault(id: vault.id, passwordHash: newHash, items: vault.items);
-      await _saveVault(vault, newPassword);
-      
-      return true;
+      final rekeyed = Vault(id: vault.id, passwordHash: newHash, items: vault.items);
+      final metadata = File('${vaultDir.path}/metadata.enc$_pendingSuffix');
+      await metadata.writeAsString(
+          await EncryptionService.encryptData(json.encode(rekeyed.toJson()), newKey),
+          flush: true);
+      staged.add(metadata);
+
+      index.remove(oldHash);
+      index[newHash] = vaultInfo;
+      await _saveVaultIndex(index);
     } catch (e) {
+      for (final file in staged) {
+        if (await file.exists()) await file.delete();
+      }
       return false;
+    }
+
+    await _commitStaged(vaultDir);
+    return true;
+  }
+
+  /// Moves staged files into place, the metadata last: while its staged copy
+  /// exists, the change is not finished.
+  static Future<void> _commitStaged(Directory vaultDir) async {
+    final metadata = File('${vaultDir.path}/metadata.enc$_pendingSuffix');
+    final staged = await vaultDir
+        .list(recursive: true)
+        .where((f) => f is File && f.path.endsWith(_pendingSuffix) && f.path != metadata.path)
+        .cast<File>()
+        .toList();
+    for (final file in [...staged, if (await metadata.exists()) metadata]) {
+      await file.rename(file.path.substring(0, file.path.length - _pendingSuffix.length));
+    }
+  }
+
+  /// Finishes or rolls back a password change that a crash interrupted:
+  /// staged files that open with [password] are the new ones.
+  static Future<void> _settleStaged(String vaultId, String password) async {
+    final vaultsDir = await _getVaultsDirectory();
+    final vaultDir = Directory('${vaultsDir.path}/$vaultId');
+    final metadata = File('${vaultDir.path}/metadata.enc$_pendingSuffix');
+    if (!await vaultDir.exists()) return;
+    final hasStaged = await vaultDir
+        .list(recursive: true)
+        .any((f) => f is File && f.path.endsWith(_pendingSuffix));
+    if (!hasStaged) return;
+
+    // Without staged metadata, either the files were never complete or the
+    // index never switched, so the staged files are dropped.
+    var opensWithPassword = false;
+    if (await metadata.exists()) {
+      try {
+        final key = await EncryptionService.deriveKeyFromPassword(password);
+        await EncryptionService.decryptData(await metadata.readAsString(), key);
+        opensWithPassword = true;
+      } catch (_) {
+        opensWithPassword = false;
+      }
+    }
+    if (opensWithPassword) {
+      await _commitStaged(vaultDir);
+    } else {
+      await for (final file in vaultDir.list(recursive: true)) {
+        if (file is File && file.path.endsWith(_pendingSuffix)) await file.delete();
+      }
     }
   }
 
@@ -483,6 +549,24 @@ class VaultService {
         index[entry.key] = entry.value.copyWith(
           isMaster: isMaster,
           canSeeVaultIds: canSeeVaultIds,
+        );
+        await _saveVaultIndex(index);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static Future<bool> renameVault(String vaultId, String name) async {
+    final index = await _getVaultIndex();
+    for (final entry in index.entries) {
+      if (entry.value.id == vaultId) {
+        index[entry.key] = VaultInfo(
+          id: entry.value.id,
+          name: name,
+          isMaster: entry.value.isMaster,
+          createdByVaultId: entry.value.createdByVaultId,
+          canSeeVaultIds: entry.value.canSeeVaultIds,
         );
         await _saveVaultIndex(index);
         return true;

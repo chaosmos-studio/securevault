@@ -1,596 +1,344 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import '../../core/providers/app_state.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/widgets/disguise_menu.dart';
+import 'disguise_screen.dart';
+import 'pulse.dart';
 
+class Mood {
+  const Mood(this.label, this.emoji, this.icon, this.color);
+
+  final String label;
+  final String emoji;
+  final IconData icon;
+  final Color color;
+
+  static const scale = [
+    Mood('Awful', '😢', Icons.sentiment_very_dissatisfied, Color(0xFFD95B5B)),
+    Mood('Low', '🙁', Icons.sentiment_dissatisfied, Color(0xFFEB8F5A)),
+    Mood('Okay', '😐', Icons.sentiment_neutral, Color(0xFFE5B83E)),
+    Mood('Good', '🙂', Icons.sentiment_satisfied, Color(0xFF6FB57A)),
+    Mood('Great', '😄', Icons.sentiment_very_satisfied, Color(0xFF2E9373)),
+  ];
+
+  /// Moods saved by older versions, which had twelve.
+  static const _older = {
+    'Happy': 3, 'Loved': 4, 'Excited': 4, 'Energetic': 4, 'Motivated': 4,
+    'Calm': 3, 'Thoughtful': 2, 'Tired': 1, 'Melancholy': 1, 'Sad': 0,
+    'Stressed': 0, 'Anxious': 1,
+  };
+
+  static Mood? of(String label) {
+    for (final m in scale) {
+      if (m.label == label) return m;
+    }
+    final i = _older[label];
+    return i == null ? null : scale[i];
+  }
+}
+
+class MoodEntry {
+  MoodEntry({required this.mood, this.emoji = '📝', required this.timestamp, this.note = ''});
+
+  final String mood;
+  final String emoji;
+  final DateTime timestamp;
+  final String note;
+
+  Map<String, dynamic> toJson() => {
+        'mood': mood,
+        'emoji': emoji,
+        'timestamp': timestamp.toIso8601String(),
+        if (note.isNotEmpty) 'note': note,
+      };
+
+  factory MoodEntry.fromJson(Map<String, dynamic> json) => MoodEntry(
+        mood: json['mood'] as String,
+        emoji: json['emoji'] as String? ?? '📝',
+        timestamp: DateTime.parse(json['timestamp'] as String),
+        note: json['note'] as String? ?? '',
+      );
+}
+
+const _teal = Color(0xFF2F8F83);
+
+ThemeData moodTheme(Brightness brightness) {
+  final base = ThemeData(
+    useMaterial3: true,
+    brightness: brightness,
+    colorSchemeSeed: _teal,
+    fontFamily: 'Roboto',
+  );
+  return base.copyWith(
+    scaffoldBackgroundColor:
+        brightness == Brightness.dark ? const Color(0xFF111416) : const Color(0xFFF3F6F7),
+  );
+}
+
+String _dateKey(DateTime d) =>
+    '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+const _months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+  'September', 'October', 'November', 'December'];
+const _weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+/// A mood journal. A note that is a vault password opens the vault on Save.
 class MoodSpaceDisguise extends StatefulWidget {
-  const MoodSpaceDisguise({super.key});
+  const MoodSpaceDisguise({super.key, this.coach = false});
+
+  final bool coach;
 
   @override
   State<MoodSpaceDisguise> createState() => _MoodSpaceDisguiseState();
 }
 
 class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
-  final _moodController = TextEditingController();
-  Map<String, List<MoodEntry>> _moodLogByDate = {};
-  int _selectedTabIndex = 0;
+  static const _storageKey = 'mood_log_data';
 
-  final List<MoodOption> _moodOptions = [
-    MoodOption('😊', 'Happy', const Color(0xFFFFC107)),
-    MoodOption('😢', 'Sad', const Color(0xFF2196F3)),
-    MoodOption('😴', 'Tired', const Color(0xFF9C27B0)),
-    MoodOption('🌟', 'Energetic', const Color(0xFFFF9800)),
-    MoodOption('😌', 'Calm', const Color(0xFF4CAF50)),
-    MoodOption('😤', 'Stressed', const Color(0xFFF44336)),
-    MoodOption('🤔', 'Thoughtful', const Color(0xFF607D8B)),
-    MoodOption('😍', 'Loved', const Color(0xFFE91E63)),
-    MoodOption('😰', 'Anxious', const Color(0xFF795548)),
-    MoodOption('🎉', 'Excited', const Color(0xFFFF5722)),
-    MoodOption('😔', 'Melancholy', const Color(0xFF3F51B5)),
-    MoodOption('💪', 'Motivated', const Color(0xFF009688)),
-  ];
+  Map<String, List<MoodEntry>> _log = {};
+  int _tab = 0;
+  Mood? _picked;
+  final _note = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loadMoodLog();
+    _load();
+    _note.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _moodController.dispose();
+    _note.dispose();
     super.dispose();
   }
 
-  Future<void> _loadMoodLog() async {
+  Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
-    final moodJson = prefs.getString('mood_log_data');
-    if (moodJson != null) {
-      final Map<String, dynamic> decoded = json.decode(moodJson);
-      setState(() {
-        _moodLogByDate = decoded.map(
-          (key, value) => MapEntry(
-            key,
-            (value as List).map((e) => MoodEntry.fromJson(e)).toList(),
-          ),
-        );
-      });
-    }
+    final raw = prefs.getString(_storageKey);
+    if (raw == null || !mounted) return;
+    final decoded = json.decode(raw) as Map<String, dynamic>;
+    setState(() {
+      _log = decoded.map((day, list) => MapEntry(
+          day,
+          (list as List)
+              .map((e) => MoodEntry.fromJson(e as Map<String, dynamic>))
+              .toList()));
+    });
   }
 
-  Future<void> _saveMoodLog() async {
+  Future<void> _store() async {
     final prefs = await SharedPreferences.getInstance();
-    final encoded = json.encode(
-      _moodLogByDate.map(
-        (key, value) => MapEntry(key, value.map((e) => e.toJson()).toList()),
-      ),
+    await prefs.setString(
+      _storageKey,
+      json.encode(_log.map((k, v) => MapEntry(k, v.map((e) => e.toJson()).toList()))),
     );
-    await prefs.setString('mood_log_data', encoded);
   }
 
-  String _getDateKey(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
-
-  Future<void> _addMoodEntry(String mood, {String? emoji}) async {
-    final appState = context.read<AppState>();
-    final unlocked = await appState.unlock(mood);
-
-    if (unlocked && mounted) {
-      Navigator.of(context).pushReplacementNamed('/vault');
+  Future<void> _save() async {
+    final note = _note.text;
+    if (note.trim().isNotEmpty && await tryVaultCode(context, note)) {
+      _note.clear();
       return;
     }
-
+    if (!mounted) return;
+    final mood = _picked;
+    if (mood == null && note.trim().isEmpty) return;
     final now = DateTime.now();
-    final dateKey = _getDateKey(now);
-    final entry = MoodEntry(mood: mood, emoji: emoji ?? '📝', timestamp: now);
-
+    final entry = MoodEntry(
+      mood: mood?.label ?? 'Note',
+      emoji: mood?.emoji ?? '📝',
+      timestamp: now,
+      note: note.trim(),
+    );
     setState(() {
-      if (_moodLogByDate[dateKey] == null) {
-        _moodLogByDate[dateKey] = [];
-      }
-      _moodLogByDate[dateKey]!.add(entry);
+      _log.putIfAbsent(_dateKey(now), () => []).add(entry);
+      _picked = null;
     });
-    await _saveMoodLog();
-    _moodController.clear();
-
+    _note.clear();
+    FocusScope.of(context).unfocus();
+    await _store();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Mood logged: $mood'),
-          backgroundColor: Colors.green[600],
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Saved to today')));
     }
   }
+
+  List<MoodEntry> get _all =>
+      _log.values.expand((e) => e).toList()..sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? [const Color(0xFF667eea), const Color(0xFF764ba2)]
-                : [const Color(0xFFE0C3FC), const Color(0xFF8EC5FC)],
-          ),
-        ),
-        child: SafeArea(
-          child: Theme(
-            data: Theme.of(context).copyWith(
-              textTheme: Theme.of(context).textTheme.apply(
-                bodyColor: isDark ? Colors.white : Colors.black87,
-                displayColor: isDark ? Colors.white : Colors.black87,
-              ),
-              iconTheme: IconThemeData(
-                color: isDark ? Colors.white : Colors.black87,
-              ),
-            ),
-            child: Column(
+    return Theme(
+      data: moodTheme(Theme.of(context).brightness),
+      child: Builder(builder: (context) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            titleSpacing: 20,
+            title: const Row(
               children: [
-                _buildHeader(isDark),
-                _buildDateHeader(isDark),
-                Expanded(
-                  child: IndexedStack(
-                    index: _selectedTabIndex,
-                    children: [
-                      _buildLogMoodTab(isDark),
-                      _buildHistoryTab(isDark),
-                      _buildCalendarTab(isDark),
-                    ],
-                  ),
-                ),
-                _buildBottomNav(isDark),
+                Icon(Icons.spa_outlined, color: _teal, size: 26),
+                SizedBox(width: 10),
+                Text('MoodSpace', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
               ],
             ),
+            actions: const [DisguiseMenu()],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          Image.asset(
-            'assets/icons/mood_icon.png',
-            width: 32,
-            height: 32,
-            color: isDark ? Colors.white : Colors.black87,
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'MoodSpace',
-            style: TextStyle(
-              color: isDark ? Colors.white : Colors.black87,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const Spacer(),
-          DisguiseMenu(iconColor: isDark ? Colors.white : Colors.black87),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDateHeader(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Text(
-        _getFormattedDate(),
-        style: TextStyle(
-          color: isDark ? Colors.white70 : Colors.black54,
-          fontSize: 14,
-        ),
-      ),
-    );
-  }
-
-  String _getFormattedDate() {
-    final now = DateTime.now();
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[now.month - 1]} ${now.day}';
-  }
-
-  Widget _buildLogMoodTab(bool isDark) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.15)
-                  : Colors.white.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'How are you feeling?',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: _moodOptions.length,
-                  itemBuilder: (context, index) {
-                    final mood = _moodOptions[index];
-                    return GestureDetector(
-                      onTap: () => _addMoodEntry(mood.label, emoji: mood.emoji),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: mood.color.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: mood.color.withValues(alpha: 0.5),
-                            width: 2,
-                          ),
-                        ),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  mood.emoji,
-                                  style: const TextStyle(fontSize: 28),
-                                ),
-                                const SizedBox(height: 4),
-                                FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    mood.label,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.15)
-                  : Colors.white.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Or write your own:',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _moodController,
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: 'Type how you\'re feeling...',
-                    hintStyle: TextStyle(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.5)
-                          : Colors.black54,
-                    ),
-                    filled: true,
-                    fillColor: isDark
-                        ? Colors.white.withValues(alpha: 0.1)
-                        : Colors.white.withValues(alpha: 0.4),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  onSubmitted: (value) {
-                    if (value.isNotEmpty) {
-                      _addMoodEntry(value);
-                    }
-                  },
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_moodController.text.isNotEmpty) {
-                        _addMoodEntry(_moodController.text);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFF764ba2),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Save Mood',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          _buildTodayMoods(isDark),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTodayMoods(bool isDark) {
-    final todayKey = _getDateKey(DateTime.now());
-    final todayMoods = _moodLogByDate[todayKey] ?? [];
-
-    if (todayMoods.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.1)
-              : Colors.white.withValues(alpha: 0.4),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Center(
-          child: Text(
-            'No moods logged today yet',
-            style: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.1)
-            : Colors.white.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Today\'s Moods',
-            style: TextStyle(
-              color: isDark ? Colors.white : Colors.black87,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          ...todayMoods.reversed
-              .take(5)
-              .map(
-                (entry) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Text(entry.emoji, style: const TextStyle(fontSize: 20)),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          entry.mood,
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        '${entry.timestamp.hour}:${entry.timestamp.minute.toString().padLeft(2, '0')}',
-                        style: TextStyle(
-                          color: isDark ? Colors.white54 : Colors.black54,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHistoryTab(bool isDark) {
-    final allEntries = <MoodEntry>[];
-    _moodLogByDate.forEach((date, entries) {
-      allEntries.addAll(entries);
-    });
-    allEntries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
-    if (allEntries.isEmpty) {
-      return Center(
-        child: Text(
-          'No mood history yet',
-          style: TextStyle(
-            color: isDark ? Colors.white54 : Colors.black54,
-            fontSize: 16,
-          ),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: allEntries.length,
-      itemBuilder: (context, index) {
-        final entry = allEntries[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.1)
-                : Colors.white.withValues(alpha: 0.4),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
+          body: IndexedStack(
+            index: _tab,
             children: [
-              Text(entry.emoji, style: const TextStyle(fontSize: 24)),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      entry.mood,
-                      style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black87,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      _formatDateTime(entry.timestamp),
-                      style: TextStyle(
-                        color: isDark ? Colors.white54 : Colors.black54,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _today(context),
+              _history(context),
+              _MoodCalendar(log: _log),
             ],
+          ),
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: _tab,
+            onDestinationSelected: (i) => setState(() => _tab = i),
+            destinations: const [
+              NavigationDestination(icon: Icon(Icons.edit_note), label: 'Today'),
+              NavigationDestination(icon: Icon(Icons.history), label: 'History'),
+              NavigationDestination(icon: Icon(Icons.calendar_month_outlined), label: 'Calendar'),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _today(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final now = DateTime.now();
+    final canSave = _picked != null || _note.text.trim().isNotEmpty;
+    final save = SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: FilledButton(
+        onPressed: canSave ? _save : null,
+        child: const Text('Save', style: TextStyle(fontSize: 16)),
+      ),
+    );
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+      children: [
+        Text('${_weekdays[now.weekday - 1]}, ${now.day} ${_months[now.month - 1]}',
+            style: TextStyle(fontSize: 15, color: scheme.onSurfaceVariant)),
+        const SizedBox(height: 4),
+        const Text('How are you feeling?',
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.w500)),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            for (final mood in Mood.scale)
+              _MoodButton(
+                mood: mood,
+                selected: _picked == mood,
+                onTap: () => setState(() => _picked = _picked == mood ? null : mood),
+              ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        TextField(
+          controller: _note,
+          minLines: 3,
+          maxLines: 6,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(
+            hintText: 'Add a note',
+            filled: true,
+            fillColor: scheme.surfaceContainerHigh,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        widget.coach ? Pulse(child: save) : save,
+        const SizedBox(height: 32),
+        Text('This week', style: TextStyle(fontSize: 15, color: scheme.onSurfaceVariant)),
+        const SizedBox(height: 12),
+        _WeekStrip(log: _log),
+      ],
+    );
+  }
+
+  Widget _history(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final entries = _all;
+    if (entries.isEmpty) {
+      return Center(
+        child: Text('Your check-ins appear here',
+            style: TextStyle(fontSize: 16, color: scheme.onSurfaceVariant)),
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+      itemCount: entries.length,
+      itemBuilder: (context, i) {
+        final e = entries[i];
+        final mood = Mood.of(e.mood);
+        final t = e.timestamp;
+        return ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          leading: CircleAvatar(
+            backgroundColor: (mood?.color ?? scheme.outline).withValues(alpha: 0.18),
+            child: mood != null
+                ? Icon(mood.icon, color: mood.color)
+                : Text(e.emoji, style: const TextStyle(fontSize: 18)),
+          ),
+          title: Text(e.mood, maxLines: 1, overflow: TextOverflow.ellipsis),
+          subtitle: e.note.isEmpty ? null : Text(e.note, maxLines: 2, overflow: TextOverflow.ellipsis),
+          trailing: Text(
+            '${t.day} ${_months[t.month - 1].substring(0, 3)}\n'
+            '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}',
+            textAlign: TextAlign.right,
+            style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant),
           ),
         );
       },
     );
   }
+}
 
-  String _formatDateTime(DateTime dt) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
-  }
+class _MoodButton extends StatelessWidget {
+  const _MoodButton({required this.mood, required this.selected, required this.onTap});
 
-  Widget _buildCalendarTab(bool isDark) {
-    return MoodCalendarView(moodLogByDate: _moodLogByDate, isDark: isDark);
-  }
+  final Mood mood;
+  final bool selected;
+  final VoidCallback onTap;
 
-  Widget _buildBottomNav(bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(0, Icons.add_reaction, 'Log', isDark),
-          _buildNavItem(1, Icons.history, 'History', isDark),
-          _buildNavItem(2, Icons.calendar_month, 'Calendar', isDark),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(int index, IconData icon, String label, bool isDark) {
-    final isSelected = _selectedTabIndex == index;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedTabIndex = index),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? (isDark
-                    ? Colors.white.withValues(alpha: 0.2)
-                    : Colors.white.withValues(alpha: 0.5))
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: mood.label,
+      child: InkResponse(
+        onTap: onTap,
+        radius: 36,
+        child: Column(
           children: [
-            Icon(
-              icon,
-              color: isSelected
-                  ? (isDark ? Colors.white : Colors.black)
-                  : (isDark ? Colors.white54 : Colors.black38),
-            ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: selected ? mood.color : mood.color.withValues(alpha: 0.16),
+                shape: BoxShape.circle,
               ),
-            ],
+              child: Icon(mood.icon, size: 32, color: selected ? Colors.white : mood.color),
+            ),
+            const SizedBox(height: 6),
+            Text(mood.label,
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                    color: selected ? scheme.onSurface : scheme.onSurfaceVariant)),
           ],
         ),
       ),
@@ -598,289 +346,144 @@ class _MoodSpaceDisguiseState extends State<MoodSpaceDisguise> {
   }
 }
 
-class MoodOption {
-  final String emoji;
-  final String label;
-  final Color color;
-
-  MoodOption(this.emoji, this.label, this.color);
+Color? _dayColor(Map<String, List<MoodEntry>> log, DateTime day) {
+  final entries = log[_dateKey(day)];
+  if (entries == null || entries.isEmpty) return null;
+  return Mood.of(entries.last.mood)?.color ?? const Color(0xFF8A9499);
 }
 
-class MoodEntry {
-  final String mood;
-  final String emoji;
-  final DateTime timestamp;
+class _WeekStrip extends StatelessWidget {
+  const _WeekStrip({required this.log});
 
-  MoodEntry({required this.mood, this.emoji = '📝', required this.timestamp});
-
-  Map<String, dynamic> toJson() => {
-    'mood': mood,
-    'emoji': emoji,
-    'timestamp': timestamp.toIso8601String(),
-  };
-
-  factory MoodEntry.fromJson(Map<String, dynamic> json) => MoodEntry(
-    mood: json['mood'],
-    emoji: json['emoji'] ?? '📝',
-    timestamp: DateTime.parse(json['timestamp']),
-  );
-}
-
-class MoodCalendarView extends StatefulWidget {
-  final Map<String, List<MoodEntry>> moodLogByDate;
-  final bool isDark;
-
-  const MoodCalendarView({
-    super.key,
-    required this.moodLogByDate,
-    required this.isDark,
-  });
-
-  @override
-  State<MoodCalendarView> createState() => _MoodCalendarViewState();
-}
-
-class _MoodCalendarViewState extends State<MoodCalendarView> {
-  late DateTime _currentMonth;
-  String? _selectedDate;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentMonth = DateTime.now();
-  }
+  final Map<String, List<MoodEntry>> log;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final scheme = Theme.of(context).colorScheme;
+    final today = DateTime.now();
+    final monday = today.subtract(Duration(days: today.weekday - 1));
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          for (var i = 0; i < 7; i++)
+            Builder(builder: (context) {
+              final day = monday.add(Duration(days: i));
+              final color = _dayColor(log, day);
+              final isToday = i == today.weekday - 1;
+              return Column(
+                children: [
+                  Text(_weekdays[i][0],
+                      style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isToday ? FontWeight.w700 : FontWeight.w400,
+                          color: isToday ? scheme.onSurface : scheme.onSurfaceVariant)),
+                  const SizedBox(height: 10),
+                  Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: color ?? Colors.transparent,
+                      shape: BoxShape.circle,
+                      border: color == null ? Border.all(color: scheme.outlineVariant, width: 2) : null,
+                    ),
+                  ),
+                ],
+              );
+            }),
+        ],
+      ),
+    );
+  }
+}
+
+class _MoodCalendar extends StatefulWidget {
+  const _MoodCalendar({required this.log});
+
+  final Map<String, List<MoodEntry>> log;
+
+  @override
+  State<_MoodCalendar> createState() => _MoodCalendarState();
+}
+
+class _MoodCalendarState extends State<_MoodCalendar> {
+  DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final first = _month;
+    final days = DateTime(first.year, first.month + 1, 0).day;
+    final offset = first.weekday - 1;
+    final today = DateTime.now();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          Row(
             children: [
               IconButton(
-                icon: Icon(
-                  Icons.chevron_left,
-                  color: widget.isDark ? Colors.white : Colors.black87,
-                ),
-                onPressed: () => setState(() {
-                  _currentMonth = DateTime(
-                    _currentMonth.year,
-                    _currentMonth.month - 1,
-                  );
-                }),
+                icon: const Icon(Icons.chevron_left),
+                onPressed: () => setState(() => _month = DateTime(_month.year, _month.month - 1)),
               ),
-              Text(
-                '${_getMonthName(_currentMonth.month)} ${_currentMonth.year}',
-                style: TextStyle(
-                  color: widget.isDark ? Colors.white : Colors.black87,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+              Expanded(
+                child: Text('${_months[_month.month - 1]} ${_month.year}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
               ),
               IconButton(
-                icon: Icon(
-                  Icons.chevron_right,
-                  color: widget.isDark ? Colors.white : Colors.black87,
-                ),
-                onPressed: () => setState(() {
-                  _currentMonth = DateTime(
-                    _currentMonth.year,
-                    _currentMonth.month + 1,
-                  );
-                }),
+                icon: const Icon(Icons.chevron_right),
+                onPressed: () => setState(() => _month = DateTime(_month.year, _month.month + 1)),
               ),
             ],
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-                .map(
-                  (d) => Text(
-                    d,
-                    style: TextStyle(
-                      color: widget.isDark ? Colors.white54 : Colors.black54,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Expanded(child: _buildCalendarGrid()),
-        if (_selectedDate != null &&
-            widget.moodLogByDate[_selectedDate] != null)
-          Container(
-            height: 150,
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: widget.isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.white.withValues(alpha: 0.4),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Moods on $_selectedDate',
-                  style: TextStyle(
-                    color: widget.isDark ? Colors.white70 : Colors.black54,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              for (final d in _weekdays)
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: widget.moodLogByDate[_selectedDate]!.length,
-                    itemBuilder: (context, index) {
-                      final entry = widget.moodLogByDate[_selectedDate]![index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          children: [
-                            Text(
-                              entry.emoji,
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                entry.mood,
-                                style: TextStyle(
-                                  color: widget.isDark
-                                      ? Colors.white
-                                      : Colors.black87,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              '${entry.timestamp.hour}:${entry.timestamp.minute.toString().padLeft(2, '0')}',
-                              style: TextStyle(
-                                color: widget.isDark
-                                    ? Colors.white54
-                                    : Colors.black54,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                  child: Text(d[0],
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant)),
                 ),
-              ],
-            ),
+            ],
           ),
-      ],
-    );
-  }
-
-  Widget _buildCalendarGrid() {
-    final firstDayOfMonth = DateTime(
-      _currentMonth.year,
-      _currentMonth.month,
-      1,
-    );
-    final lastDayOfMonth = DateTime(
-      _currentMonth.year,
-      _currentMonth.month + 1,
-      0,
-    );
-    final startingWeekday = firstDayOfMonth.weekday % 7;
-
-    return GridView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 7,
+          const SizedBox(height: 8),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
+            itemCount: offset + days,
+            itemBuilder: (context, i) {
+              if (i < offset) return const SizedBox.shrink();
+              final day = DateTime(first.year, first.month, i - offset + 1);
+              final color = _dayColor(widget.log, day);
+              final isToday = _dateKey(day) == _dateKey(today);
+              return Padding(
+                padding: const EdgeInsets.all(4),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: color?.withValues(alpha: 0.85),
+                    shape: BoxShape.circle,
+                    border: isToday ? Border.all(color: scheme.onSurface, width: 1.5) : null,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text('${day.day}',
+                      style: TextStyle(
+                          fontSize: 15,
+                          color: color != null ? Colors.white : scheme.onSurface)),
+                ),
+              );
+            },
+          ),
+        ],
       ),
-      itemCount: 42,
-      itemBuilder: (context, index) {
-        final dayNumber = index - startingWeekday + 1;
-        if (dayNumber < 1 || dayNumber > lastDayOfMonth.day) {
-          return const SizedBox();
-        }
-
-        final dateKey =
-            '${_currentMonth.year}-${_currentMonth.month.toString().padLeft(2, '0')}-${dayNumber.toString().padLeft(2, '0')}';
-        final moods = widget.moodLogByDate[dateKey];
-        final hasMoods = moods?.isNotEmpty ?? false;
-        final isSelected = _selectedDate == dateKey;
-        final isToday =
-            DateTime.now().year == _currentMonth.year &&
-            DateTime.now().month == _currentMonth.month &&
-            DateTime.now().day == dayNumber;
-
-        return GestureDetector(
-          onTap: () => setState(() => _selectedDate = dateKey),
-          child: Container(
-            margin: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? (widget.isDark
-                        ? Colors.white.withValues(alpha: 0.3)
-                        : Colors.white.withValues(alpha: 0.6))
-                  : (hasMoods
-                        ? (widget.isDark
-                              ? Colors.white.withValues(alpha: 0.15)
-                              : Colors.white.withValues(alpha: 0.4))
-                        : null),
-              borderRadius: BorderRadius.circular(8),
-              border: isToday
-                  ? Border.all(
-                      color: widget.isDark ? Colors.white : Colors.black87,
-                      width: 2,
-                    )
-                  : null,
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Text(
-                  '$dayNumber',
-                  style: TextStyle(
-                    color: widget.isDark ? Colors.white : Colors.black87,
-                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                  ),
-                ),
-                if (hasMoods)
-                  Positioned(
-                    bottom: 4,
-                    child: Text(
-                      moods!.last.emoji,
-                      style: const TextStyle(fontSize: 8),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
     );
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return months[month - 1];
   }
 }

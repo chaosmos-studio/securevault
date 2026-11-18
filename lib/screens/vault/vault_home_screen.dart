@@ -1,19 +1,22 @@
-import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/providers/app_state.dart';
+import '../../core/services/temp_files.dart';
 import '../../core/services/vault_service.dart';
-import 'vault_settings_screen.dart';
-import 'photo_viewer_screen.dart';
-import 'video_player_screen.dart';
+import '../../ui/disguise_icon.dart';
+import '../../ui/vault_theme.dart';
+import 'media_tile.dart';
 import 'notes_vault_screen.dart';
-import 'cached_media_tile.dart';
+import 'photo_viewer_screen.dart';
+import 'vault_settings_screen.dart';
+import 'video_player_screen.dart';
 
+/// The vault: photos, videos and notes, with the lock always one tap away.
 class VaultHomeScreen extends StatefulWidget {
   const VaultHomeScreen({super.key});
 
@@ -21,627 +24,538 @@ class VaultHomeScreen extends StatefulWidget {
   State<VaultHomeScreen> createState() => _VaultHomeScreenState();
 }
 
-class _VaultHomeScreenState extends State<VaultHomeScreen>
-    with WidgetsBindingObserver {
-  int _selectedIndex = 0;
-  bool _isLoading = false;
-  final ImagePicker _picker = ImagePicker();
+class _VaultHomeScreenState extends State<VaultHomeScreen> {
+  int _tab = 0;
+  bool _working = false;
+  final _picker = ImagePicker();
+  final _selected = <String>{};
+  final _notes = GlobalKey<NotesPaneState>();
 
-  bool _isSelectionMode = false;
-  final Set<String> _selectedItems = {};
+  bool get _selecting => _selected.isNotEmpty;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _welcome());
   }
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      final appState = context.read<AppState>();
-      if (appState.shouldAutoLock()) {
-        appState.lock();
-        Navigator.of(context).pushReplacementNamed('/home');
-      }
-    }
-  }
-
-  Future<void> _addPhoto() async {
-    final appState = context.read<AppState>();
-    final source = await _showSourceDialog();
-    if (source == null) return;
-
-    try {
-      if (source == ImageSource.gallery) {
-        final List<XFile> images = await _picker.pickMultiImage();
-        if (images.isEmpty) return;
-
-        setState(() => _isLoading = true);
-        final vault = appState.currentVault;
-        final password = appState.currentPassword;
-        final key = appState.currentKey;
-
-        if (vault == null || password == null) return;
-
-        final addedFiles = <String>[];
-        for (final image in images) {
-          final bytes = await image.readAsBytes();
-          final thumbnail = await _generateThumbnail(bytes);
-
-          await VaultService.addItem(
-            vault: vault,
-            password: password,
-            type: VaultItemType.photo,
-            name: image.name,
-            data: bytes,
-            thumbnail: thumbnail,
-            key: key,
-          );
-          addedFiles.add(image.path);
-        }
-
-        await appState.refreshVault();
-
-        if (mounted && addedFiles.isNotEmpty) {
-          _showManualDeleteReminderDialog(context, 'photo');
-        }
-      } else {
-        final XFile? image = await _picker.pickImage(source: source);
-        if (image == null) return;
-
-        setState(() => _isLoading = true);
-        final vault = appState.currentVault;
-        final password = appState.currentPassword;
-        final key = appState.currentKey;
-
-        if (vault == null || password == null) return;
-
-        final bytes = await image.readAsBytes();
-        final thumbnail = await _generateThumbnail(bytes);
-
-        await VaultService.addItem(
-          vault: vault,
-          password: password,
-          type: VaultItemType.photo,
-          name: image.name,
-          data: bytes,
-          thumbnail: thumbnail,
-          key: key,
-        );
-
-        await appState.refreshVault();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error adding photo: $e')));
-      }
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _addVideo() async {
-    final appState = context.read<AppState>();
-    final source = await _showSourceDialog();
-    if (source == null) return;
-
-    try {
-      final XFile? video = await _picker.pickVideo(source: source);
-      if (video == null) return;
-
-      setState(() => _isLoading = true);
-      final vault = appState.currentVault;
-      final password = appState.currentPassword;
-      final key = appState.currentKey;
-
-      if (vault == null || password == null) return;
-
-      final bytes = await video.readAsBytes();
-
-      await VaultService.addItem(
-        vault: vault,
-        password: password,
-        type: VaultItemType.video,
-        name: video.name,
-        data: bytes,
-        key: key,
-      );
-
-      await appState.refreshVault();
-
-      if (mounted && source == ImageSource.gallery) {
-        _showManualDeleteReminderDialog(context, 'video');
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error adding video: $e')));
-      }
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  void _showManualDeleteReminderDialog(BuildContext context, String type) {
-    showDialog(
+  Future<void> _welcome() async {
+    final state = context.read<AppState>();
+    if (!state.welcomePending || !mounted) return;
+    await showModalBottomSheet<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Privacy Reminder'),
-            content: Text(
-              'Your $type has been securely encrypted and stored in the vault.\n\n'
-              'To ensure complete privacy, please manually delete the original $type from your device gallery.\n\n'
-              'We do not automatically delete files or access your gallery to guarantee that even we cannot see your personal media.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('I Understand'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
+      isDismissible: false,
+      enableDrag: false,
+      showDragHandle: false,
+      builder: (context) => _WelcomeSheet(disguise: state.currentDisguise),
     );
+    await state.dismissWelcome();
   }
 
-  Future<ImageSource?> _showSourceDialog() async {
+  List<VaultItem> _items(Vault vault, VaultItemType type) =>
+      vault.items.where((i) => i.type == type).toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+  Future<ImageSource?> _askSource({required bool video}) {
     return showModalBottomSheet<ImageSource>(
       context: context,
       builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: Text(video ? 'Choose videos' : 'Choose photos'),
+                onTap: () => Navigator.pop(context, ImageSource.gallery),
+              ),
+              ListTile(
+                leading: Icon(video ? Icons.videocam_outlined : Icons.photo_camera_outlined),
+                title: Text(video ? 'Record a video' : 'Take a photo'),
+                onTap: () => Navigator.pop(context, ImageSource.camera),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Future<Uint8List?> _generateThumbnail(Uint8List imageBytes) async {
-    return imageBytes;
-  }
+  Future<void> _add() async {
+    if (_tab == 2) {
+      _notes.currentState?.create();
+      return;
+    }
+    final video = _tab == 1;
+    final source = await _askSource(video: video);
+    if (source == null || !mounted) return;
+    final state = context.read<AppState>();
 
-  void _lockVault() {
-    final appState = context.read<AppState>();
-    appState.lock();
-    Navigator.of(context).pushReplacementNamed('/home');
-  }
-
-  void _toggleSelectionMode() {
-    setState(() {
-      _isSelectionMode = !_isSelectionMode;
-      if (!_isSelectionMode) {
-        _selectedItems.clear();
+    final picked = await state.whileOutside(() async {
+      if (video) {
+        final file = await _picker.pickVideo(source: source);
+        return file == null ? <XFile>[] : [file];
       }
+      if (source == ImageSource.gallery) return _picker.pickMultiImage();
+      final file = await _picker.pickImage(source: source);
+      return file == null ? <XFile>[] : [file];
     });
-  }
+    if (picked.isEmpty || !mounted) return;
 
-  void _toggleItemSelection(String itemId) {
-    setState(() {
-      if (_selectedItems.contains(itemId)) {
-        _selectedItems.remove(itemId);
-        if (_selectedItems.isEmpty) {
-          _isSelectionMode = false;
-        }
-      } else {
-        _selectedItems.add(itemId);
+    setState(() => _working = true);
+    try {
+      for (final file in picked) {
+        final vault = state.currentVault;
+        final password = state.currentPassword;
+        if (vault == null || password == null) return;
+        final bytes = await file.readAsBytes();
+        await VaultService.addItem(
+          vault: vault,
+          password: password,
+          type: video ? VaultItemType.video : VaultItemType.photo,
+          name: file.name,
+          data: bytes,
+          thumbnail: video ? null : await _thumbnail(bytes),
+          key: state.currentKey,
+        );
+        await TempFiles.discard(file.path);
       }
-    });
+      await state.refreshVault();
+      if (mounted && source == ImageSource.gallery) {
+        final n = picked.length;
+        final what = video ? (n == 1 ? 'video' : 'videos') : (n == 1 ? 'photo' : 'photos');
+        _toast('Added $n $what. The originals are still in your gallery.');
+      }
+    } catch (e) {
+      _toast('Could not add that file');
+    } finally {
+      for (final file in picked) {
+        await TempFiles.discard(file.path);
+      }
+      if (mounted) setState(() => _working = false);
+    }
   }
 
-  Future<void> _shareSelectedItems() async {
-    final appState = context.read<AppState>();
-    final vault = appState.currentVault;
-    final password = appState.currentPassword;
-    final key = appState.currentKey;
+  /// A small copy for the grid, so it never decodes full photos.
+  Future<Uint8List> _thumbnail(Uint8List bytes) async {
+    try {
+      final codec = await ui.instantiateImageCodec(bytes, targetWidth: 480);
+      final frame = await codec.getNextFrame();
+      final data = await frame.image.toByteData(format: ui.ImageByteFormat.png);
+      frame.image.dispose();
+      codec.dispose();
+      return data == null ? bytes : data.buffer.asUint8List();
+    } catch (_) {
+      return bytes;
+    }
+  }
 
+  void _toast(String text) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  void _toggle(String id) => setState(() {
+        if (!_selected.remove(id)) _selected.add(id);
+      });
+
+  Future<void> _open(VaultItem item, List<VaultItem> siblings) async {
+    if (_selecting) {
+      _toggle(item.id);
+      return;
+    }
+    final state = context.read<AppState>();
+    final vault = state.currentVault;
+    final password = state.currentPassword;
     if (vault == null || password == null) return;
 
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final tempDir = await getTemporaryDirectory();
+    if (item.type == VaultItemType.photo) {
+      await Navigator.of(context).push(MaterialPageRoute<void>(
+        builder: (_) => PhotoViewerScreen(
+          vault: vault,
+          password: password,
+          encryptionKey: state.currentKey,
+          items: siblings,
+          initialIndex: siblings.indexOf(item),
+          onDelete: _deleteOne,
+        ),
+      ));
+    } else {
+      final data = await VaultService.getItemData(vault, password, item.id, key: state.currentKey);
+      if (data == null || !mounted) return;
+      await Navigator.of(context).push(MaterialPageRoute<void>(
+        builder: (_) => VideoPlayerScreen(
+          videoData: data,
+          title: item.name,
+          onDelete: () => _deleteOne(item),
+        ),
+      ));
+    }
+  }
+
+  Future<void> _deleteOne(VaultItem item) async {
+    final state = context.read<AppState>();
+    final vault = state.currentVault;
+    final password = state.currentPassword;
+    if (vault == null || password == null) return;
+    await VaultService.deleteItem(vault, password, item.id);
+    await state.refreshVault();
+  }
+
+  Future<void> _shareSelected() async {
+    final state = context.read<AppState>();
+    final vault = state.currentVault;
+    final password = state.currentPassword;
+    if (vault == null || password == null) return;
     final files = <XFile>[];
-
-    for (final itemId in _selectedItems) {
-      final item = vault.items.firstWhere((i) => i.id == itemId);
-      final data = await VaultService.getItemData(vault, password, itemId, key: key);
-      if (data != null) {
-        final ext = item.type == VaultItemType.photo ? 'jpg' : 'mp4';
-        final file = File('${tempDir.path}/${item.name}.$ext');
-        await file.writeAsBytes(data);
-        files.add(XFile(file.path));
-      }
+    for (final id in _selected) {
+      final item = vault.items.firstWhere((i) => i.id == id);
+      final data = await VaultService.getItemData(vault, password, id, key: state.currentKey);
+      if (data == null) continue;
+      files.add(XFile((await TempFiles.write(item.name, data)).path));
     }
-
-    if (files.isNotEmpty) {
-      await Share.shareXFiles(files, text: 'Shared from SecureVault');
-    }
-
-    setState(() {
-      _isSelectionMode = false;
-      _selectedItems.clear();
-    });
-
-    scaffoldMessenger.showSnackBar(
-      SnackBar(content: Text('Shared ${files.length} items')),
-    );
+    if (files.isEmpty) return;
+    await state.whileOutside(() => Share.shareXFiles(files));
+    if (mounted) setState(_selected.clear);
   }
 
-  Future<void> _deleteSelectedItems() async {
-    final appState = context.read<AppState>();
-    final vault = appState.currentVault;
-    final password = appState.currentPassword;
-
-    if (vault == null || password == null) return;
-
-    final confirmed = await showDialog<bool>(
+  Future<void> _deleteSelected() async {
+    final count = _selected.length;
+    final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Items'),
-        content: Text('Delete ${_selectedItems.length} selected items?'),
+        title: Text('Delete $count ${count == 1 ? 'item' : 'items'}?'),
+        content: const Text('They are removed from the vault for good.'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: context.vault.danger),
             child: const Text('Delete'),
           ),
         ],
       ),
     );
-
-    if (confirmed != true) return;
-
-    for (final itemId in _selectedItems) {
-      await VaultService.deleteItem(vault, password, itemId);
+    if (ok != true || !mounted) return;
+    final state = context.read<AppState>();
+    final vault = state.currentVault;
+    final password = state.currentPassword;
+    if (vault == null || password == null) return;
+    for (final id in _selected.toList()) {
+      await VaultService.deleteItem(vault, password, id);
     }
-
-    await appState.refreshVault();
-
-    setState(() {
-      _isSelectionMode = false;
-      _selectedItems.clear();
-    });
+    await state.refreshVault();
+    if (mounted) setState(_selected.clear);
   }
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<AppState>();
-    final vault = appState.currentVault;
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final state = context.watch<AppState>();
+    final c = context.vault;
+    final vault = state.currentVault;
+    if (vault == null) return Scaffold(backgroundColor: c.ground);
 
-    if (vault == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    final photos = _items(vault, VaultItemType.photo);
+    final videos = _items(vault, VaultItemType.video);
+    final noteCount = vault.items.where((i) => i.type == VaultItemType.note).length;
 
-    return Scaffold(
-      appBar: _isSelectionMode
-          ? AppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: _toggleSelectionMode,
-              ),
-              title: Text('${_selectedItems.length} selected'),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.share),
-                  onPressed: _selectedItems.isNotEmpty
-                      ? _shareSelectedItems
-                      : null,
-                  tooltip: 'Share',
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: _selectedItems.isNotEmpty
-                      ? _deleteSelectedItems
-                      : null,
-                  tooltip: 'Delete',
-                ),
-              ],
-            )
-          : AppBar(
-              title: const Text('Vault'),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.settings),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const VaultSettingsScreen(),
-                      ),
-                    );
-                  },
-                  tooltip: 'Settings',
-                ),
-                IconButton(
-                  icon: const Icon(Icons.lock),
-                  onPressed: _lockVault,
-                  tooltip: 'Lock Vault',
-                ),
-              ],
-            ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : IndexedStack(
-              index: _selectedIndex,
-              children: [
-                _buildMediaGrid(vault, VaultItemType.photo),
-                _buildMediaGrid(vault, VaultItemType.video),
-                const NotesVaultScreen(),
-              ],
-            ),
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isDark
-                ? [Colors.grey[850]!, Colors.grey[900]!]
-                : [Colors.white, Colors.grey[50]!],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.primary.withValues(alpha: 0.15),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-              spreadRadius: 2,
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          border: Border.all(
-            color: isDark
-                ? Colors.grey[700]!.withValues(alpha: 0.3)
-                : Colors.grey[200]!.withValues(alpha: 0.8),
-            width: 1,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return PopScope(
+      canPop: !_selecting,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) setState(_selected.clear);
+      },
+      child: Scaffold(
+        backgroundColor: c.ground,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildNavItem(
-                0,
-                Icons.photo_outlined,
-                Icons.photo,
-                'Photos',
-                colorScheme,
+              _selecting
+                  ? _SelectionBar(
+                      count: _selected.length,
+                      onClose: () => setState(_selected.clear),
+                      onShare: _shareSelected,
+                      onDelete: _deleteSelected,
+                    )
+                  : _Header(
+                      title: state.currentVaultInfo?.name ?? 'Vault',
+                      onSettings: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                          builder: (_) => const VaultSettingsScreen())),
+                      onLock: state.lock,
+                    ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                child: Wrap(
+                  runSpacing: 8,
+                  children: [
+                    _TabPill(label: 'Photos', count: photos.length, selected: _tab == 0, onTap: () => _switch(0)),
+                    _TabPill(label: 'Videos', count: videos.length, selected: _tab == 1, onTap: () => _switch(1)),
+                    _TabPill(label: 'Notes', count: noteCount, selected: _tab == 2, onTap: () => _switch(2)),
+                  ],
+                ),
               ),
-              _buildNavItem(
-                1,
-                Icons.videocam_outlined,
-                Icons.videocam,
-                'Videos',
-                colorScheme,
-              ),
-              _buildNavItem(
-                2,
-                Icons.note_outlined,
-                Icons.note,
-                'Notes',
-                colorScheme,
+              if (_working) LinearProgressIndicator(minHeight: 2, backgroundColor: c.ground),
+              Expanded(
+                child: IndexedStack(
+                  index: _tab,
+                  children: [
+                    _grid(state, vault, photos, VaultItemType.photo),
+                    _grid(state, vault, videos, VaultItemType.video),
+                    NotesPane(key: _notes),
+                  ],
+                ),
               ),
             ],
           ),
         ),
-      ),
-      floatingActionButton: _selectedIndex < 2 && !_isSelectionMode
-          ? FloatingActionButton(
-              onPressed: _selectedIndex == 0 ? _addPhoto : _addVideo,
-              child: const Icon(Icons.add),
-            )
-          : null,
-    );
-  }
-
-  Widget _buildNavItem(
-    int index,
-    IconData icon,
-    IconData selectedIcon,
-    String label,
-    ColorScheme colorScheme,
-  ) {
-    final isSelected = _selectedIndex == index;
-
-    return GestureDetector(
-      onTap: () => setState(() => _selectedIndex = index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 20 : 16,
-          vertical: 10,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primaryContainer : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isSelected ? selectedIcon : icon,
-              color: isSelected
-                  ? colorScheme.onPrimaryContainer
-                  : colorScheme.onSurface.withValues(alpha: 0.6),
-              size: 24,
-            ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
+        floatingActionButton: _selecting
+            ? null
+            : FloatingActionButton.extended(
+                heroTag: null,
+                onPressed: _working ? null : _add,
+                icon: const Icon(Icons.add),
+                label: Text(switch (_tab) { 0 => 'Add photos', 1 => 'Add videos', _ => 'New note' }),
               ),
-            ],
-          ],
-        ),
       ),
     );
   }
 
-  Widget _buildMediaGrid(Vault vault, VaultItemType type) {
-    final items = vault.items.where((item) => item.type == type).toList();
+  void _switch(int tab) => setState(() {
+        _tab = tab;
+        _selected.clear();
+      });
 
+  Widget _grid(AppState state, Vault vault, List<VaultItem> items, VaultItemType type) {
     if (items.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              type == VaultItemType.photo
-                  ? Icons.photo_library
-                  : Icons.video_library,
-              size: 64,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              type == VaultItemType.photo ? 'No photos yet' : 'No videos yet',
-              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton.icon(
-              onPressed: type == VaultItemType.photo ? _addPhoto : _addVideo,
-              icon: const Icon(Icons.add),
-              label: Text(
-                type == VaultItemType.photo ? 'Add Photo' : 'Add Video',
-              ),
-            ),
-          ],
-        ),
+      return _EmptyPane(
+        icon: type == VaultItemType.photo ? Icons.photo_outlined : Icons.movie_outlined,
+        text: type == VaultItemType.photo ? 'No photos yet' : 'No videos yet',
       );
     }
-
     return GridView.builder(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.only(bottom: 104),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        crossAxisSpacing: 4,
-        mainAxisSpacing: 4,
+        mainAxisSpacing: 2,
+        crossAxisSpacing: 2,
       ),
       itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return _buildMediaTile(item, type);
+      itemBuilder: (context, i) {
+        final item = items[i];
+        return MediaTile(
+          key: ValueKey(item.id),
+          item: item,
+          vault: vault,
+          password: state.currentPassword!,
+          encryptionKey: state.currentKey,
+          selected: _selected.contains(item.id),
+          selecting: _selecting,
+          onTap: () => _open(item, items),
+          onLongPress: () => _toggle(item.id),
+        );
       },
     );
   }
+}
 
-  Widget _buildMediaTile(VaultItem item, VaultItemType type) {
-    final appState = context.read<AppState>();
-    final isSelected = _selectedItems.contains(item.id);
+class _Header extends StatelessWidget {
+  const _Header({required this.title, required this.onSettings, required this.onLock});
 
-    return CachedMediaTile(
-      item: item,
-      vault: appState.currentVault!,
-      password: appState.currentPassword!,
-      encryptionKey: appState.currentKey,
-      isSelected: isSelected,
-      isSelectionMode: _isSelectionMode,
-      onToggleSelection: _toggleItemSelection,
-      onOpen: _openMedia,
-      onLongPress: (id) {
-        if (!_isSelectionMode) {
-          setState(() {
-            _isSelectionMode = true;
-            _selectedItems.add(id);
-          });
-        }
-      },
+  final String title;
+  final VoidCallback onSettings;
+  final VoidCallback onLock;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.vault;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 12, 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.headlineSmall),
+          ),
+          IconButton(
+            tooltip: 'Settings',
+            onPressed: onSettings,
+            icon: const Icon(Icons.tune_rounded),
+          ),
+          const SizedBox(width: 4),
+          FilledButton.icon(
+            onPressed: onLock,
+            icon: const Icon(Icons.lock_outline_rounded, size: 20),
+            label: const Text('Lock'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(0, 44),
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              backgroundColor: c.ink,
+              foregroundColor: c.ground,
+              textStyle: const TextStyle(fontFamily: kVaultFont, fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
     );
   }
+}
 
+class _SelectionBar extends StatelessWidget {
+  const _SelectionBar({
+    required this.count,
+    required this.onClose,
+    required this.onShare,
+    required this.onDelete,
+  });
 
-  void _openMedia(VaultItem item) async {
-    final appState = context.read<AppState>();
-    final vault = appState.currentVault;
-    final password = appState.currentPassword;
-    final key = appState.currentKey;
+  final int count;
+  final VoidCallback onClose;
+  final VoidCallback onShare;
+  final VoidCallback onDelete;
 
-    if (vault == null || password == null) return;
-
-    final data = await VaultService.getItemData(vault, password, item.id, key: key);
-    if (data == null || !mounted) return;
-
-    if (item.type == VaultItemType.photo) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PhotoViewerScreen(
-            imageData: data,
-            title: item.name,
-            onDelete: () => _deleteItem(item),
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
+      child: Row(
+        children: [
+          IconButton(tooltip: 'Cancel', onPressed: onClose, icon: const Icon(Icons.close)),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text('$count selected', style: Theme.of(context).textTheme.titleLarge),
           ),
-        ),
-      );
-    } else if (item.type == VaultItemType.video) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => VideoPlayerScreen(
-            videoData: data,
-            title: item.name,
-            onDelete: () => _deleteItem(item),
+          IconButton(tooltip: 'Share', onPressed: onShare, icon: const Icon(Icons.ios_share_rounded)),
+          IconButton(
+            tooltip: 'Delete',
+            onPressed: onDelete,
+            icon: Icon(Icons.delete_outline_rounded, color: context.vault.danger),
           ),
-        ),
-      );
-    }
+        ],
+      ),
+    );
   }
+}
 
-  Future<void> _deleteItem(VaultItem item) async {
-    final appState = context.read<AppState>();
-    final vault = appState.currentVault;
-    final password = appState.currentPassword;
+class _TabPill extends StatelessWidget {
+  const _TabPill({required this.label, required this.count, required this.selected, required this.onTap});
 
-    if (vault == null || password == null) return;
+  final String label;
+  final int count;
+  final bool selected;
+  final VoidCallback onTap;
 
-    try {
-      await VaultService.deleteItem(vault, password, item.id);
-      await appState.refreshVault();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error deleting item: $e')));
-      }
-    }
+  @override
+  Widget build(BuildContext context) {
+    final c = context.vault;
+    final fg = selected ? c.ground : c.muted;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Semantics(
+        selected: selected,
+        button: true,
+        child: Material(
+          color: selected ? c.ink : Colors.transparent,
+          shape: const StadiumBorder(),
+          child: InkWell(
+            customBorder: const StadiumBorder(),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Text.rich(
+                TextSpan(children: [
+                  TextSpan(text: label),
+                  if (count > 0)
+                    TextSpan(
+                      text: '  $count',
+                      style: TextStyle(color: fg.withValues(alpha: 0.7), fontWeight: FontWeight.w500),
+                    ),
+                ]),
+                style: TextStyle(
+                  fontFamily: kVaultFont,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: selected ? c.ground : c.ink,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyPane extends StatelessWidget {
+  const _EmptyPane({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.vault;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 96),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 40, color: c.muted),
+            const SizedBox(height: 12),
+            Text(text, style: Theme.of(context).textTheme.titleMedium!.copyWith(color: c.muted)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WelcomeSheet extends StatelessWidget {
+  const _WelcomeSheet({required this.disguise});
+
+  final DisguiseType disguise;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.vault;
+    final text = Theme.of(context).textTheme;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 32, 24, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                const DisguiseIcon(disguise: null, size: 56),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: Icon(Icons.arrow_forward_rounded, color: c.muted),
+                ),
+                DisguiseIcon(disguise: disguise, size: 56),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Text('Your vault is ready', style: text.headlineSmall),
+            const SizedBox(height: 10),
+            Text(
+              'When you leave, SecureVault becomes ${disguise.displayName} on your phone. '
+              'Look for it in your apps.',
+              style: text.bodyLarge!.copyWith(color: c.muted),
+            ),
+            const SizedBox(height: 28),
+            FilledButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Got it'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

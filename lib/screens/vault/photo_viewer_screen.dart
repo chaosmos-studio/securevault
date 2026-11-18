@@ -1,222 +1,183 @@
-import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:flutter/services.dart';
 import 'package:open_file/open_file.dart';
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../core/providers/app_state.dart';
+import '../../core/services/downloads.dart';
+import '../../core/services/temp_files.dart';
+import '../../core/services/vault_service.dart';
+import 'viewer_chrome.dart';
 
+/// Full-screen photos, swiped left and right, pinched to zoom.
 class PhotoViewerScreen extends StatefulWidget {
-  final Uint8List imageData;
-  final String title;
-  final VoidCallback? onDelete;
-
   const PhotoViewerScreen({
     super.key,
-    required this.imageData,
-    required this.title,
-    this.onDelete,
+    required this.vault,
+    required this.password,
+    required this.encryptionKey,
+    required this.items,
+    required this.initialIndex,
+    required this.onDelete,
   });
+
+  final Vault vault;
+  final String password;
+  final String? encryptionKey;
+  final List<VaultItem> items;
+  final int initialIndex;
+  final Future<void> Function(VaultItem) onDelete;
 
   @override
   State<PhotoViewerScreen> createState() => _PhotoViewerScreenState();
 }
 
 class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
-  bool _showControls = true;
+  late final List<VaultItem> _items = [...widget.items];
+  late final PageController _pages = PageController(initialPage: widget.initialIndex);
+  late int _index = widget.initialIndex;
+  final _cache = <String, Future<Uint8List?>>{};
+  bool _chrome = true;
 
-  Future<File> _getTempFile() async {
-    final tempDir = await getTemporaryDirectory();
-    final tempPath =
-        '${tempDir.path}/temp_${DateTime.now().millisecondsSinceEpoch}.jpg';
-    final file = File(tempPath);
-    await file.writeAsBytes(widget.imageData);
-    return file;
+  @override
+  void dispose() {
+    _pages.dispose();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    super.dispose();
   }
 
-  Future<void> _shareImage() async {
-    try {
-      final file = await _getTempFile();
-      await Share.shareXFiles([XFile(file.path)], text: widget.title);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error sharing: $e')));
-      }
+  Future<Uint8List?> _bytes(VaultItem item) => _cache.putIfAbsent(
+        item.id,
+        () => VaultService.getItemData(widget.vault, widget.password, item.id,
+            key: widget.encryptionKey),
+      );
+
+  VaultItem get _current => _items[_index];
+
+  void _toggleChrome() {
+    setState(() => _chrome = !_chrome);
+    SystemChrome.setEnabledSystemUIMode(
+        _chrome ? SystemUiMode.edgeToEdge : SystemUiMode.immersiveSticky);
+  }
+
+  Future<void> _share() async {
+    final data = await _bytes(_current);
+    if (data == null || !mounted) return;
+    final file = await TempFiles.write(_current.name, data);
+    if (!mounted) return;
+    await context.read<AppState>().whileOutside(() => Share.shareXFiles([XFile(file.path)]));
+  }
+
+  Future<void> _openElsewhere() async {
+    final data = await _bytes(_current);
+    if (data == null || !mounted) return;
+    final file = await TempFiles.write(_current.name, data);
+    if (!mounted) return;
+    await context.read<AppState>().whileOutside(() => OpenFile.open(file.path));
+  }
+
+  Future<void> _saveToPhone() async {
+    final data = await _bytes(_current);
+    if (data == null || !mounted) return;
+    await saveToPhone(context, _current.name, data);
+  }
+
+  Future<void> _delete() async {
+    if (!await confirmDelete(context, 'photo')) return;
+    final item = _current;
+    await widget.onDelete(item);
+    if (!mounted) return;
+    if (_items.length == 1) {
+      Navigator.pop(context);
+      return;
     }
-  }
-
-  Future<void> _openInExternalApp() async {
-    try {
-      final file = await _getTempFile();
-      await OpenFile.open(file.path);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error opening: $e')));
-      }
-    }
-  }
-
-  Future<void> _exportToGallery() async {
-    try {
-      final downloadsDir = Platform.isAndroid
-          ? Directory('/storage/emulated/0/Download')
-          : await getApplicationDocumentsDirectory();
-
-      final fileName =
-          'SecureVault_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final file = File('${downloadsDir.path}/$fileName');
-      await file.writeAsBytes(widget.imageData);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Saved to Downloads: $fileName')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error exporting: $e')));
-      }
-    }
-  }
-
-  void _showOptionsMenu() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.open_in_new),
-              title: const Text('Open in other app'),
-              onTap: () {
-                Navigator.pop(context);
-                _openInExternalApp();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _confirmDelete() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Photo'),
-        content: const Text(
-          'Are you sure you want to delete this photo from the vault?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              widget.onDelete?.call();
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+    setState(() {
+      _items.removeAt(_index);
+      _index = _index.clamp(0, _items.length - 1);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: GestureDetector(
-        onTap: () => setState(() => _showControls = !_showControls),
-        child: Stack(
-          children: [
-            SizedBox.expand(
-              child: InteractiveViewer(
-                panEnabled: true,
-                minScale: 0.5,
-                maxScale: 4.0,
-                child: Center(
-                  child: Image.memory(widget.imageData, fit: BoxFit.contain),
-                ),
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _pages,
+            itemCount: _items.length,
+            onPageChanged: (i) => setState(() => _index = i),
+            itemBuilder: (context, i) => GestureDetector(
+              onTap: _toggleChrome,
+              child: FutureBuilder<Uint8List?>(
+                future: _bytes(_items[i]),
+                builder: (context, snap) {
+                  final data = snap.data;
+                  if (data == null) {
+                    return snap.connectionState == ConnectionState.done
+                        ? const Center(
+                            child: Icon(Icons.broken_image_outlined, color: Colors.white54, size: 48))
+                        : const SizedBox.expand();
+                  }
+                  return InteractiveViewer(
+                    minScale: 1,
+                    maxScale: 5,
+                    child: SizedBox.expand(
+                      child: Image.memory(data, fit: BoxFit.contain, gaplessPlayback: true),
+                    ),
+                  );
+                },
               ),
             ),
-            if (_showControls) ...[
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: AppBar(
-                  backgroundColor: Colors.black54,
-                  elevation: 0,
-                  iconTheme: const IconThemeData(color: Colors.white),
-                  titleTextStyle: const TextStyle(color: Colors.white, fontSize: 18),
-                  title: Text(widget.title, overflow: TextOverflow.ellipsis),
-                  actions: [
-                    IconButton(
-                      icon: const Icon(Icons.more_vert, color: Colors.white),
-                      onPressed: _showOptionsMenu,
-                      tooltip: 'More options',
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  color: Colors.black54,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildActionButton(Icons.share, 'Share', _shareImage),
-                      _buildActionButton(
-                        Icons.save_alt,
-                        'Export',
-                        _exportToGallery,
-                      ),
-                      if (widget.onDelete != null)
-                        _buildActionButton(
-                          Icons.delete,
-                          'Delete',
-                          _confirmDelete,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
+          ),
+          ViewerChrome(
+            visible: _chrome,
+            title: '${_index + 1} of ${_items.length}',
+            onMore: _openElsewhere,
+            actions: [
+              ViewerAction(icon: Icons.ios_share_rounded, label: 'Share', onTap: _share),
+              ViewerAction(icon: Icons.download_rounded, label: 'Save to phone', onTap: _saveToPhone),
+              ViewerAction(icon: Icons.delete_outline_rounded, label: 'Delete', onTap: _delete),
             ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton(IconData icon, String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.white, size: 28),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
           ),
         ],
       ),
     );
   }
+}
+
+/// Writes a copy outside the vault: into Downloads, or on phones where
+/// Downloads can't be written, through the share sheet.
+Future<void> saveToPhone(BuildContext context, String name, Uint8List data) async {
+  final state = context.read<AppState>();
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    final copy = await Downloads.save(name, data);
+    if (copy.inDownloads) {
+      messenger.showSnackBar(const SnackBar(content: Text('Saved to Downloads')));
+    } else {
+      await state.whileOutside(() => Share.shareXFiles([XFile(copy.file.path)]));
+    }
+  } catch (_) {
+    messenger.showSnackBar(const SnackBar(content: Text('Could not save a copy')));
+  }
+}
+
+Future<bool> confirmDelete(BuildContext context, String what) async {
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Delete this $what?'),
+      content: const Text('It is removed from the vault for good.'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+          child: const Text('Delete'),
+        ),
+      ],
+    ),
+  );
+  return ok == true;
 }
