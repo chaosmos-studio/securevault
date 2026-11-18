@@ -45,5 +45,4 @@ Release Name: 1.0.0 (Internal Beta 1)
 Release Notes:
 Initial internal testing release.
 - Secure Vault feature basic implementation.
-- Biometric authentication.
 - File encryption and hiding.
