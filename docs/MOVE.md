@@ -35,9 +35,9 @@ How to filter, with `git filter-repo` on a fresh mirror clone, never on this wor
 - [ ] Use `--replace-text` to turn old addresses in file contents (the gmail and shravangoswami.com contacts) into `hello@chaosmos.studio`.
 - [ ] Use `--mailmap` for commit authors, with the addresses each person chose in section 1.
 - [ ] Check the result:
-  - `git diff <old HEAD> <new HEAD> --stat` shows no differences in kept files;
-  - `flutter test` passes;
-  - a release build signs with the same upload key fingerprint;
+  - `git diff <old HEAD> <new HEAD> --stat` shows no differences in kept files
+  - `flutter test` passes
+  - a release build signs with the same upload key fingerprint
   - a secrets scan (`gitleaks` or the audit's greps) over every commit finds nothing.
 
 Commit messages such as "Fixed: The Secret Backdoor" stay as written. They describe old website copy and harm no one.
