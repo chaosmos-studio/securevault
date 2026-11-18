@@ -15,19 +15,16 @@ import {
 } from '@lucide/astro';
 
 import { Image } from 'astro:assets';
-import heroDark from '../assets/screenshots/hero_section_dark.png';
-import heroLight from '../assets/screenshots/hero_section_light.png';
-import calculatorDark from '../assets/screenshots/calculator_dark.jpeg';
-import calculatorLight from '../assets/screenshots/calculator_light.jpeg';
-import clockDark from '../assets/screenshots/clock_dark.jpeg';
-import clockLight from '../assets/screenshots/clock_light.jpeg';
-import moodspaceDark from '../assets/screenshots/moodspace_dark.jpeg';
-import moodspaceLight from '../assets/screenshots/moodspace_light.jpeg';
-import notesDark from '../assets/screenshots/notes_dark.jpeg';
-import notesLight from '../assets/screenshots/notes_light.jpeg';
+import heroDark from '../assets/screenshots/vault-dark.jpg';
+import heroLight from '../assets/screenshots/vault.jpg';
+import calculatorDark from '../assets/screenshots/calculator-dark.jpg';
+import calculatorLight from '../assets/screenshots/calculator.jpg';
+import clockShot from '../assets/screenshots/clock.jpg';
+import moodspaceShot from '../assets/screenshots/moodspace.jpg';
+import notesShot from '../assets/screenshots/notes.jpg';
 ---
 
-<Layout title="SecureVault - Invisible Privacy">
+<Layout title="SecureVault - A private vault that looks like an everyday app">
   <div class="premium-container" id="main-container">
     <SiteHeader />
 
@@ -39,9 +36,9 @@ import notesLight from '../assets/screenshots/notes_light.jpeg';
               Hidden in <br /><span class="reveal-text">Plain Sight.</span>
             </h1>
             <p class="subheadline">
-              The privacy vault that lives a double life. Choose from 4
-              innocent-looking disguises to keep your photos, videos, and
-              secrets truly invisible.
+              A private vault for photos, videos and notes that looks like an
+              everyday app. Pick one of four disguises that really work, and
+              only your PIN opens the vault inside.
             </p>
 
             <div class="cta-row">
@@ -78,7 +75,7 @@ import notesLight from '../assets/screenshots/notes_light.jpeg';
               <div class="phone-screen">
                 <Image
                   src={heroDark}
-                  alt="SecureVault Calculator"
+                  alt="Photos in a SecureVault vault"
                   class="screen-img main-shot"
                   id="hero-img"
                   loading="eager"
@@ -105,7 +102,7 @@ import notesLight from '../assets/screenshots/notes_light.jpeg';
                 </div>
                 <div class="d-info">
                   <h3>Calculator</h3>
-                  <p>Type your PIN to unlock.</p>
+                  <p>Type your PIN, then =.</p>
                 </div>
               </button>
 
@@ -113,7 +110,7 @@ import notesLight from '../assets/screenshots/notes_light.jpeg';
                 <div class="d-icon"><Clock size={32} /></div>
                 <div class="d-info">
                   <h3>Clock</h3>
-                  <p>Set time as password or use alarm title.</p>
+                  <p>Type your PIN on the timer and press Start.</p>
                 </div>
               </button>
 
@@ -121,7 +118,7 @@ import notesLight from '../assets/screenshots/notes_light.jpeg';
                 <div class="d-icon"><Smile size={32} /></div>
                 <div class="d-info">
                   <h3>MoodSpace</h3>
-                  <p>Log your specific "mood" to enter.</p>
+                  <p>Write your PIN as the note and press Save.</p>
                 </div>
               </button>
 
@@ -129,7 +126,7 @@ import notesLight from '../assets/screenshots/notes_light.jpeg';
                 <div class="d-icon"><FileText size={32} /></div>
                 <div class="d-info">
                   <h3>Notes</h3>
-                  <p>Type the secret title to open the vault.</p>
+                  <p>Search for your PIN in your notes.</p>
                 </div>
               </button>
             </div>
@@ -154,21 +151,21 @@ import notesLight from '../assets/screenshots/notes_light.jpeg';
         <div class="content-wrapper grid-2-imbalanced-left">
           <div class="feature-visual">
             <div class="vault-stack hover-trigger">
-              <div class="vault-card v3">Family Vault</div>
-              <div class="vault-card v2">Work Vault</div>
+              <div class="vault-card v3">Travel</div>
+              <div class="vault-card v2">Work</div>
               <div class="vault-card v1 glow-card">
                 <div class="lock-icon"><Lock size={32} /></div>
-                <span>Admin Vault</span>
+                <span>My vault</span>
               </div>
             </div>
           </div>
           <div class="feature-text">
             <div class="feature-icon"><Layers size={48} /></div>
-            <h2>Multiple Vaults</h2>
+            <h2>A Second Vault to Show</h2>
             <p>
-              Create unlimited vaults. If forced to unlock, open a <strong
-                >separate vault</strong
-              > to show empty or fake content while keeping your real data safe.
+              Make another vault with its own PIN and a few harmless things in
+              it. If someone makes you open SecureVault, type that PIN instead
+              and the <strong>second vault</strong> opens.
             </p>
             <p class="hint-text">Hover over the stack to see all vaults.</p>
           </div>
@@ -179,12 +176,11 @@ import notesLight from '../assets/screenshots/notes_light.jpeg';
         <div class="content-wrapper grid-2-imbalanced-right">
           <div class="feature-text">
             <div class="feature-icon"><DoorOpen size={48} /></div>
-            <h2>The Secret Backdoor</h2>
+            <h2>One More Way In</h2>
             <p>
-              Every disguise has a hidden entry. Tap the <strong
+              Every disguise has the same second way in. Tap the <strong
                 >three dots</strong
-              > menu, select "Request a Feature", and type your password there. You're
-              in.
+              > menu, choose "Request a feature", and type your PIN there.
             </p>
           </div>
           <div class="feature-visual">
@@ -236,12 +232,9 @@ import notesLight from '../assets/screenshots/notes_light.jpeg';
     heroLightSrc: heroLight.src,
     calcDarkSrc: calculatorDark.src,
     calcLightSrc: calculatorLight.src,
-    clockDarkSrc: clockDark.src,
-    clockLightSrc: clockLight.src,
-    moodDarkSrc: moodspaceDark.src,
-    moodLightSrc: moodspaceLight.src,
-    notesDarkSrc: notesDark.src,
-    notesLightSrc: notesLight.src,
+    clockSrc: clockShot.src,
+    moodSrc: moodspaceShot.src,
+    notesSrc: notesShot.src,
   }}
 >
   const buttons = document.querySelectorAll('.disguise-btn');
@@ -259,16 +252,16 @@ import notesLight from '../assets/screenshots/notes_light.jpeg';
       dark: calcDarkSrc,
     },
     clock: {
-      light: clockLightSrc,
-      dark: clockDarkSrc,
+      light: clockSrc,
+      dark: clockSrc,
     },
     mood: {
-      light: moodLightSrc,
-      dark: moodDarkSrc,
+      light: moodSrc,
+      dark: moodSrc,
     },
     notes: {
-      light: notesLightSrc,
-      dark: notesDarkSrc,
+      light: notesSrc,
+      dark: notesSrc,
     },
   };
 
@@ -555,7 +548,7 @@ import notesLight from '../assets/screenshots/notes_light.jpeg';
 
   .phone-frame {
     width: 300px;
-    height: 600px;
+    height: 673px;
     background: #000;
     border-radius: 40px;
     border: 8px solid #222;
