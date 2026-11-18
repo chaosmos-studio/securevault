@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/providers/app_state.dart';
+import '../../core/services/downloads.dart';
 import '../../core/services/temp_files.dart';
 import '../../core/services/vault_service.dart';
 import 'viewer_chrome.dart';
@@ -78,9 +78,8 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
 
   Future<void> _saveToPhone() async {
     final data = await _bytes(_current);
-    if (data == null) return;
-    final message = await saveToDownloads(_current.name, data);
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    if (data == null || !mounted) return;
+    await saveToPhone(context, _current.name, data);
   }
 
   Future<void> _delete() async {
@@ -147,21 +146,20 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
   }
 }
 
-/// Writes a copy to the phone's Downloads folder, outside the vault.
-Future<String> saveToDownloads(String name, Uint8List data) async {
+/// Writes a copy outside the vault: into Downloads, or on phones where
+/// Downloads can't be written, through the share sheet.
+Future<void> saveToPhone(BuildContext context, String name, Uint8List data) async {
+  final state = context.read<AppState>();
+  final messenger = ScaffoldMessenger.of(context);
   try {
-    final dir = Directory('/storage/emulated/0/Download');
-    final dot = name.lastIndexOf('.');
-    final stem = dot > 0 ? name.substring(0, dot) : name;
-    final ext = dot > 0 ? name.substring(dot) : '';
-    var file = File('${dir.path}/$name');
-    for (var n = 1; await file.exists(); n++) {
-      file = File('${dir.path}/$stem ($n)$ext');
+    final copy = await Downloads.save(name, data);
+    if (copy.inDownloads) {
+      messenger.showSnackBar(const SnackBar(content: Text('Saved to Downloads')));
+    } else {
+      await state.whileOutside(() => Share.shareXFiles([XFile(copy.file.path)]));
     }
-    await file.writeAsBytes(data, flush: true);
-    return 'Saved to Downloads';
   } catch (_) {
-    return 'Could not save to Downloads';
+    messenger.showSnackBar(const SnackBar(content: Text('Could not save a copy')));
   }
 }
 

@@ -81,10 +81,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     await context.read<AppState>().whileOutside(() => OpenFile.open(file.path));
   }
 
-  Future<void> _saveToPhone() async {
-    final message = await saveToDownloads(widget.title, widget.videoData);
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
+  Future<void> _saveToPhone() => saveToPhone(context, widget.title, widget.videoData);
 
   Future<void> _delete() async {
     if (!await confirmDelete(context, 'video')) return;
