@@ -30,6 +30,23 @@ class VaultSettingsScreen extends StatelessWidget {
   void _push(BuildContext context, Widget screen) =>
       Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
 
+  void _showCredits(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Made by Chaosmos'),
+        content: const Text(
+          "SecureVault is made by Chaosmos, Shravan Goswami's studio.\n\n"
+          'Created by Shravan Goswami, Jash Ambaliya and Jitendra Verma.\n\n'
+          '© 2026 Chaosmos',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+        ],
+      ),
+    );
+  }
+
   Future<void> _pickDisguise(BuildContext context) async {
     final state = context.read<AppState>();
     final picked = await showModalBottomSheet<DisguiseType>(
@@ -165,14 +182,14 @@ class VaultSettingsScreen extends StatelessWidget {
             SettingsRow(
               icon: Icons.favorite_outline_rounded,
               title: 'Made by',
-              value: 'Shravan Goswami, Jash Ambaliya',
-              onTap: () => launchUrl(Uri.parse('https://shravangoswami.com/SecureVault/developers/'),
-                  mode: LaunchMode.externalApplication),
+              value: 'Chaosmos',
+              onTap: () => _showCredits(context),
             ),
           ]),
           const SizedBox(height: 12),
           Center(
-            child: Text('SecureVault ${AppConstants.version}',
+            child: Text('SecureVault ${AppConstants.version}\n© 2026 Chaosmos',
+                textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall!.copyWith(color: c.muted)),
           ),
         ],
