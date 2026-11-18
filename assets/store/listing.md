@@ -1,6 +1,7 @@
 # SecureVault store listing (draft for 1.1.0)
 
 Drafts only. Nothing here has been sent to Play.
+Contact email on the listing: hello@chaosmos.studio
 Counts are checked by `store/tools/store_art.py`.
 
 ## App name (24 of 30)

@@ -9,7 +9,7 @@ import '../../ui/text_prompt.dart';
 /// The dialogs behind each disguise's menu. They speak as the disguise, so
 /// nothing here names the vault.
 class AppDialogsService {
-  static const String developerEmail = 'hello@chaosmos.studio';
+  static const String developerEmail = AppConstants.contactEmail;
 
   static void showAboutUs(BuildContext context) {
     final disguise = context.read<AppState>().currentDisguise;

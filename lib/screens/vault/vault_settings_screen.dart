@@ -153,8 +153,8 @@ class VaultSettingsScreen extends StatelessWidget {
             SettingsRow(
               icon: Icons.mail_outline_rounded,
               title: 'Contact',
-              value: 'hello@chaosmos.studio',
-              onTap: () => launchUrl(Uri.parse('mailto:hello@chaosmos.studio')),
+              value: AppConstants.contactEmail,
+              onTap: () => launchUrl(Uri.parse('mailto:${AppConstants.contactEmail}')),
             ),
             SettingsRow(
               icon: Icons.privacy_tip_outlined,

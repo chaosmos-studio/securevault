@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppConstants {
   static const String version = '1.1.0';
+  static const String contactEmail = 'hello@chaosmos.studio';
   static const int autoLockSeconds = 60;
 }
 
