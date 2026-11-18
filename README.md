@@ -3,6 +3,8 @@
 A private vault for photos, videos and notes that looks like an everyday app on the phone.
 Android first, built with Flutter.
 
+SecureVault is free, with no ads and no in-app purchases, and that is how it stays.
+
 Published by [Chaosmos](https://chaosmos.studio).
 Get it on [Google Play](https://play.google.com/store/apps/details?id=com.shravangoswami.securevault), and read more at [chaosmos.studio/securevault](https://chaosmos.studio/securevault/).
 

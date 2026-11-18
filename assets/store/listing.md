@@ -1,6 +1,6 @@
 # SecureVault store listing (draft for 1.1.0)
 
-Drafts only. Nothing here has been sent to Play.
+Sent to Play with 1.1.0 on 18 November 2026, except the "Free, with no ads and no in-app purchases" line, which waits for that review to finish.
 Contact email on the listing: hello@chaosmos.studio
 Website: https://chaosmos.studio/securevault/
 Privacy policy: https://chaosmos.studio/securevault/privacy/
@@ -33,7 +33,8 @@ Make another vault with its own PIN and a few harmless things in it. If someone 
 
 Private by design
 - Everything stays on your phone, encrypted with your PIN
-- No account, no ads, no tracking
+- Free, with no ads and no in-app purchases
+- No account and no tracking
 - Screenshots are blocked while a vault is open
 - It locks the moment you leave, or after a time you choose
 - Back up a vault to one file and bring it back on a new phone
