@@ -288,8 +288,10 @@ class VaultService {
 
   static Future<Uint8List?> getThumbnail(Vault vault, String password, VaultItem item, {String? key}) async {
     if (item.thumbnailPath == null) return null;
-    
-    final file = File(item.thumbnailPath!);
+
+    // The stored path is absolute and goes stale if the app's folder ever moves, so the file is found by name.
+    final vaultsDir = await _getVaultsDirectory();
+    final file = File('${vaultsDir.path}/${vault.id}/assets/${item.id}_thumb.enc');
     if (!await file.exists()) return null;
     
     try {
