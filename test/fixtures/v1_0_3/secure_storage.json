@@ -1,0 +1,4 @@
+{
+  "encryption_salt": "zguxU0qnEXCit+QXopisZA==",
+  "vault_index": "{\"c4fe70a9a2e6c63c5ad272c4bf97a8946b10d2e19f107fa53c88ab4ae19a6081\":{\"id\":\"349d5ee6-c3f2-4a28-86fe-886de7737b84\",\"name\":\"Personal\",\"isMaster\":true,\"createdByVaultId\":null,\"canSeeVaultIds\":[]},\"4e3831b7a1f89fe96b7f8079d94f4dc4bc9922b7141ddd5518da126f25dc4039\":{\"id\":\"6b4c0472-32d4-4100-b9d1-a4c77bbfeffb\",\"name\":\"Work\",\"isMaster\":false,\"createdByVaultId\":\"349d5ee6-c3f2-4a28-86fe-886de7737b84\",\"canSeeVaultIds\":[]},\"92859a75dcf34c671eaf0e5290d48ac1fa5f9c60c6e644c9d765ace5f931e71b\":{\"id\":\"91f37028-3d78-4bee-b660-f2b8d3efd5e9\",\"name\":\"Old\",\"isMaster\":false,\"createdByVaultId\":\"349d5ee6-c3f2-4a28-86fe-886de7737b84\",\"canSeeVaultIds\":[]}}"
+}
