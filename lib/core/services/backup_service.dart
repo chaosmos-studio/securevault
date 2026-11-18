@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
 import '../constants/app_constants.dart';
+import 'downloads.dart';
 import 'encryption_service.dart';
 import 'vault_service.dart';
 
@@ -24,20 +25,12 @@ class BackupException implements Exception {
 class BackupService {
   static const _magic = 'SVB2\n';
 
-  static Future<Directory> _downloads() async {
-    if (Platform.isAndroid) {
-      final dir = Directory('/storage/emulated/0/Download');
-      if (await dir.exists()) return dir;
-    }
-    return getApplicationDocumentsDirectory();
-  }
-
-  /// Writes a backup of [vault] and returns the file. [folder] is for tests.
-  static Future<File> backUp({
+  /// Writes a backup of [vault] into Downloads, or where Downloads can't be
+  /// written, into the app's own folder for the share sheet.
+  static Future<SavedCopy> backUp({
     required Vault vault,
     required String vaultName,
     required String password,
-    Directory? folder,
   }) async {
     final salt = await EncryptionService.deviceSalt();
     final key = EncryptionService.deriveKeyWithSalt(password, salt);
@@ -62,10 +55,9 @@ class BackupService {
 
     final now = DateTime.now();
     String two(int n) => n.toString().padLeft(2, '0');
-    final dir = folder ?? await _downloads();
-    final out = File('${dir.path}/backup-${now.year}-${two(now.month)}-${two(now.day)}-'
+    final copy = await Downloads.create('backup-${now.year}-${two(now.month)}-${two(now.day)}-'
         '${two(now.hour)}${two(now.minute)}.svb');
-    final sink = await out.open(mode: FileMode.write);
+    final sink = await copy.file.open(mode: FileMode.write);
     try {
       await sink.writeFrom(utf8.encode('$_magic$salt\n'));
       await sink.writeFrom((ByteData(4)..setUint32(0, sealed.length)).buffer.asUint8List());
@@ -76,7 +68,7 @@ class BackupService {
     } finally {
       await sink.close();
     }
-    return out;
+    return copy;
   }
 
   /// Adds the items in [backup] that [vault] does not have yet, and returns

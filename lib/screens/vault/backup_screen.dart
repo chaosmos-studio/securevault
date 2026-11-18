@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/providers/app_state.dart';
 import '../../core/services/backup_service.dart';
+import '../../core/services/downloads.dart';
 import '../../ui/text_prompt.dart';
 import '../../ui/vault_theme.dart';
 
@@ -18,7 +19,7 @@ class BackupScreen extends StatefulWidget {
 
 class _BackupScreenState extends State<BackupScreen> {
   bool _busy = false;
-  File? _saved;
+  SavedCopy? _saved;
 
   void _say(String text) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
@@ -29,24 +30,30 @@ class _BackupScreenState extends State<BackupScreen> {
     final password = state.currentPassword;
     if (vault == null || password == null) return;
     setState(() => _busy = true);
+    final SavedCopy copy;
     try {
-      final file = await BackupService.backUp(
+      copy = await BackupService.backUp(
         vault: vault,
         vaultName: state.currentVaultInfo?.name ?? 'Vault',
         password: password,
       );
-      setState(() => _saved = file);
     } catch (_) {
       _say('Could not save the backup');
-    } finally {
       if (mounted) setState(() => _busy = false);
+      return;
     }
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _saved = copy;
+    });
+    if (!copy.inDownloads) await _share();
   }
 
   Future<void> _share() async {
-    final file = _saved;
-    if (file == null) return;
-    await context.read<AppState>().whileOutside(() => Share.shareXFiles([XFile(file.path)]));
+    final saved = _saved;
+    if (saved == null) return;
+    await context.read<AppState>().whileOutside(() => Share.shareXFiles([XFile(saved.file.path)]));
   }
 
   Future<void> _restore() async {
@@ -125,7 +132,10 @@ class _BackupScreenState extends State<BackupScreen> {
                     Icon(Icons.check_circle, color: c.accent),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text('Saved to Downloads as ${saved.uri.pathSegments.last}',
+                      child: Text(
+                          saved.inDownloads
+                              ? 'Saved to Downloads as ${saved.file.uri.pathSegments.last}'
+                              : 'Ready to send as ${saved.file.uri.pathSegments.last}',
                           style: text.bodyMedium),
                     ),
                     TextButton(onPressed: _share, child: const Text('Send')),

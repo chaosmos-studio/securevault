@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:securevault/core/constants/app_constants.dart';
 import 'package:securevault/core/models/vault_note.dart';
 import 'package:securevault/core/services/backup_service.dart';
+import 'package:securevault/core/services/downloads.dart';
 import 'package:securevault/core/services/encryption_service.dart';
 import 'package:securevault/core/services/vault_service.dart';
 
@@ -21,15 +22,17 @@ void main() {
 
   setUp(() async {
     carried = await Directory.systemTemp.createTemp('securevault_carried_');
+    Downloads.folder = carried;
   });
 
   tearDown(() async {
+    setWritable(carried, true);
     for (final d in [phoneA, phoneB, carried]) {
       if (await d.exists()) await d.delete(recursive: true);
     }
   });
 
-  Future<File> backUpOnPhoneA() async {
+  Future<SavedCopy> backUpOnPhoneA() async {
     phoneA = await useFreshDevice();
     await VaultService.createVault('482915', name: 'Mine', isMaster: true);
     final vault = (await VaultService.unlockVault('482915'))!;
@@ -43,12 +46,11 @@ void main() {
       vault: (await VaultService.unlockVault('482915'))!,
       vaultName: 'Mine',
       password: '482915',
-      folder: carried,
     );
   }
 
   test('brings a vault back on a new phone with a new PIN', () async {
-    final backup = await backUpOnPhoneA();
+    final backup = (await backUpOnPhoneA()).file;
     final saltA = await EncryptionService.deviceSalt();
 
     phoneB = await useFreshDevice();
@@ -75,8 +77,27 @@ void main() {
     expect(VaultNote.decode(noteBytes!).content, 'Code 2207 ☕');
   });
 
+  test('a backup made where Downloads is read-only waits in the app folder and restores',
+      () async {
+    setWritable(carried, false);
+    final copy = await backUpOnPhoneA();
+    expect(copy.inDownloads, isFalse);
+    expect(carried.listSync(), isEmpty);
+
+    phoneB = await useFreshDevice();
+    await VaultService.createVault('111222', name: 'Fresh', isMaster: true);
+    final added = await BackupService.restore(
+      backup: copy.file,
+      backupPassword: '482915',
+      vault: (await VaultService.unlockVault('111222'))!,
+      password: '111222',
+    );
+
+    expect(added, 3);
+  });
+
   test('restoring the same backup twice adds nothing the second time', () async {
-    final backup = await backUpOnPhoneA();
+    final backup = (await backUpOnPhoneA()).file;
     phoneB = phoneA;
 
     final added = await BackupService.restore(
@@ -91,7 +112,7 @@ void main() {
   });
 
   test('a wrong PIN or another file is refused without touching the vault', () async {
-    final backup = await backUpOnPhoneA();
+    final backup = (await backUpOnPhoneA()).file;
     phoneB = await useFreshDevice();
     await VaultService.createVault('111222', name: 'Fresh');
     final vault = (await VaultService.unlockVault('111222'))!;
