@@ -6,12 +6,15 @@ Usage, from the repo root:
   python3 store/tools/play_release.py read
   python3 store/tools/play_release.py listing [--images] [--commit]
   python3 store/tools/play_release.py release <aab> [--commit]
+  python3 store/tools/play_release.py publish [--images] [--commit]
 
 read: prints the listing, contact details and production track Play holds, then discards the edit.
 listing: the en-US title, short and full description from assets/store/listing.md, the contact email and
   website, and with --images the 512 icon, the feature graphic and the phone screenshots from assets/store/,
   each set replaced in file name order.
 release: uploads the AAB and puts it on production for everyone, with the newest notes in release_notes.txt.
+publish: the listing as above, and the production draft that .github/workflows/release-android.yml uploaded
+  rolled out to everyone, in one edit so Play reviews them together.
 
 The key (default ~/.config/chaosmos/ci-uploader.json) is read by path and never printed. Its service account
 needs "Manage store presence" for the listing and "Release to production" for a release.
@@ -162,6 +165,17 @@ def listing(edit: Edit, images: bool) -> None:
     print("phoneScreenshots: " + ", ".join(p.name for p in shots))
 
 
+def rollout(edit: Edit) -> None:
+    """The production draft (the release workflow uploads production as a draft) goes out to everyone."""
+    drafts = [r for r in edit.call("GET", "tracks/production").get("releases", []) if r.get("status") == "draft"]
+    if len(drafts) != 1:
+        sys.exit(f"expected one production draft, found {len(drafts)}")
+    release = {k: v for k, v in drafts[0].items() if k in ("name", "versionCodes", "releaseNotes")}
+    release["status"] = "completed"
+    edit.call("PUT", "tracks/production", {"track": "production", "releases": [release]})
+    print(f"production: {release['name']} (codes {release['versionCodes']}) to everyone")
+
+
 def release(edit: Edit, aab: Path) -> None:
     name, text = notes()
     bundle = edit.call("POST", "bundles", raw=aab.read_bytes(), kind="application/octet-stream")
@@ -175,13 +189,13 @@ def release(edit: Edit, aab: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("action", choices=["read", "listing", "release"])
+    parser.add_argument("action", choices=["read", "listing", "release", "publish"])
     parser.add_argument("aab", nargs="?", type=Path, help="release: the signed AAB")
     parser.add_argument("--images", action="store_true", help="listing: also the icon, feature graphic and screenshots")
     parser.add_argument("--commit", action="store_true", help="send the edit instead of discarding it")
     parser.add_argument("--key", type=Path, default=Path.home() / ".config/chaosmos/ci-uploader.json")
     args = parser.parse_args()
-    if args.action == "listing":
+    if args.action in ("listing", "publish"):
         words()
     if args.action == "release" and (args.aab is None or not args.aab.exists()):
         sys.exit("release needs the path of a signed AAB")
@@ -189,9 +203,11 @@ def main() -> None:
     if args.action == "read":
         read(edit)
         return
-    if args.action == "listing":
+    if args.action in ("listing", "publish"):
         listing(edit, args.images)
-    else:
+    if args.action == "publish":
+        rollout(edit)
+    if args.action == "release":
         release(edit, args.aab)
     edit.finish(args.commit)
 
