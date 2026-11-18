@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/providers/app_state.dart';
 import '../../core/services/backup_service.dart';
 import '../../core/services/downloads.dart';
+import '../../core/services/temp_files.dart';
 import '../../ui/text_prompt.dart';
 import '../../ui/vault_theme.dart';
 
@@ -86,6 +87,7 @@ class _BackupScreenState extends State<BackupScreen> {
     } catch (_) {
       _say('Could not read that backup');
     } finally {
+      await TempFiles.discard(path);
       if (mounted) setState(() => _busy = false);
     }
   }

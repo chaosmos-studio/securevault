@@ -119,6 +119,7 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> {
           thumbnail: video ? null : await _thumbnail(bytes),
           key: state.currentKey,
         );
+        await TempFiles.discard(file.path);
       }
       await state.refreshVault();
       if (mounted && source == ImageSource.gallery) {
@@ -129,6 +130,9 @@ class _VaultHomeScreenState extends State<VaultHomeScreen> {
     } catch (e) {
       _toast('Could not add that file');
     } finally {
+      for (final file in picked) {
+        await TempFiles.discard(file.path);
+      }
       if (mounted) setState(() => _working = false);
     }
   }
