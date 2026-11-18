@@ -1,10 +1,12 @@
 ---
-import { Shield, Sun, Moon, Menu, X } from '@lucide/astro';
+import { Image } from 'astro:assets';
+import { Sun, Moon, Menu, X } from '@lucide/astro';
+import vaultIcon from '../assets/vault-icon.png';
 ---
 
 <nav class="nav glass-panel">
   <a href={`${import.meta.env.BASE_URL}/`.replace(/\/\//g, '/')} class="logo">
-    <Shield class="logo-icon" size={24} /> SecureVault
+    <Image src={vaultIcon} alt="" class="logo-icon" width={28} height={28} /> SecureVault
   </a>
 
   <div class="nav-right desktop-nav">
@@ -207,7 +209,9 @@ import { Shield, Sun, Moon, Menu, X } from '@lucide/astro';
     z-index: 1002; /* Ensure above mobile nav */
   }
   .logo-icon {
-    color: var(--accent);
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
   }
 
   .nav-right {
