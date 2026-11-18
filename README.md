@@ -1,50 +1,45 @@
-# SecureVault
+<p align="center">
+  <img src="assets/icons/vault_icon.png" alt="SecureVault" width="160">
+</p>
 
-A private vault for photos, videos and notes that looks like an everyday app on the phone.
-Android first, built with Flutter.
+SecureVault keeps photos, videos and notes in a private vault on your phone.
+It takes the name and icon of a Calculator, Notes, Clock or MoodSpace app that really works, and your PIN opens the vault inside it.
+Each vault has its own PIN, and everything in it is encrypted with a key made from that PIN.
+Nothing leaves the phone unless you share it.
+SecureVault is free, with no ads and no in-app purchases.
 
-SecureVault is free, with no ads and no in-app purchases, and that is how it stays.
-
-Published by [Chaosmos](https://chaosmos.studio).
 Get it on [Google Play](https://play.google.com/store/apps/details?id=com.shravangoswami.securevault), and read more at [chaosmos.studio/securevault](https://chaosmos.studio/securevault/).
 
-## How it works
+## Screenshots
 
-- Setup picks a disguise (Calculator, Notes, Clock or MoodSpace) and a 6 to 12 digit PIN, then has you open the vault once on the disguise.
-- The app swaps its launcher icon and name to the disguise's when you next leave it.
-- Each disguise is a working app with its own way in:
+<p align="center">
+  <img src="assets/store/screenshots/phone/01_disguise.png" alt="The Calculator disguise with the vault behind it" width="250">
+  <img src="assets/store/screenshots/phone/02_disguises.png" alt="The Calculator, Notes, Clock and MoodSpace disguises" width="250">
+  <img src="assets/store/screenshots/phone/03_photos.png" alt="Photos in the vault" width="250">
+</p>
 
-| Disguise | Opens the vault |
-| --- | --- |
-| Calculator | Type the PIN, then `=` (or `%`) |
-| Notes | Search for the PIN, or tap the title five times, or title a new note with it |
-| Clock | Type the PIN on the Timer keypad and press Start, or set an alarm labelled with it |
-| MoodSpace | Write the PIN as the note and press Save |
-| Any | Menu > Request a feature, with any password, including older ones with letters |
+## Build
 
-- Every vault has its own PIN. A vault can make others, such as a harmless one to show if someone insists.
-- Files are encrypted with AES-256 under a key made from the PIN and a per-phone salt. They stay on the phone unless you save, share or back them up, and they are left out of Android's backups. [docs/CRYPTO_1.2.md](docs/CRYPTO_1.2.md) plans the next step: Argon2id, a key per vault and authenticated encryption.
-- Screenshots are blocked while a vault is open, and the vault locks when the app is left (or after the time set in Settings).
-- Settings > Back up and restore saves one vault to a file that opens on any phone with that vault's PIN.
-
-## Build and test
+SecureVault is built with Flutter 3.44.0.
 
 ```bash
 flutter pub get
+flutter run
 flutter test
-flutter build apk --debug      # installs as com.shravangoswami.securevault.dev, beside the Play build
-flutter build appbundle --release
 ```
 
-`test/compat/` opens a vault snapshot written by the 1.0.3 release, so an update can never strand existing vaults.
-`test/capture/` renders every screen at phone size when `SV_CAPTURE_OUT` is set, and `store/tools/store_art.py` turns those captures into the Play graphics in `assets/store/`.
+A debug build installs as `com.shravangoswami.securevault.dev`, beside the Play build.
+
+## License
+
+SecureVault is available under the [GNU General Public License, version 3 or later](LICENSE).
+The Red Hat Text font is under the [SIL Open Font License](assets/fonts/RedHatText-OFL.txt).
 
 ## Credits
 
 SecureVault was created by Shravan Goswami ([shravanngoswamii](https://github.com/shravanngoswamii)), Jash Ambaliya ([AJ0070](https://github.com/AJ0070)) and Jitendra Verma ([jitendravjh](https://github.com/jitendravjh)).
 Chaosmos, the studio Shravan Goswami runs, publishes and maintains it.
 
-## License
+## Privacy and terms
 
-SecureVault is free software under the GNU General Public License, version 3 or later (GPL-3.0-or-later). See [LICENSE](LICENSE).
-The Red Hat Text font in `assets/fonts/` is under the SIL Open Font License, in `assets/fonts/RedHatText-OFL.txt`.
+Read the [privacy policy](https://chaosmos.studio/securevault/privacy/) and the [terms of service](https://chaosmos.studio/securevault/terms/).
