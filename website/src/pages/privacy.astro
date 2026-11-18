@@ -34,8 +34,7 @@ import BackToTop from '../components/BackToTop.astro';
         <div class="text-block">
           <h2>1. Data Collection</h2>
           <p>
-            SecureVault is designed with a "Zero-Knowledge" architecture. This
-            means:
+            SecureVault has no accounts and no servers. This means:
           </p>
           <ul>
             <li>We do not collect personal usage data.</li>
@@ -48,32 +47,21 @@ import BackToTop from '../components/BackToTop.astro';
         <div class="text-block">
           <h2>2. Local Storage</h2>
           <p>
-            All data you import into SecureVault is encrypted (AES-256) and
-            stored in your device's internal storage. This data never leaves
-            your device unless you manually perform a backup to your own
-            personal cloud storage (if applicable).
+            All data you add to SecureVault is encrypted (AES-256) and stored in
+            your phone's internal storage. It is left out of Android's backups
+            and phone-to-phone transfers. It leaves your phone only when you
+            save or share a copy, or make a backup file yourself.
           </p>
         </div>
 
         <div class="text-block">
           <h2>3. Permissions</h2>
           <p>
-            The app requests the following permissions strictly for
-            functionality:
+            SecureVault asks for no permissions. Photos and videos come in
+            through Android's own photo picker, the camera opens through your
+            phone's camera app, and copies and backups go to Downloads or
+            through the share sheet.
           </p>
-          <ul>
-            <li>
-              <strong>Storage / Media:</strong> Required to encrypt and hide your
-              photos and videos.
-            </li>
-            <li>
-              <strong>Camera:</strong> Required to take photos directly into the vault.
-            </li>
-            <li>
-              <strong>Biometrics:</strong> Required effectively verify your identity
-              for unlocking (optional).
-            </li>
-          </ul>
         </div>
 
         <div class="text-block">
