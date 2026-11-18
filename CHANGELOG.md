@@ -2,6 +2,25 @@
 
 All notable changes to SecureVault will be documented in this file.
 
+## [1.1.0] - November 2026
+
+Build 5 (Play version code 5).
+
+### Changed
+- A calm new look for the vault and all four disguises
+- Setup now asks for a PIN and lets you open your vault once on the disguise, so you know how it works
+- The disguises work like real apps: sums in the right order, a timer keypad, saved alarms, a mood journal
+- Notes search, the timer and a mood note now open your vault too
+- The new icon appears when you leave the app, with no restart
+- The vault locks the moment you leave, or after the time you choose in settings
+- Photos swipe from one to the next, and decrypted copies are cleared when the vault locks
+
+### Fixed
+- Backups now hold your photos, videos and notes, and restore on a new phone
+- Notes in any language read back exactly as written
+- Changing a PIN can no longer leave a vault half changed if the phone switches off
+- The Clock no longer shows a minute digit twice, and its text shows in the light theme
+
 ## [1.0.3] - March 2026
 
 ### Changed
