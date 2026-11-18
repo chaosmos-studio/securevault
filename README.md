@@ -1,73 +1,38 @@
 # SecureVault
 
-A privacy vault app disguised as utility apps. Store photos, videos, and notes with AES-256 encryption. Multiple password-protected vaults where each password unlocks different content.
+A private vault for photos, videos and notes that looks like an everyday app on the phone.
+Android first, built with Flutter.
 
-## Features
+## How it works
 
-- 4 disguises: Calculator, Notes, Clock, MoodSpace
-- Multi-vault system with separate passwords
-- AES-256 encryption
-- Dynamic app icon and name (Android)
-- Photo, video, and notes storage
-- Auto-lock and screenshot prevention
+- Setup picks a disguise (Calculator, Notes, Clock or MoodSpace) and a 6 to 12 digit PIN, then has you open the vault once on the disguise.
+- The app swaps its launcher icon and name to the disguise's when you next leave it.
+- Each disguise is a working app with its own way in:
 
-## Disguise Utilities
+| Disguise | Opens the vault |
+| --- | --- |
+| Calculator | Type the PIN, then `=` (or `%`) |
+| Notes | Search for the PIN, or tap the title five times, or title a new note with it |
+| Clock | Type the PIN on the Timer keypad and press Start, or set an alarm labelled with it |
+| MoodSpace | Write the PIN as the note and press Save |
+| Any | Menu > Request a feature, with any password, including older ones with letters |
 
-### Calculator
-A fully functional calculator with basic arithmetic operations (+, -, ×, ÷). Works exactly like a real calculator app.
+- Every vault has its own PIN. A vault can make others, such as a harmless one to show if someone insists.
+- Files are encrypted with AES-256 under a key made from the PIN and a per-phone salt, and never leave the phone.
+- Screenshots are blocked while a vault is open, and the vault locks when the app is left (or after the time set in Settings).
+- Settings > Back up and restore saves one vault to a file that opens on any phone with that vault's PIN.
 
-**Secret Entry:** Type your numeric passcode and press `=` or `%` to unlock the vault.
-
-### Notes
-A simple notes app where you can create, edit, and delete text notes. Notes are stored locally and persist between sessions.
-
-**Secret Entry:** Tap the "Notes" title in the app bar **5 times** rapidly. A password dialog will appear where you enter your passcode.
-
-### Clock
-Displays current time with an analog clock face. Shows hours, minutes, and seconds with smooth animations.
-
-**Secret Entry:** Tap the clock digits (hours/minutes) to input your code. For passcode `1234`, set it as time `12:34`. Alternatively, use the alarm feature and set the alarm time as your code.
-
-### MoodSpace
-A mood tracking and emotional wellness app. Log your daily moods, view mood history with beautiful visualizations, and gain insights into your emotional patterns.
-
-**Secret Entry:** Tap the **settings icon** (gear) in the top-right corner **7 times** rapidly. A password dialog will appear.
-
-## Multi-Vault System
-
-SecureVault supports multiple vaults with different passwords:
-
-- **Master Vault:** Primary storage accessible with your main password
-- **Decoy Vaults:** Create additional vaults with different passwords that show different content
-- **Panic Password:** Optionally set a password that wipes all data when entered
-
-Each vault has its own encrypted storage for photos, videos, and notes.
-
-## Security
-
-- **AES-256 Encryption:** Military-grade encryption for all stored files
-- **PBKDF2 Key Derivation:** Passwords are never stored; keys are derived securely
-- **Auto-Lock:** App locks automatically when backgrounded or after timeout
-- **Screenshot Prevention:** Blocks screenshots and screen recording
-- **No Cloud Sync:** All data stays on your device
-
-## Build
+## Build and test
 
 ```bash
 flutter pub get
-flutter run
-flutter build apk --release
-```
-
-APK output: `build/app/outputs/flutter-apk/app-release.apk`
-
-## Play Store Publish Build
-
-```bash
+flutter test
+flutter build apk --debug      # installs as com.shravangoswami.securevault.dev, beside the Play build
 flutter build appbundle --release
 ```
 
-AAB output: `build\app\outputs\bundle\release\app-release.aab`
+`test/compat/` opens a vault snapshot written by the 1.0.3 release, so an update can never strand existing vaults.
+`test/capture/` renders every screen at phone size when `SV_CAPTURE_OUT` is set, and `store/tools/store_art.py` turns those captures into the Play graphics in `assets/store/`.
 
 ## License
 
