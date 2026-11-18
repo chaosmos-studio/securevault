@@ -20,15 +20,15 @@ This records what changed and what is left.
 
 - **Kept:** all 174 commits, with their authors.
 - **Removed from every commit:**
-  - `node_modules/`, `android/build/`, and the Flutter ephemeral folders for Linux, Windows and macOS;
-  - the One Piece and anime avatar images, and the old SVGRepo favicon;
-  - the iOS disguise icons of unknown origin, the weather icons, the old shield icons, and 66 older versions of the disguise and vault icons.
+  - `node_modules/`, `android/build/`, and the Flutter ephemeral folders for Linux, Windows and macOS
+  - the One Piece and anime avatar images, and the old SVGRepo favicon
+  - the iOS disguise icons of unknown origin, the weather icons, the old shield icons, and 66 older versions of the disguise and vault icons
 - **Replaced:** Shravan's old addresses, and two placeholder addresses at a domain we do not own, became `hello@chaosmos.studio` in every file and commit message.
 - **Left out:** the `gh-pages` branch and the pull request refs.
 - **Checked:**
-  - none of those paths or blobs is in any commit;
-  - the pack went from 29.6 MiB to 17.6 MiB;
-  - `tools/secret-scan.sh --history` is clean.
+  - none of those paths or blobs is in any commit
+  - the pack went from 29.6 MiB to 17.6 MiB
+  - `tools/secret-scan.sh --history` is clean
 
 The iOS disguise icons were drawn again by `store/tools/icons.py` after the cleanup.
 
