@@ -8,6 +8,7 @@ Build 5 (Play version code 5).
 
 ### Changed
 - A calm new look for the vault and all four disguises
+- New icons for SecureVault and its disguises, made to sit among your phone's own apps
 - Setup now asks for a PIN and lets you open your vault once on the disguise, so you know how it works
 - The disguises work like real apps: sums in the right order, a timer keypad, saved alarms, a mood journal
 - Notes search, the timer and a mood note now open your vault too
