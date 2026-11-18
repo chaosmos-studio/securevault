@@ -11,7 +11,7 @@ Usage, from the repo root:
 
 Writes the layers and the square icons older Android versions use into
 android/app/src/main/res, previews into assets/icons for the app, and the 512 px
-store icon into store/.
+store icon into assets/store.
 """
 
 import math
@@ -224,7 +224,7 @@ def write_app():
             for suffix, side in (("", 60), ("@2x", 120), ("@3x", 180)):
                 full_icon(bg, fg, side).convert("RGB").save(ROOT / "ios/Runner" / f"{IOS[name]}{suffix}.png")
         if name == "ic_vault":
-            full_icon(bg, fg, 512).convert("RGB").save(ROOT / "store/icon-512.png")
+            full_icon(bg, fg, 512).convert("RGB").save(ROOT / "assets/store/play_store_icon_512.png")
         print(f"wrote {name}")
     colors.append("</resources>")
     (RES / "values" / "icon_colors.xml").write_text("\n".join(colors) + "\n")

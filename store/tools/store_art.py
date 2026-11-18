@@ -2,15 +2,15 @@
 screen captures (test/capture/capture_screens_test.dart).
 
 Usage, from the repo root:
+  python3 store/tools/sample_photos.py <photos>
   SV_CAPTURE_OUT=<raw> SV_PHOTOS=<photos> flutter test test/capture/capture_screens_test.dart
   python3 store/tools/store_art.py <raw>
 
-Writes assets/store/: screenshots/phone/NN_name.png (1080x1920), the 1024x500
-feature graphic and the 512 icon.
+Writes assets/store/: screenshots/phone/NN_name.png (1080x1920) and the 1024x500
+feature graphic. store/tools/icons.py writes the 512 icon beside them.
 """
 
 import math
-import shutil
 import sys
 from pathlib import Path
 
@@ -179,7 +179,6 @@ def main():
     for spec in SHOTS:
         shot(spec, raw_dir).save(phone_dir / f"{spec['name']}.png", optimize=True)
     feature(raw_dir).save(OUT / "feature_graphic_1024x500.png", optimize=True)
-    shutil.copy(ROOT / "store/icon-512.png", OUT / "play_store_icon_512.png")
 
 
 if __name__ == "__main__":
