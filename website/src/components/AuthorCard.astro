@@ -1,10 +1,6 @@
 ---
-import { Image } from 'astro:assets';
 import { Github, Linkedin, Globe, Mail, Heart } from '@lucide/astro';
 import authors from '../data/authors.json';
-
-import luffyImg from '../assets/luffy.png';
-import zoroImg from '../assets/zoro.png';
 
 interface Props {
   authorId: string;
@@ -18,27 +14,17 @@ if (!author) {
   throw new Error(`Author with id "${authorId}" not found`);
 }
 
-const imageMap: Record<string, ImageMetadata> = {
-  shravan: luffyImg,
-  jash: zoroImg,
-};
-
-const authorImage = imageMap[authorId];
+const initials = author.name
+  .split(' ')
+  .map((word) => word[0])
+  .join('')
+  .slice(0, 2)
+  .toUpperCase();
 ---
 
 <div class="author-wrapper">
   <button class="author-trigger" type="button" aria-expanded="false">
-    {
-      authorImage && (
-        <Image
-          src={authorImage}
-          alt={author.name}
-          class="author-avatar"
-          width={28}
-          height={28}
-        />
-      )
-    }
+    <span class="author-avatar initials" aria-hidden="true">{initials}</span>
     <span class="author-name">{author.name}</span>
   </button>
 
@@ -47,18 +33,10 @@ const authorImage = imageMap[authorId];
       <div class="author-card">
         <div class="card-arrow" />
         <div class="card-content">
-          {authorImage && (
-            <div class="card-image-wrapper">
-              <Image
-                src={authorImage}
-                alt={author.name}
-                class="card-image"
-                width={80}
-                height={80}
-              />
-              <div class="role-badge">{author.role}</div>
-            </div>
-          )}
+          <div class="card-image-wrapper">
+            <span class="card-image initials" aria-hidden="true">{initials}</span>
+            <div class="role-badge">{author.role}</div>
+          </div>
           <h4 class="card-name">{author.name}</h4>
           <div class="card-social">
             {author.social.github && (
@@ -217,7 +195,17 @@ const authorImage = imageMap[authorId];
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    object-fit: cover;
+    font-size: 0.6rem;
+  }
+
+  .initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: 0.02em;
   }
 
   .author-name {
@@ -316,8 +304,8 @@ const authorImage = imageMap[authorId];
     width: 70px;
     height: 70px;
     border-radius: 50%;
-    object-fit: cover;
     border: 3px solid var(--bg-surface);
+    font-size: 1.4rem;
   }
 
   .role-badge {
