@@ -26,6 +26,6 @@ SecureVault was built to challenge this status quo. We believe that privacy is a
 1. **Audit your permissions:** Does your calculator app really need access to your contacts?
 2. **Use end-to-end encryption:** Ensure your messages can only be read by you and the recipient.
 3. **Store sensitive files locally:** Cloud storage is convenient, but it means someone else holds the keys to your data.
-4. **Use tools like SecureVault:** Keep your most personal memories and documents behind a wall of encryption that even we can't breach.
+4. **Use tools like SecureVault:** Keep your most personal photos and notes encrypted on your phone, with no account and no server in between.
 
 Privacy requires effort, but it is the price of freedom in the digital age. Start locking down your digital life today.

@@ -1,34 +1,32 @@
 ---
 title: 'Encryption Explained: How SecureVault Protects You'
-description: 'A deep dive into the AES-256 encryption that powers SecureVault’s security.'
+description: 'What SecureVault encrypts, where the key comes from, and why a longer PIN helps.'
 pubDate: 'Jan 21 2026'
 heroImage: '../../assets/blog-placeholder-3.jpg'
 authors:
   - shravan
 ---
 
-"Military-grade encryption" is a marketing buzzword thrown around by many companies. But what does it actually mean, and how does it keep your files safe inside SecureVault?
+"AES-256" appears on a lot of app pages. Here is what it means inside SecureVault, and what it doesn't.
 
 ### What is AES-256?
 
-AES stands for **Advanced Encryption Standard**. It is a symmetric block cipher chosen by the U.S. government to protect classified information. The "256" refers to the key size—256 bits.
+AES stands for **Advanced Encryption Standard**, a cipher used around the world to protect data. The "256" is the key size: 256 bits. Nobody can find a 256-bit key by trying them all.
 
-To put that into perspective, a 256-bit key has $2^{256}$ possible combinations. That is a number so large that even if you used every computer on Earth to check billions of keys per second, it would still take longer than the age of the universe to crack a single file.
+### Where the key comes from
 
-### Zero-Knowledge Architecture
+SecureVault doesn't store your key. It makes the key from your PIN and a random value kept on your phone, each time you open the vault.
 
-Encryption is only as strong as who holds the key. At SecureVault, we use a **Zero-Knowledge** architecture.
+That means your PIN is what really protects your files. A 6-digit PIN has a million possibilities, and a 10-digit one has ten billion. Choose a longer PIN for the vault that matters most.
 
-- **We don't know your password.**
-- **We don't see your files.**
-- **We cannot recover your account if you lose access.**
+### What stays on your phone
 
-Your password is processed locally on your device to decrypt your unique encryption key. This key never leaves your phone. This means that even if SecureVault's servers were compromised (which wouldn't matter since your files effectively live on your device), hackers would get nothing but scrambled noise.
+- **There are no accounts and no servers.** Your photos, videos and notes are encrypted on your phone and stay there.
+- **Nobody can reset a forgotten PIN, including us.** Keep a backup from Settings, Back up and restore, somewhere safe off your phone.
+- **A backup file opens only with that vault's PIN,** so keep it as carefully as the vault itself.
 
 ### Beyond Encryption: Disguises
 
-Reviewing encryption is important, but physical privacy matters too. SecureVault allows you to disguise the app as a functioning **Calculator** or **Clock**.
+Encryption keeps the files unreadable. The disguise keeps the vault out of sight: SecureVault looks and works like a **Calculator**, **Notes**, **Clock** or **MoodSpace** app.
 
-If someone forces you to open the app, you can use a **Decoy Vault**. Entering a fake PIN opens a completely separate vault with harmless files, keeping your real private data safe without raising suspicion.
-
-Security is about layers. Encryption is the foundation, but camouflage is the shield.
+If someone makes you open it, you can type the PIN of a **second vault** that holds a few harmless things instead.
