@@ -1,20 +1,17 @@
-"""Vector drawing for SecureVault's icons and store art, with Pillow and numpy.
+"""Vector drawing for SecureVault's icons, with Pillow and numpy.
 
 Shapes are masks of one 108 dp adaptive icon layer, drawn at 16 px per dp and
 scaled down, with coordinates in dp from the layer's centre. Fills are solid
-colours or gradients. The sheet helpers lay icons out the way launchers show
-them.
+colours or gradients.
 """
 
-import math
 from functools import reduce
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[2]
-FONTS = ROOT / "assets/fonts"
 
 S = 1728  # one 108 dp layer, 16 px per dp
 DP = S / 108
@@ -49,17 +46,6 @@ def path(start, *segments):
         else:
             pts.append(seg)
     return pts
-
-
-def reflect(p, a, b):
-    dx, dy = b[0] - a[0], b[1] - a[1]
-    t = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / (dx * dx + dy * dy)
-    fx, fy = a[0] + t * dx, a[1] + t * dy
-    return (2 * fx - p[0], 2 * fy - p[1])
-
-
-def lerp(a, b, t):
-    return (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
 
 
 # Masks: L images of one layer.
@@ -102,20 +88,6 @@ def stroke(pts, width):
     return m
 
 
-def ribbon(pts, widths):
-    """A band along pts whose width changes point by point, with a round tip."""
-    left, right = [], []
-    for i, (x, y) in enumerate(pts):
-        a, b = pts[max(i - 1, 0)], pts[min(i + 1, len(pts) - 1)]
-        dx, dy = b[0] - a[0], b[1] - a[1]
-        n = math.hypot(dx, dy) or 1
-        nx, ny = -dy / n, dx / n
-        h = widths[i] / 2
-        left.append((x + nx * h, y + ny * h))
-        right.append((x - nx * h, y - ny * h))
-    return union(poly(left + right[::-1]), ellipse(pts[-1], widths[-1] / 2))
-
-
 def union(*ms):
     return reduce(ImageChops.lighter, ms)
 
@@ -126,12 +98,6 @@ def inter(*ms):
 
 def minus(a, b):
     return ImageChops.subtract(a, b)
-
-
-def shift(m, dx, dy):
-    out = blank()
-    out.paste(m, (round(dx * DP), round(dy * DP)))
-    return out
 
 
 def blur(m, r):
@@ -156,12 +122,6 @@ def ramp(t, stops):
     return Image.fromarray(np.clip(out + 0.5, 0, 255).astype(np.uint8), "RGBA")
 
 
-def linear(stops, p0, p1):
-    dx, dy = p1[0] - p0[0], p1[1] - p0[1]
-    t = ((GX - p0[0]) * dx + (GY - p0[1]) * dy) / (dx * dx + dy * dy)
-    return ramp(np.clip(t, 0, 1), stops)
-
-
 def radial(stops, c, r, ry=None):
     ry = r if ry is None else ry
     return ramp(np.clip(np.hypot((GX - c[0]) / r, (GY - c[1]) / ry), 0, 1), stops)
@@ -174,10 +134,6 @@ def paint(lay, mask, fill, opacity=1.0):
         a = a.point(lambda v: round(v * opacity))
     src.putalpha(a)
     lay.alpha_composite(src)
-
-
-def shadow(lay, mask, dx, dy, r, color, opacity):
-    paint(lay, blur(shift(mask, dx, dy), r), color, opacity)
 
 
 def layer():
@@ -204,103 +160,3 @@ def full_icon(bg, fg, size):
     whole = bg.copy()
     whole.alpha_composite(fg)
     return visible(whole, size)
-
-
-def shape_mask(kind, size):
-    big = size * 4
-    if kind == "round":
-        m = Image.new("L", (big, big), 0)
-        ImageDraw.Draw(m).ellipse([0, 0, big - 1, big - 1], fill=255)
-    elif kind == "squircle":
-        u = (np.arange(big, dtype=np.float32) + 0.5) / big * 2 - 1
-        x, y = np.meshgrid(u, u)
-        m = Image.fromarray(((np.abs(x) ** 5 + np.abs(y) ** 5) <= 1).astype(np.uint8) * 255, "L")
-    else:
-        m = Image.new("L", (big, big), 0)
-        ImageDraw.Draw(m).rounded_rectangle([0, 0, big - 1, big - 1], radius=big * 0.2, fill=255)
-    return m.resize((size, size), Image.LANCZOS)
-
-
-def masked(img, kind):
-    out = img.convert("RGBA")
-    out.putalpha(ImageChops.multiply(out.getchannel("A"), shape_mask(kind, img.width)))
-    return out
-
-
-def themed(mono, size, back, ink):
-    tile = Image.new("RGBA", (size, size), rgba(back))
-    glyph = Image.new("RGBA", (size, size), rgba(ink))
-    glyph.putalpha(visible(mono, size))
-    tile.alpha_composite(glyph)
-    return masked(tile, "round")
-
-
-# Sheets.
-
-PAPER = (244, 242, 238)
-INK = (28, 28, 30)
-MUTED = (110, 108, 104)
-THEME_LIGHT = ((214, 227, 255), (26, 58, 105))
-THEME_DARK = ((42, 50, 66), (207, 224, 255))
-WALL_LIGHT = [(0, (250, 232, 214)), (1, (210, 226, 242))]
-WALL_DARK = [(0, (34, 40, 60)), (1, (12, 14, 22))]
-
-
-def font(weight, size):
-    name = {"semibold": "RedHatText-SemiBold.otf", "medium": "RedHatText-Medium.otf",
-            "regular": "RedHatText-Regular.otf"}[weight]
-    return ImageFont.truetype(str(FONTS / name), size)
-
-
-def wrap(draw, text, fnt, width):
-    lines, line = [], ""
-    for word in text.split():
-        trial = f"{line} {word}".strip()
-        if draw.textlength(trial, font=fnt) <= width:
-            line = trial
-        else:
-            lines.append(line)
-            line = word
-    return lines + [line]
-
-
-def drop(canvas, img, x, y, r=10, opacity=60):
-    sh = Image.new("RGBA", (img.width + 4 * r, img.height + 4 * r), (0, 0, 0, 0))
-    a = Image.new("L", sh.size, 0)
-    a.paste(img.getchannel("A").point(lambda v: v * opacity // 255), (2 * r, 2 * r))
-    sh.putalpha(a.filter(ImageFilter.GaussianBlur(r)))
-    canvas.alpha_composite(sh, (x - 2 * r, y - 2 * r + r // 2))
-    canvas.alpha_composite(img, (x, y))
-
-
-def label(draw, x, y, text, size=17, fill=MUTED, centre_w=None, weight="regular"):
-    fnt = font(weight, size)
-    if centre_w:
-        x += (centre_w - draw.textlength(text, font=fnt)) / 2
-    draw.text((x, y), text, font=fnt, fill=fill)
-
-
-def wallpaper(w, h, stops, radius=14):
-    t = np.linspace(0, 1, h, dtype=np.float32)[:, None] * np.ones((1, w), np.float32)
-    wall = ramp(t, stops)
-    m = Image.new("L", (w, h), 0)
-    ImageDraw.Draw(m).rounded_rectangle([0, 0, w - 1, h - 1], radius=radius, fill=255)
-    wall.putalpha(m)
-    return wall
-
-
-def home_row(canvas, x, y, icons, dark, size=48, gap=28, pad=22):
-    """Icons at launcher size with their names, in a row on a wallpaper."""
-    cell = size + gap
-    w = pad * 2 + cell * len(icons) - gap
-    h = size + 62
-    canvas.alpha_composite(wallpaper(w, h, WALL_DARK if dark else WALL_LIGHT), (x, y))
-    d = ImageDraw.Draw(canvas)
-    fnt = font("regular", 12)
-    for k, (icon, name) in enumerate(icons):
-        ix = x + pad + k * cell
-        canvas.alpha_composite(icon, (ix, y + 18))
-        tw = d.textlength(name, font=fnt)
-        d.text((ix + (size - tw) / 2, y + 18 + size + 8), name, font=fnt,
-               fill=(255, 255, 255) if dark else (40, 40, 44))
-    return w, h
