@@ -2,7 +2,9 @@
     <application
         android:label="SecureVault"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_vault">
+        android:icon="@mipmap/ic_vault"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules">
 
         <activity
             android:name=".MainActivity"
