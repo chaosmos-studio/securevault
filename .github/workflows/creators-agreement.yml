@@ -44,6 +44,8 @@ jobs:
             const blob = (sha, path) => `https://github.com/${owner}/${repo}/blob/${sha}/${path}`;
 
             const creatorFor = (login) => creators.find((c) => c.toLowerCase() === login.toLowerCase());
+            const list = (names) => (names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`);
+            const all = creators.length === 1 ? 'The creator has' : `All ${['', '', 'two', 'three', 'four', 'five'][creators.length] || creators.length} creators have`;
             const shaIn = (body) => (body.match(/<!-- agreement-sha: ([0-9a-f]{40}) -->/) || [])[1];
 
             async function signed() {
@@ -77,7 +79,7 @@ jobs:
               const { data: file } = await github.rest.repos.getContent({ owner, repo, path: process.env.AGREEMENT, ref: sha });
               const text = Buffer.from(file.content, 'base64').toString('utf8');
               const name = (c) => (dry ? `\`${c}\`` : `@${c}`);
-              const who = `${creators.slice(0, -1).map(name).join(', ')} and ${name(creators[creators.length - 1])}`;
+              const who = list(creators.map(name));
               try {
                 await github.rest.issues.createLabel({ owner, repo, name: process.env.LABEL, color: '2c8058', description: "The creators' agreement" });
               } catch (err) {
@@ -169,7 +171,7 @@ jobs:
                 const held = await record(c);
                 lines.push(`- @${held.data.login}: [comment](${held.data.comment_url}), recorded in ${held.commit.html_url}`);
               }
-              await say(issue.number, ['All three creators have signed the agreement at ' + `[${sha.slice(0, 7)}](${blob(sha, process.env.AGREEMENT)}).`, ...lines, '', 'Thank you. This issue is now closed and locked.'].join('\n'));
+              await say(issue.number, [`${all} signed the agreement at [${sha.slice(0, 7)}](${blob(sha, process.env.AGREEMENT)}).`, ...lines, '', 'Thank you. This issue is now closed and locked.'].join('\n'));
               await github.rest.issues.update({ owner, repo, issue_number: issue.number, state: 'closed', state_reason: 'completed' });
               await github.rest.issues.lock({ owner, repo, issue_number: issue.number, lock_reason: 'resolved' });
             }
