@@ -15,9 +15,6 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_shield">
 
-        <!-- App-cloning containers on Google Play must not load the vault. -->
-        <property android:name="REQUIRE_SECURE_ENV" android:value="1" />
-
         <activity
             android:name=".MainActivity"
             android:exported="true"
