@@ -16,14 +16,16 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
+from icons import spiral_edges
+
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "assets/store"
 FONTS = ROOT / "assets/fonts"
 
-SPRUCE = (30, 94, 80)
-DIAL = (38, 108, 92)
+JADE = (24, 84, 58)
+TAIL = (33, 101, 71)
 INK = (255, 255, 255)
-SUB = (205, 230, 220)
+SUB = (200, 228, 210)
 BEZEL = (14, 17, 16)
 
 SHOTS = [
@@ -60,16 +62,24 @@ def wrap(draw, text, fnt, width):
     return list(min(fitting or splits, key=lambda s: max(draw.textlength(l, font=fnt) for l in s)))
 
 
-def dial(canvas, centre, radius):
-    """The vault dial from the app icon, as one quiet shape behind the phones."""
-    d = ImageDraw.Draw(canvas)
-    cx, cy = centre
-    d.ellipse([cx - radius, cy - radius, cx + radius, cy + radius], outline=DIAL, width=int(radius * 0.16))
-    for k in range(8):
-        a = k * math.pi / 4
-        x, y = cx + math.cos(a) * radius * 1.3, cy + math.sin(a) * radius * 1.3
-        r = radius * 0.1
-        d.ellipse([x - r, y - r, x + r, y + r], fill=DIAL)
+def tail(canvas, centre, radius):
+    """The chameleon's tail from the app icon, as one quiet spiral behind the phones.
+
+    It starts off the right edge, so only its curl shows.
+    """
+    ss = 2
+    b, k = math.log(2.4) / (2 * math.pi), 0.36
+    a1 = math.log(0.12) / b
+    outer, inner, mid = spiral_edges((centre[0] * ss, centre[1] * ss), 0, radius * ss, b, k, a1)
+    mask = Image.new("L", (canvas.width * ss, canvas.height * ss), 0)
+    d = ImageDraw.Draw(mask)
+    d.polygon(outer + inner[::-1], fill=255)
+    tx, ty, tr = mid[-1]
+    cap = tr * k / 2
+    d.ellipse([tx - cap, ty - cap, tx + cap, ty + cap], fill=255)
+    shape = Image.new("RGBA", canvas.size, TAIL + (255,))
+    shape.putalpha(mask.resize(canvas.size, Image.LANCZOS))
+    canvas.alpha_composite(shape)
 
 
 def phone(raw, width):
@@ -120,8 +130,8 @@ def caption(canvas, head, sub, top=130):
 
 
 def shot(spec, raw_dir):
-    canvas = Image.new("RGBA", (1080, 1920), SPRUCE + (255,))
-    dial(canvas, (540, 1260), 360)
+    canvas = Image.new("RGBA", (1080, 1920), JADE + (255,))
+    tail(canvas, (520, 1300), 640)
     below = caption(canvas, spec["head"], spec["sub"])
     raw = lambda name: raw_dir / f"{name}.png"
     if spec["layout"] == "screen":
@@ -146,10 +156,10 @@ def shot(spec, raw_dir):
 
 
 def feature(raw_dir):
-    canvas = Image.new("RGBA", (1024, 500), SPRUCE + (255,))
-    dial(canvas, (800, 250), 170)
+    canvas = Image.new("RGBA", (1024, 500), JADE + (255,))
+    tail(canvas, (790, 270), 300)
     d = ImageDraw.Draw(canvas)
-    icon = Image.open(ROOT / "assets/icons/shield_icon.png").convert("RGBA").resize((112, 112), Image.LANCZOS)
+    icon = Image.open(ROOT / "assets/icons/vault_icon.png").convert("RGBA").resize((112, 112), Image.LANCZOS)
     canvas.alpha_composite(icon, (64, 92))
     d.text((64, 222), "SecureVault", font=font("semibold", 68), fill=INK)
     tf = font("regular", 30)
