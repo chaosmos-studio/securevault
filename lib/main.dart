@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'core/licenses.dart';
 import 'core/providers/app_state.dart';
 import 'core/services/migration_service.dart';
 import 'screens/disguises/disguise_screen.dart';
@@ -19,6 +20,8 @@ void main() async {
   ]);
 
   await MigrationService.runMigrations();
+
+  registerLicenses();
 
   runApp(
     ChangeNotifierProvider(

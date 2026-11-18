@@ -176,8 +176,23 @@ class VaultSettingsScreen extends StatelessWidget {
             SettingsRow(
               icon: Icons.privacy_tip_outlined,
               title: 'Privacy',
-              onTap: () => launchUrl(Uri.parse('https://shravangoswami.com/SecureVault/privacy/'),
-                  mode: LaunchMode.externalApplication),
+              onTap: () => launchUrl(Uri.parse(AppConstants.privacyUrl), mode: LaunchMode.externalApplication),
+            ),
+            SettingsRow(
+              icon: Icons.code_rounded,
+              title: 'Source code',
+              value: 'GPL-3.0',
+              onTap: () => launchUrl(Uri.parse(AppConstants.sourceUrl), mode: LaunchMode.externalApplication),
+            ),
+            SettingsRow(
+              icon: Icons.description_outlined,
+              title: 'Open-source licences',
+              onTap: () => showLicensePage(
+                context: context,
+                applicationName: 'SecureVault',
+                applicationVersion: AppConstants.version,
+                applicationLegalese: '© 2026 Chaosmos\nFree software under the GNU GPL, version 3 or later.',
+              ),
             ),
             SettingsRow(
               icon: Icons.favorite_outline_rounded,
