@@ -27,7 +27,7 @@ What you can keep
 - Swipe through photos, zoom in, play videos, and share or save a copy when you need one
 
 A second vault to show
-Make another vault with its own PIN and a few harmless things in it. If someone makes you open SecureVault, type that PIN instead. Each vault shows only what is inside it.
+Make another vault with its own PIN and a few harmless things in it. If someone makes you open SecureVault, type that PIN instead. It shows only its own photos and notes, and your main vault never appears in it.
 
 Private by design
 - Everything stays on your phone, encrypted with your PIN
