@@ -34,7 +34,7 @@ The iOS disguise icons were drawn again by `store/tools/icons.py` after the clea
 
 ## Left to do
 
-- [ ] Shravan Goswami, Jash Ambaliya and Jitendra Verma each comment **I agree** on issue #1.
+- [x] Shravan Goswami, Jash Ambaliya and Jitendra Verma each comment **I agree** on issue #1.
 - [ ] Play Console, App content, Privacy policy: `https://chaosmos.studio/securevault/privacy/`. The old address answers 404 before it redirects.
 - [ ] Add SecureVault to the studio site's list of apps.
 - [ ] Later, F-Droid. The app has no Google Play Services, Firebase, ads or billing. It needs a pinned Flutter version in the build recipe and its own signing key. Moving from the Play build to the F-Droid build means a reinstall, which deletes vaults, so the listing must say to make a backup first.

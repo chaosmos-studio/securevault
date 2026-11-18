@@ -103,13 +103,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> completeSetup() async {
-    _isSetupComplete = true;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_setup_complete', true);
-    notifyListeners();
-  }
-
   Future<bool> unlock(String password) async {
     if (password.isEmpty) return false;
     final vault = await VaultService.unlockVault(password);

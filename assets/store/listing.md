@@ -60,12 +60,3 @@ SecureVault hides what you put inside it. It cannot hide other apps. Nobody can 
 4. Notes only you can read. / Pin them, tag them, find them fast.
 5. A second vault to show. / Another PIN opens a vault with harmless things.
 6. Set up in a minute. / Choose a disguise and a PIN, then try it once.
-
-## Other titles considered
-
-- SecureVault: Hide Photos (24)
-- SecureVault: Photo Vault (24)
-- SecureVault: Private Vault (26)
-
-"Calculator vault" is the main search term for apps like this one, and the calculator is the default disguise.
-The live title, "SecureVault - Hide Anything", promises more than the app does, and one user has emailed asking it to hide other apps.
