@@ -170,7 +170,7 @@ import { Mail, MessageCircle } from '@lucide/astro';
   }
   .support-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px -12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 12px 40px -12px rgba(var(--accent-rgb), 0.3);
     border-color: var(--accent);
   }
 
@@ -204,7 +204,7 @@ import { Mail, MessageCircle } from '@lucide/astro';
     font-size: 0.95rem;
     transition: all 0.3s ease;
     text-decoration: none;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.3);
     word-break: break-all;
     max-width: 100%;
     margin-top: 1rem;
@@ -213,7 +213,7 @@ import { Mail, MessageCircle } from '@lucide/astro';
   .contact-btn:hover {
     background: #2563eb;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.4);
   }
 
   .no-decoration {

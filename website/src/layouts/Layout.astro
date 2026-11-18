@@ -17,35 +17,37 @@ const { title } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <link
       rel="icon"
-      type="image/svg+xml"
-      href={`${import.meta.env.BASE_URL}/favicon.svg`.replace(/\/\//g, '/')}
+      type="image/png"
+      href={`${import.meta.env.BASE_URL}/favicon.png`.replace(/\/\//g, '/')}
     />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <style is:global>
       :root {
-        --bg-main: #050505;
-        --bg-glass: rgba(20, 20, 20, 0.6);
-        --bg-surface: rgba(15, 15, 15, 0.8);
+        --bg-main: #070c0a;
+        --bg-glass: rgba(16, 24, 20, 0.6);
+        --bg-surface: rgba(12, 19, 16, 0.8);
         --bg-surface-2: rgba(255, 255, 255, 0.05);
         --text-main: #ffffff;
-        --text-muted: #888888;
-        --accent: #3b82f6;
-        --accent-purple: #a855f7;
+        --text-muted: #8a948f;
+        --accent: #3dbe84;
+        --accent-rgb: 61, 190, 132;
+        --accent-soft: #9bd6b2;
         --border: rgba(255, 255, 255, 0.1);
         --glow: rgba(255, 255, 255, 0.08);
-        --card-bg: #0a0a0a;
+        --card-bg: #0b110e;
       }
 
       [data-theme='light'] {
-        --bg-main: #fcfcfd;
+        --bg-main: #f7f8f3;
         --bg-glass: rgba(255, 255, 255, 0.75);
         --bg-surface: #ffffff;
-        --bg-surface-2: #f2f2f7;
-        --text-main: #1d1d1f;
-        --text-muted: #86868b;
-        --accent: #2997ff;
-        --accent-purple: #9e64e8;
+        --bg-surface-2: #eef1e6;
+        --text-main: #1b1f1d;
+        --text-muted: #6f7772;
+        --accent: #2c8058;
+        --accent-rgb: 44, 128, 88;
+        --accent-soft: #4e9a6e;
         --border: rgba(0, 0, 0, 0.1);
         --glow: rgba(0, 0, 0, 0.12);
         --card-bg: #ffffff;
@@ -109,7 +111,7 @@ const { title } = Astro.props;
         mix-blend-mode: normal;
         background: radial-gradient(
           600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-          rgba(59, 130, 246, 0.15),
+          rgba(var(--accent-rgb), 0.15),
           transparent 50%
         );
       }
@@ -153,7 +155,7 @@ const { title } = Astro.props;
         background: linear-gradient(
           135deg,
           var(--accent),
-          var(--accent-purple)
+          var(--accent-soft)
         );
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
