@@ -16,7 +16,7 @@ class CoachCard extends StatelessWidget {
     final c = context.vault;
     final code = pin ?? 'your PIN';
     final (before, after) = switch (disguise) {
-      DisguiseType.calculator => ('Type', 'then  ='),
+      DisguiseType.calculator => ('Type', 'then ='),
       DisguiseType.notes => ('Search for', ''),
       DisguiseType.clock => ('Type', 'then Start'),
       DisguiseType.moodspace => ('Write', 'then Save'),
