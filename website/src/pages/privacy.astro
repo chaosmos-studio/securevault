@@ -7,7 +7,8 @@ import BackToTop from '../components/BackToTop.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const links = {
   googlePrivacy: 'https://policies.google.com/privacy',
-  github: 'https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement',
+  cloudflarePrivacy: 'https://www.cloudflare.com/privacypolicy/',
+  webAnalytics: 'https://www.cloudflare.com/web-analytics/',
 };
 ---
 
@@ -29,24 +30,25 @@ const links = {
           <div class="compliance-text">
             <h3>Google Play Data safety</h3>
             <p>
-              SecureVault <strong>collects no data and shares no data</strong>. It
-              has no accounts, no ads, no analytics and no internet access.
+              The SecureVault app <strong>collects no data and shares no data</strong>.
+              It has no accounts, no ads, no analytics and no internet access.
             </p>
           </div>
         </div>
 
         <div class="text-block">
           <p>
-            Last updated on 18 November 2026. This policy covers the SecureVault
+            Last updated on 20 November 2026. This policy covers the SecureVault
             app for Android and these pages. The rules for using the app are in
             its <a href={`${base}/terms/`}>terms of service</a>.
           </p>
           <ul>
             <li>No accounts and no servers</li>
             <li>Your vaults stay on your phone, encrypted with your PIN</li>
-            <li>No ads, no analytics, no tracking</li>
+            <li>No ads, no analytics and no tracking in the app</li>
             <li>No permissions to grant</li>
             <li>Works fully offline</li>
+            <li>Visits to these pages counted without cookies</li>
           </ul>
         </div>
 
@@ -137,12 +139,21 @@ const links = {
         <div class="text-block">
           <h2>These pages</h2>
           <p>
-            These pages are static pages hosted on GitHub Pages. GitHub may log
-            standard technical data, such as IP addresses, to keep the service
-            secure and working, as described in
-            <a href={links.github}>GitHub's privacy statement</a>. The pages use
-            no analytics and no cookies. Your theme choice is kept in your
-            browser's local storage.
+            These pages are part of the Chaosmos website and are served by
+            Cloudflare. Cloudflare handles standard technical data, such as IP
+            addresses, to deliver the pages and keep them secure, as described in
+            <a href={links.cloudflarePrivacy}>Cloudflare's privacy policy</a>.
+          </p>
+          <p>
+            Only these pages have analytics, never the app.
+            <a href={links.webAnalytics}>Cloudflare Web Analytics</a> counts visits
+            to them and how fast each page loads. It records the page, the site
+            that sent you, and your country, browser, operating system and device
+            type. It sets no cookie, stores nothing on your device and collects no
+            personal data, and it does not use your IP address or browser to tell
+            visitors apart. We use it only to count visits and to see how fast
+            pages load. The pages set no cookies, and your theme choice is kept in
+            your browser's local storage.
           </p>
           <p>
             The blog and the help center have an optional comment box powered by
