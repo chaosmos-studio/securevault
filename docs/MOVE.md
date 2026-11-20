@@ -6,7 +6,7 @@ This records what changed and what is left.
 ## Where things are
 
 - **Code:** https://github.com/chaosmos-studio/securevault, public, GPL-3.0-or-later.
-- **Website:** https://chaosmos.studio/securevault/, built from `website/` onto this repo's `gh-pages` by `.github/workflows/website-deploy.yml`.
+- **Website:** https://chaosmos.studio/securevault/, built from `website/` by `.github/workflows/website-deploy.yml` and served by the Cloudflare Worker `securevault-site`. The workflow needs the repository secret `CLOUDFLARE_API_TOKEN`.
 - **The old repo:** `shravanngoswamii/SecureVault`, private and archived, with the history from before the move.
   - Its `gh-pages` holds one `index.html` and one `404.html`.
   - Both send `shravangoswami.com/SecureVault/<path>` to the same path under `https://chaosmos.studio/securevault/`, with the query and the hash.
