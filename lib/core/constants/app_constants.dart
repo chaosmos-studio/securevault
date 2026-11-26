@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppConstants {
   static const String version = '1.1.0';
   static const String contactEmail = 'hello@chaosmos.studio';
-  static const String privacyUrl = 'https://chaosmos.studio/securevault/privacy/';
+  static const String privacyUrl = 'https://chaosmos.studio/apps/securevault/privacy/';
   static const String sourceUrl = 'https://github.com/chaosmos-studio/securevault';
   static const int autoLockSeconds = 60;
 }

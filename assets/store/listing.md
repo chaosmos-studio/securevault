@@ -2,8 +2,8 @@
 
 Sent to Play with 1.1.0 on 18 November 2026, except the "Free, with no ads and no in-app purchases" line, which waits for that review to finish.
 Contact email on the listing: hello@chaosmos.studio
-Website: https://chaosmos.studio/securevault/
-Privacy policy: https://chaosmos.studio/securevault/privacy/
+Website: https://chaosmos.studio/apps/securevault/
+Privacy policy: https://chaosmos.studio/apps/securevault/privacy/
 
 ## App name (29 of 30)
 
