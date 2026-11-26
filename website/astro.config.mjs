@@ -7,7 +7,7 @@ import { defineConfig } from 'astro/config';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://chaosmos.studio',
-  base: '/securevault',
+  base: '/apps/securevault',
   integrations: [mdx(), sitemap()],
   image: {
     service: {

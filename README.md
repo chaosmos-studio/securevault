@@ -8,7 +8,7 @@ Each vault has its own PIN, and everything in it is encrypted with a key made fr
 Nothing leaves the phone unless you share it.
 SecureVault is free, with no ads and no in-app purchases.
 
-Get it on [Google Play](https://play.google.com/store/apps/details?id=com.shravangoswami.securevault), and read more at [chaosmos.studio/securevault](https://chaosmos.studio/securevault/).
+Get it on [Google Play](https://play.google.com/store/apps/details?id=com.shravangoswami.securevault), and read more at [chaosmos.studio/apps/securevault](https://chaosmos.studio/apps/securevault/).
 
 ## Screenshots
 
@@ -42,4 +42,4 @@ Chaosmos, the studio Shravan Goswami runs, publishes and maintains it.
 
 ## Privacy and terms
 
-Read the [privacy policy](https://chaosmos.studio/securevault/privacy/) and the [terms of service](https://chaosmos.studio/securevault/terms/).
+Read the [privacy policy](https://chaosmos.studio/apps/securevault/privacy/) and the [terms of service](https://chaosmos.studio/apps/securevault/terms/).
