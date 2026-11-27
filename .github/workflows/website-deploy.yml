@@ -34,9 +34,9 @@ jobs:
       - run: npm run build
         working-directory: website
 
-      - name: Publish to chaosmos.studio/securevault/
+      - name: Publish to chaosmos.studio/apps/securevault/
         uses: chaosmos-studio/.github/actions/deploy-web@main
         with:
           worker: securevault-site
-          paths: securevault=website/dist
+          paths: apps/securevault=website/dist
           cloudflare-api-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
